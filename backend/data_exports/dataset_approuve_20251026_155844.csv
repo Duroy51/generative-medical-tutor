@@ -1,0 +1,2 @@
+id,case_title,case_summary,age,sexe,symptoms_list,medical_history_json,diagnoses_list
+4,Céphalée Aiguë Simple (Test de Structure),"Présentation d'un patient consultant pour une céphalée, utilisée principalement pour valider le processus d'extraction et de structuration des données cliniques minimales à partir d'une note très brève.",40,Femme,Céphalée,"[{""type"": ""Médical"", ""description"": ""Antécédents inconnus / Non pertinents pour cet exercice de structure.""}]",
