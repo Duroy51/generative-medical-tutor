@@ -1,0 +1,189 @@
+{
+  "app": {
+    "brand_title": "Business Partnership",
+    "brand_description": "Plateforme nationale de mise en relation entre entreprises locales et partenaires étrangers — équipements, financement, appui-conseil et débouchés.",
+    "language_label": "Langue :",
+    "navigation": "Navigation",
+    "nav": {
+      "home": "Accueil",
+      "domains": "Domaines",
+      "companies": "Entreprises",
+      "needs": "Besoins",
+      "matches": "Matches"
+    },
+    "open_menu": "Ouvrir le menu",
+    "close_menu": "Fermer le menu",
+    "logout": "Déconnexion",
+    "dashboard": "Tableau de bord",
+    "main_navigation": "Navigation principale",
+    "contact": "Contact",
+    "shortcuts": "Raccourcis",
+    "register": "S'inscrire",
+    "login": "Se connecter",
+    "privacy": "Confidentialité",
+    "copyright": "Business Partnership — MINEPAT. Tous droits réservés.",
+  
+    "hero": {
+    "title": "Connectez votre entreprise locale avec des partenaires internationaux",
+    "subtitle": "La plateforme qui facilite les partenariats commerciaux entre les entreprises camerounaises et les investisseurs étrangers",
+    "cta_register": "Inscrire mon entreprise",
+    "cta_register_aria": "Inscrire mon entreprise",
+    "cta_explore": "Explorer les opportunités",
+    "cta_explore_aria": "Explorer les opportunités"
+  },
+  "features": {
+    "title": "Pourquoi choisir Business Partnership ?",
+    "card_local": {
+      "title": "Pour les entreprises locales",
+      "desc": "Accédez à des équipements, financements, débouchés et conseils pour développer votre activité et atteindre de nouveaux marchés."
+    },
+    "card_foreign": {
+      "title": "Pour les partenaires étrangers",
+      "desc": "Découvrez des opportunités d'investissement prometteuses et collaborez avec des entreprises camerounaises dynamiques."
+    },
+    "card_targeting": {
+      "title": "Ciblage précis",
+      "desc": "Trouvez exactement ce que vous cherchez grâce à notre système de navigation intelligent par domaines et secteurs."
+    }
+  },
+  "how": {
+    "title": "Comment ça marche ?",
+    "steps": [
+      {
+        "title": "Choisissez un domaine",
+        "desc": "Sélectionnez parmi 8 domaines stratégiques : Équipements, Financement, Débouchés, Emballages, Matières premières, Partage d'expérience, Appui-conseil, Formation"
+      },
+      {
+        "title": "Précisez votre besoin",
+        "desc": "Naviguez dans les sous-domaines pour affiner votre recherche selon vos besoins spécifiques et identifier les partenaires idéaux"
+      },
+      {
+        "title": "Contactez les entreprises",
+        "desc": "Accédez aux coordonnées complètes des entreprises et initiez des partenariats mutuellement bénéfiques"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Prêt à développer votre activité ?",
+    "subtitle": "Rejoignez dès maintenant notre communauté d'entrepreneurs et d'investisseurs",
+    "button": "Commencer maintenant",
+    "button_aria": "Commencer maintenant"
+  },
+
+  "error": {
+    "title": "Oups ! Une erreur est survenue",
+    "subtitle": "Quelque chose ne fonctionne pas comme prévu",
+    "description": "Nous sommes désolés pour ce désagrément. Notre équipe a été notifiée et travaille à résoudre le problème. En attendant, vous pouvez retourner à la page d'accueil ou revenir à la page précédente.",
+    "return_home": "Retour à l'accueil",
+    "go_back": "Page précédente",
+    "technical_details": "Détails techniques",
+    "error_message_label": "Message d'erreur :",
+    "stack_trace_label": "Stack trace :",
+    "no_message": "Aucun message d'erreur disponible",
+    "still_problem": "Le problème persiste ?",
+    "contact_support": "Contactez notre support"
+  },
+
+  "registers": {
+    "header": {
+      "title": "Créer un compte",
+      "subtitle": "Choisissez le type d'inscription qui vous correspond. Rejoignez notre plateforme pour développer vos partenariats commerciaux et accéder à de nouvelles opportunités."
+    },
+    "local": {
+      "title": "Entreprise locale",
+      "subtitle": "Basée au Cameroun",
+      "description": "Créez votre fiche entreprise, publiez vos besoins et connectez-vous avec des partenaires internationaux pour développer votre activité.",
+      "what_you_can_do_title": "Ce que vous pouvez faire",
+      "bullet": {
+        "kyc": "Créer votre profil d'entreprise avec validation KYC sécurisée",
+        "publish_needs": "Publier vos besoins (financement, équipements, matières premières, etc.)",
+        "visible_to_foreign": "Être visible par les entreprises étrangères et investisseurs",
+        "access_opportunities": "Accéder aux opportunités de partenariat et conseils"
+      },
+      "cta_register": "S'inscrire maintenant",
+      "cta_more": "En savoir plus",
+      "cta_more_aria": "Plus d'informations sur l'inscription entreprise locale"
+    },
+    "foreign": {
+      "title": "Entreprise étrangère",
+      "subtitle": "Partenaire international",
+      "description": "Fournisseurs, équipementiers, financeurs ou consultants : collaborez avec des entreprises camerounaises dynamiques et accédez à de nouveaux marchés.",
+      "what_you_can_do_title": "Ce que vous pouvez faire",
+      "bullet": {
+        "secure_process": "Processus sécurisé avec validation et approbation rapide",
+        "upload_offers": "Télécharger vos documents et présenter vos offres d'équipements",
+        "access_profiles": "Accéder aux profils détaillés des entreprises locales",
+        "propose_services": "Proposer vos services et initier des collaborations"
+      },
+      "cta_register": "S'inscrire maintenant",
+      "cta_more": "En savoir plus",
+      "cta_more_aria": "Plus d'informations sur l'inscription entreprise étrangère"
+    },
+    "additional": {
+      "title": "Pourquoi s'inscrire sur notre plateforme ?",
+      "description": "Notre plateforme facilite les connexions entre entreprises locales et internationales. Bénéficiez d'un processus sécurisé, d'une visibilité accrue et d'opportunités de croissance adaptées à vos besoins.",
+      "benefit": {
+        "secure_process": "Processus sécurisé",
+        "dedicated_support": "Support dédié",
+        "international_network": "Réseau international"
+      }
+    },
+    "footer": {
+      "help_text": "Besoin d'aide ou de renseignements ?",
+      "contact_us": "Contactez notre équipe"
+    }
+  }
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  },
+  "auth": {
+    "section": "🔐 Auth Context",
+    "isAuthenticated": "Est Authentifié",
+    "isGuest": "Est Invité",
+    "profile": "Profil",
+    "noProfile": "Aucun",
+    "loginTest": "Login Test",
+    "logout": "Logout",
+    "updateProfile": "Update Profile"
+  },
+  "language": {
+    "section": "🌐 Language Context",
+    "current": "Langue Actuelle",
+    "fr": "FR",
+    "en": "EN",
+    "note": "Change la langue → Vérifie localStorage et serveur (si connecté)."
+  },
+  "textSize": {
+    "section": "📝 Text Size Context",
+    "current": "Taille de Texte Actuelle",
+    "scale": "Échelle",
+    "testText": "Texte de test (change la taille).",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "note": "Observe le CSS var --text-scale appliqué."
+  },
+  "theme": {
+    "section": "🎨 Theme Context",
+    "selected": "Thème Sélectionné",
+    "effective": "Thème Effectif",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Toggle",
+    "note": "Change → Vérifie classes sur <html> (inspect dev tools). Teste system en changeant OS theme."
+  }
+} 

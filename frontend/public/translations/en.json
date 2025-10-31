@@ -1,0 +1,185 @@
+{
+  "app": {
+    "brand_title": "Business Partnership",
+    "brand_description": "National platform connecting local businesses with foreign partners — equipment, financing, advisory support and market access.",
+    "language_label": "Language:",
+    "navigation": "Navigation",
+    "nav": {
+      "home": "Home",
+      "domains": "Domains",
+      "companies": "Companies",
+      "needs": "Needs",
+      "matches": "Matches"
+    },
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "main_navigation": "Main navigation",
+    "contact": "Contact",
+    "shortcuts": "Shortcuts",
+    "register": "Register",
+    "login": "Sign in",
+    "privacy": "Privacy",
+    "copyright": "Business Partnership — MINEPAT. All rights reserved.",
+  
+    "hero": {
+      "title": "Connect your local business with international partners",
+      "subtitle": "The platform that facilitates business partnerships between Cameroonian companies and foreign investors",
+      "cta_register": "Register my company",
+      "cta_register_aria": "Register my company",
+      "cta_explore": "Explore opportunities",
+      "cta_explore_aria": "Explore opportunities"
+    },
+    "features": {
+      "title": "Why choose Business Partnership?",
+      "card_local": {
+        "title": "For local businesses",
+        "desc": "Access equipment, financing, market outlets and advice to grow your business and reach new markets."
+      },
+      "card_foreign": {
+        "title": "For foreign partners",
+        "desc": "Discover promising investment opportunities and collaborate with dynamic Cameroonian companies."
+      },
+      "card_targeting": {
+        "title": "Precise targeting",
+        "desc": "Find exactly what you need thanks to our intelligent navigation system by domains and sectors."
+      }
+    },
+    "how": {
+      "title": "How does it work?",
+      "steps": [
+        {
+          "title": "Choose a domain",
+          "desc": "Select from 8 strategic domains: Equipment, Financing, Market Outlets, Packaging, Raw Materials, Knowledge Sharing, Advisory Support, Training"
+        },
+        {
+          "title": "Specify your need",
+          "desc": "Browse sub-domains to refine your search according to your specific needs and identify ideal partners"
+        },
+        {
+          "title": "Contact companies",
+          "desc": "Access full company contact details and initiate mutually beneficial partnerships"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to grow your business?",
+      "subtitle": "Join our community of entrepreneurs and investors now",
+      "button": "Get started now",
+      "button_aria": "Get started now"
+    },
+
+    "error": {
+      "title": "Oops! An error occurred",
+      "subtitle": "Something isn't working as expected",
+      "description": "We apologize for the inconvenience. Our team has been notified and is working to resolve the issue. In the meantime, you can return to the homepage or go back to the previous page.",
+      "return_home": "Return to homepage",
+      "go_back": "Previous page",
+      "technical_details": "Technical details",
+      "error_message_label": "Error message:",
+      "stack_trace_label": "Stack trace:",
+      "no_message": "No error message available",
+      "still_problem": "Still having issues?",
+      "contact_support": "Contact our support"
+    },
+
+    "registers": {
+      "header": {
+        "title": "Create an account",
+        "subtitle": "Choose the registration type that suits you. Join our platform to develop your business partnerships and access new opportunities."
+      },
+      "local": {
+        "title": "Local company",
+        "subtitle": "Based in Cameroon",
+        "description": "Create your company profile, publish your needs and connect with international partners to grow your business.",
+        "what_you_can_do_title": "What you can do",
+        "bullet": {
+          "kyc": "Create your company profile with secure KYC verification",
+          "publish_needs": "Publish your needs (financing, equipment, raw materials, etc.)",
+          "visible_to_foreign": "Be visible to foreign companies and investors",
+          "access_opportunities": "Access partnership opportunities and advisory support"
+        },
+        "cta_register": "Register now",
+        "cta_more": "Learn more",
+        "cta_more_aria": "More information about local company registration"
+      },
+      "foreign": {
+        "title": "Foreign company",
+        "subtitle": "International partner",
+        "description": "Suppliers, equipment providers, financiers or consultants: collaborate with dynamic Cameroonian companies and access new markets.",
+        "what_you_can_do_title": "What you can do",
+        "bullet": {
+          "secure_process": "Secure process with fast verification and approval",
+          "upload_offers": "Upload your documents and showcase your equipment offers",
+          "access_profiles": "Access detailed profiles of local companies",
+          "propose_services": "Offer your services and initiate collaborations"
+        },
+        "cta_register": "Register now",
+        "cta_more": "Learn more",
+        "cta_more_aria": "More information about foreign company registration"
+      },
+      "additional": {
+        "title": "Why register on our platform?",
+        "description": "Our platform facilitates connections between local and international companies. Benefit from a secure process, increased visibility and growth opportunities tailored to your needs.",
+        "benefit": {
+          "secure_process": "Secure process",
+          "dedicated_support": "Dedicated support",
+          "international_network": "International network"
+        }
+      },
+      "footer": {
+        "help_text": "Need help or information?",
+        "contact_us": "Contact our team"
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+    
+  },
+  "auth": {
+    "section": "🔐 Auth Context",
+    "isAuthenticated": "Is Authenticated",
+    "isGuest": "Is Guest",
+    "profile": "Profile",
+    "noProfile": "None",
+    "loginTest": "Login Test",
+    "logout": "Logout",
+    "updateProfile": "Update Profile"
+  },
+  "language": {
+    "section": "🌐 Language Context",
+    "current": "Current Language",
+    "fr": "FR",
+    "en": "EN",
+    "note": "Change the language → Check localStorage and server (if connected)."
+  },
+  "textSize": {
+    "section": "📝 Text Size Context",
+    "current": "Current Text Size",
+    "scale": "Scale",
+    "testText": "Test text (changes the size).",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "note": "Observe the applied CSS var --text-scale."
+  },
+  "theme": {
+    "section": "🎨 Theme Context",
+    "selected": "Selected theme",
+    "effective": "Effective theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Toggle",
+    "note": "Change → Check classes on <html> (dev tools). Test system by changing OS theme."
+  }
+}
