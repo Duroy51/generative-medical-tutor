@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'simulation.apps.SimulationConfig',
     'evaluation.apps.EvaluationConfig',
     'api.apps.ApiConfig',
+    'rest_framework_simplejwt'
 ]
 
 MIDDLEWARE = [
@@ -140,3 +141,10 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 FULTANG_API_URL = os.getenv("FULTANG_API_URL")
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}

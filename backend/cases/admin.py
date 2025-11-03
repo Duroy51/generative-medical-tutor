@@ -36,13 +36,19 @@ class PhysicalFindingInline(admin.TabularInline):
 @admin.register(ClinicalCase)
 class ClinicalCaseAdmin(admin.ModelAdmin):
     # Ce qu'on voit dans la liste des cas
-    list_display = ('id', 'case_title', 'status', 'validated_by', 'updated_at')
-    # Permet de filtrer par statut
-    list_filter = ('status',)
+    list_display = ('id', 'case_title', 'status','display_categories', 'validated_by', 'updated_at', )
+    # Permet de filtrer par statut et catégorie
+    list_filter = ('status', 'categories')
+    filter_horizontal = ('categories',)
     # Permet de faire une recherche
     search_fields = ('case_title', 'case_summary')
     # Permet d'éditer les symptômes et antécédents directement depuis la page du cas
     inlines = [SymptomInline, MedicalHistoryInline]
+
+    def display_categories(self, obj):
+        return ", ".join([category.name for category in obj.categories.all()])
+
+    display_categories.short_description = 'Catégories'
 
 
 admin.site.register(Symptom)

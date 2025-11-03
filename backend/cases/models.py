@@ -5,6 +5,17 @@ from django.conf import settings
 
 
 
+class Category(models.Model):
+    """Représente une catégorie médicale officielle pour classer les cas."""
+    name = models.CharField(max_length=100, unique=True, help_text="Nom unique de la catégorie (ex: Cardiologie)")
+    description = models.TextField(blank=True, help_text="Description optionnelle de la catégorie.")
+
+    class Meta:
+        verbose_name_plural = "Categories"
+
+    def __str__(self):
+        return self.name
+
 
 class ClinicalCase(models.Model):
     """
@@ -34,7 +45,7 @@ class ClinicalCase(models.Model):
     learning_objectives = models.TextField(
         help_text="Objectifs pédagogiques que l'apprenant doit atteindre avec ce cas")
 
-    # --- Données Personnelles Anonymisées (correspondant à la Figure 1) ---
+    #  Données Personnelles Anonymisées (correspondant à la Figure 1)
     motif_consultation = models.TextField()
     age = models.PositiveIntegerField()
     sexe = models.CharField(max_length=50)
@@ -43,17 +54,22 @@ class ClinicalCase(models.Model):
     nombre_enfant = models.PositiveIntegerField(default=0)
     groupe_sanguin = models.CharField(max_length=10, blank=True)
 
-    # --- Données sur le Mode de Vie (regroupées pour la simplicité) ---
+    #  Données sur le Mode de Vie (regroupées pour la simplicité)
     mode_de_vie = models.JSONField(null=True, blank=True,
-                                   help_text="Objet JSON contenant des infos sur voyage, activité physique, addiction, etc.")
+
+                                  help_text="Objet JSON contenant des infos sur voyage, activité physique, addiction, etc.")
+    # Catégorie du cas clinique
+    categories = models.ManyToManyField(Category, blank=True, related_name='cases',
+                                        help_text="Catégories médicales associées à ce cas.")
+    raw_llm_suggestions = models.JSONField(default=dict, blank=True,
+                                           help_text="Stocke les suggestions brutes du LLM (catégories, etc.) pour revue par l'expert.")
+
 
     def __str__(self):
         return f"Cas #{self.id} ({self.case_title}) - {self.get_status_display()}"
 
 
-# ==============================================================================
-# MODÈLES LIÉS : Informations multiples associées à un cas clinique
-# ==============================================================================
+
 
 class Symptom(models.Model):
     """Un symptôme spécifique rapporté par le patient."""
@@ -135,3 +151,6 @@ class Diagnosis(models.Model):
     def __str__(self):
         final_text = "[Final] " if self.is_final else ""
         return f"{final_text}{self.description} (Cas #{self.case.id})"
+
+
+

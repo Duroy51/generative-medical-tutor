@@ -2,6 +2,6 @@
 from django.urls import path, include
 
 urlpatterns = [
+    path('users/', include('users.urls')),
     path('', include('cases.urls')),
-    # Nous ajouterons les URLs de simulation et d'évaluation ici plus tard
 ]
