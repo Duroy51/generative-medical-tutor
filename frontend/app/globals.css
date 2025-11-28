@@ -1,0 +1,25 @@
+/* app/globals.css */
+/* Fichier CSS global avec variables pour thèmes clair/sombre et échelle de texte */
+/* Utilise Tailwind CSS pour les utilitaires */
+/* Variables CSS personnalisées pour thèmes et échelle de texte */
+
+
+@import "tailwindcss";
+
+
+
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+
+@import 'leaflet/dist/leaflet.css';

@@ -1,0 +1,458 @@
+[
+  {
+    "id": "fultang_case_001",
+    "timestamp": "2024-10-15T10:30:00Z",
+    "raw_notes": "Patient de 55 ans, se présente pour une douleur thoracique oppressante irradiant vers le bras gauche, apparue il y a 2 heures. Antécédents de HTA et de diabète de type 2. Fumeur (1 paquet/jour). Examen : TA 160/100, FC 110 bpm. Bruits du coeur réguliers. ECG montre un sus-décalage du segment ST en V1-V4."
+  },
+  {
+    "id": "fultang_case_002",
+    "timestamp": "2024-10-15T11:00:00Z",
+    "raw_notes": "Jeune femme de 28 ans, consulte pour une toux sèche persistante depuis 1 semaine, accompagnée de fièvre (38.5°C) et de céphalées. Pas d'antécédents notables. Examen : Gorge rouge, auscultation pulmonaire normale. Contexte épidémique de grippe."
+  },
+  {
+    "id": "fultang_case_003",
+    "timestamp": "2024-10-15T12:00:00Z",
+    "raw_notes": "Cas intentionnellement simple pour vérifier la logique. Patient avec un mal de tête."
+  },
+  {
+    "id": "fultang_case_004",
+    "timestamp": "2024-10-15T13:45:00Z",
+    "patient_info": {
+      "age": 72,
+      "gender": "Female",
+      "past_medical_history": ["Osteoarthritis", "Mild cognitive impairment"],
+      "medications": ["Paracetamol", "Donepezil"],
+      "allergies": []
+    },
+    "presenting_complaint": {
+      "chief_complaint": "Difficulty walking and balance issues",
+      "onset": "Gradual, over the last 3 months",
+      "duration": "Ongoing",
+      "type_of_pain": "N/A",
+      "radiation": "N/A",
+      "aggravating_factors": "Walking on uneven surfaces",
+      "alleviating_factors": "Rest",
+      "associated_symptoms": ["Occasional dizziness", "No falls reported"]
+    },
+    "physical_examination": {
+      "general_appearance": "Well-nourished, alert but slow to respond",
+      "vitals": {
+        "blood_pressure": "130/80 mmHg",
+        "heart_rate": "75 bpm (regular)",
+        "respiratory_rate": "16 breaths/min",
+        "temperature": "37.0°C",
+        "oxygen_saturation": "98% on room air"
+      },
+      "neurological": {
+        "gait": "Broad-based, unsteady",
+        "romberg_test": "Positive",
+        "reflexes": "Brisk, symmetrical",
+        "motor_strength": "5/5 in all limbs",
+        "sensory": "Intact to light touch and pinprick"
+      },
+      "other_findings": "Mild bilateral knee effusions"
+    },
+    "initial_assessment": "Gait disturbance, likely multifactorial given age and cognitive status. Consider neurological workup and physiotherapy.",
+    "raw_notes": "Patiente de 72 ans se plaignant de difficultés à la marche et de problèmes d'équilibre depuis 3 mois. Pas de chutes. Antécédents d'arthrose et de troubles cognitifs légers. Examen : marche instable, Romberg positif. Réflexes vifs. Bilan neurologique et kinésithérapie envisagés."
+  },
+  {
+    "id": "fultang_case_005",
+    "timestamp": "2024-10-15T14:10:00Z",
+    "patient_info": {
+      "age": 45,
+      "gender": "Male",
+      "past_medical_history": ["Gastroesophageal reflux disease (GERD)"],
+      "medications": ["Omeprazole"],
+      "allergies": ["Penicillin"]
+    },
+    "presenting_complaint": {
+      "chief_complaint": "Severe epigastric pain",
+      "onset": "Sudden, after a heavy meal",
+      "duration": "Started 3 hours ago, worsening",
+      "type_of_pain": "Burning, sharp",
+      "radiation": "To the back",
+      "aggravating_factors": "Eating, lying down",
+      "alleviating_factors": "Antacids provide minimal relief",
+      "associated_symptoms": ["Nausea", "Vomiting once", "No fever"]
+    },
+    "physical_examination": {
+      "general_appearance": "Distressed, guarding abdomen",
+      "vitals": {
+        "blood_pressure": "140/90 mmHg",
+        "heart_rate": "105 bpm (regular)",
+        "respiratory_rate": "20 breaths/min",
+        "temperature": "37.2°C",
+        "oxygen_saturation": "97% on room air"
+      },
+      "abdominal": {
+        "inspection": "Flat, no visible distension",
+        "palpation": "Tenderness in epigastrium, mild rebound tenderness",
+        "auscultation": "Normal bowel sounds"
+      },
+      "other_findings": "Nil remarkable"
+    },
+    "initial_assessment": "Acute epigastric pain, possibly pancreatitis or severe gastritis/ulcer. Urgent labs and imaging (ultrasound/CT abdomen) indicated.",
+    "raw_notes": "Homme de 45 ans avec douleur épigastrique sévère apparue soudainement après un repas copieux, irradiant vers le dos. Antécédents de RGO. Allergie à la pénicilline. Examen : abdomen sensible à la palpation épigastrique, défense légère. Nausées, un épisode de vomissements. Suspecte pancréatite ou ulcère gastrique. Nécessite examens complémentaires."
+  },
+  {
+    "id": "fultang_case_006",
+    "timestamp": "2024-10-15T15:30:00Z",
+    "patient_info": {
+      "age": 6,
+      "gender": "Female",
+      "past_medical_history": ["Childhood asthma (well-controlled)"],
+      "medications": ["Salbutamol PRN"],
+      "allergies": []
+    },
+    "presenting_complaint": {
+      "chief_complaint": "Rash and itching",
+      "onset": "Yesterday evening",
+      "duration": "Since yesterday",
+      "type_of_pain": "N/A, mainly itching",
+      "radiation": "Generalized",
+      "aggravating_factors": "Heat, scratching",
+      "alleviating_factors": "Cool bath",
+      "associated_symptoms": ["No fever", "No respiratory distress", "Parents report eating new berries in the garden"]
+    },
+    "physical_examination": {
+      "general_appearance": "Active, playful, slightly irritable due to itching",
+      "vitals": {
+        "blood_pressure": "Not taken",
+        "heart_rate": "90 bpm (regular)",
+        "respiratory_rate": "22 breaths/min",
+        "temperature": "36.8°C",
+        "oxygen_saturation": "99% on room air"
+      },
+      "skin": {
+        "lesions": "Erythematous, papular rash, scattered wheals on trunk and limbs",
+        "distribution": "Generalized, more prominent on trunk",
+        "other": "No signs of secondary infection"
+      },
+      "respiratory": "Clear to auscultation, no wheezes"
+    },
+    "initial_assessment": "Acute allergic reaction (urticaria), likely food-induced. Recommend antihistamines and observation. Advise avoiding unknown berries.",
+    "raw_notes": "Fillette de 6 ans, présente éruption cutanée prurigineuse généralisée depuis hier soir. Antécédents d'asthme. Les parents ont rapporté qu'elle avait mangé de nouvelles baies dans le jardin. Examen : urticaire papuleuse érythémateuse sur le tronc et les membres. Pas de fièvre ni de détresse respiratoire. Suspecte réaction allergique. Antihistaminiques prescrits."
+  },
+  {
+    "id": "fultang_case_007",
+    "timestamp": "2024-10-15T16:00:00Z",
+    "patient_info": {
+      "age": 32,
+      "gender": "Male",
+      "past_medical_history": [],
+      "medications": [],
+      "allergies": []
+    },
+    "presenting_complaint": {
+      "chief_complaint": "Acute onset lower back pain",
+      "onset": "Sudden, after lifting a heavy box",
+      "duration": "Started this morning",
+      "type_of_pain": "Sharp, localized",
+      "radiation": "No radiation to legs",
+      "aggravating_factors": "Bending, twisting, sitting for long periods",
+      "alleviating_factors": "Lying flat",
+      "associated_symptoms": ["No numbness or tingling in legs", "No bladder/bowel issues"]
+    },
+    "physical_examination": {
+      "general_appearance": "Uncomfortable, moves cautiously",
+      "vitals": {
+        "blood_pressure": "125/75 mmHg",
+        "heart_rate": "80 bpm (regular)",
+        "respiratory_rate": "18 breaths/min",
+        "temperature": "37.0°C",
+        "oxygen_saturation": "98% on room air"
+      },
+      "musculoskeletal": {
+        "spinal_inspection": "No obvious deformity",
+        "palpation": "Tenderness over lumbar spine (L4-L5 region), paravertebral muscle spasm",
+        "range_of_motion": "Limited flexion and extension of lumbar spine due to pain",
+        "neurological_lower_limbs": {
+          "motor_strength": "5/5 bilaterally",
+          "sensory": "Intact to light touch",
+          "reflexes": "Patellar and Achilles reflexes 2+ bilaterally"
+        }
+      },
+      "other_findings": "Straight leg raise negative bilaterally"
+    },
+    "initial_assessment": "Acute mechanical lower back pain, likely muscle strain or ligamentous injury. No red flags for radiculopathy or cauda equina syndrome. Advise pain management, activity modification, and gentle exercise.",
+    "raw_notes": "Homme de 32 ans, douleur lombaire aiguë d'apparition soudaine après avoir soulevé une charge lourde ce matin. Pas d'irradiation aux jambes, pas de troubles neurologiques. Examen : douleur à la palpation lombaire, spasme musculaire paravertébral, limitation des mouvements du rachis lombaire. Réflexes et force normaux dans les membres inférieurs. Diagnostic : lombalgie mécanique. Traitement : antalgiques, repos relatif."
+  },
+  {
+    "id": "fultang_case_008",
+    "timestamp": "2024-10-15T17:15:00Z",
+    "patient_info": {
+      "age": 88,
+      "gender": "Female",
+      "past_medical_history": ["Congestive heart failure (CHF)", "Atrial fibrillation (AFib)", "Chronic kidney disease (CKD) stage 3"],
+      "medications": ["Furosemide", "Digoxin", "Warfarin", "Ramipril"],
+      "allergies": []
+    },
+    "presenting_complaint": {
+      "chief_complaint": "Increased shortness of breath and leg swelling",
+      "onset": "Gradual, over the last 3 days",
+      "duration": "Ongoing",
+      "type_of_pain": "N/A",
+      "radiation": "N/A",
+      "aggravating_factors": "Lying flat, exertion",
+      "alleviating_factors": "Sitting upright",
+      "associated_symptoms": ["Fatigue", "Decreased appetite", "No fever or cough"]
+    },
+    "physical_examination": {
+      "general_appearance": "Elderly, frail, orthopneic",
+      "vitals": {
+        "blood_pressure": "110/60 mmHg",
+        "heart_rate": "120 bpm (irregularly irregular)",
+        "respiratory_rate": "24 breaths/min",
+        "temperature": "36.5°C",
+        "oxygen_saturation": "90% on room air (improving to 94% with 2L O2)"
+      },
+      "cardiovascular": {
+        "jugular_venous_pressure": "Elevated (10 cm)",
+        "heart_sounds": "S3 gallop, irregular rhythm",
+        "peripheral_edema": "Bilateral pitting edema to mid-thigh"
+      },
+      "respiratory": {
+        "auscultation": "Bibasilar crackles",
+        "effort": "Increased work of breathing"
+      },
+      "other_findings": "Slightly distended abdomen"
+    },
+    "initial_assessment": "Acute decompensated congestive heart failure, likely exacerbated by poor fluid balance/medication adherence. Needs admission for aggressive diuresis, oxygen therapy, and close monitoring.",
+    "raw_notes": "Patiente de 88 ans, insuffisance respiratoire et œdèmes des membres inférieurs progressifs depuis 3 jours. Antécédents d'insuffisance cardiaque, fibrillation auriculaire, IRC stade 3. Examen : dyspnée, orthopnée, turgescence jugulaire, crépitants bilatéraux, œdèmes pitting jusqu'aux cuisses. Saturation 90%. FC 120, irrégulière. Diagnostic : décompensation cardiaque aiguë. Hospitalisation pour diurèse et oxygénothérapie."
+  },
+  {
+    "id": "fultang_case_009",
+    "timestamp": "2024-10-16T08:00:00Z",
+    "patient_info": {
+      "age": 25,
+      "gender": "Female",
+      "past_medical_history": ["Migraines"],
+      "medications": ["Sumatriptan PRN"],
+      "allergies": []
+    },
+    "presenting_complaint": {
+      "chief_complaint": "Sudden onset of severe headache and stiff neck",
+      "onset": "This morning, woke up with it",
+      "duration": "Several hours, worsening",
+      "type_of_pain": "Thunderclap headache, throbbing",
+      "radiation": "To the neck and shoulders",
+      "aggravating_factors": "Light, sound, movement of head",
+      "alleviating_factors": "None",
+      "associated_symptoms": ["Nausea", "Photophobia", "Phonophobia", "No fever or rash"]
+    },
+    "physical_examination": {
+      "general_appearance": "Distressed, guarding head, lying in a dark room",
+      "vitals": {
+        "blood_pressure": "150/95 mmHg",
+        "heart_rate": "95 bpm (regular)",
+        "respiratory_rate": "18 breaths/min",
+        "temperature": "37.0°C",
+        "oxygen_saturation": "98% on room air"
+      },
+      "neurological": {
+        "meningeal_signs": "Nuchal rigidity present (positive Kernig and Brudzinski signs)",
+        "cranial_nerves": "Intact",
+        "motor_strength": "5/5 in all limbs",
+        "sensory": "Intact",
+        "fundoscopy": "No papilledema"
+      },
+      "other_findings": "Nil remarkable"
+    },
+    "initial_assessment": "Sudden onset severe headache with meningeal signs. High suspicion for subarachnoid hemorrhage or meningitis. Urgent CT head and lumbar puncture are mandatory.",
+    "raw_notes": "Jeune femme de 25 ans, se présente pour une céphalée brutale et sévère (\"coup de tonnerre\") apparue ce matin, avec raideur de la nuque. Antécédents de migraines, mais cette douleur est différente. Nausées, photophobie, phonophobie. Examen : raideur méningée (signes de Kernig et Brudzinski positifs). TA élevée. Urgence vitale : suspecte hémorragie sous-arachnoïdienne ou méningite. Nécessite scanner cérébral et ponction lombaire."
+  },
+  {
+    "id": "fultang_case_010",
+    "timestamp": "2024-10-16T09:30:00Z",
+    "patient_info": {
+      "age": 50,
+      "gender": "Male",
+      "past_medical_history": ["Hyperlipidemia"],
+      "medications": ["Simvastatin"],
+      "allergies": []
+    },
+    "presenting_complaint": {
+      "chief_complaint": "Intermittent claudication in left leg",
+      "onset": "Gradual, over the last 6 months",
+      "duration": "Ongoing",
+      "type_of_pain": "Cramping, aching",
+      "radiation": "Calf muscle",
+      "aggravating_factors": "Walking more than 100 meters, uphill walking",
+      "alleviating_factors": "Rest (relieves within 5 minutes)",
+      "associated_symptoms": ["Coldness in left foot", "No skin changes or ulcers"]
+    },
+    "physical_examination": {
+      "general_appearance": "Well-appearing",
+      "vitals": {
+        "blood_pressure": "135/85 mmHg",
+        "heart_rate": "70 bpm (regular)",
+        "respiratory_rate": "16 breaths/min",
+        "temperature": "37.0°C",
+        "oxygen_saturation": "98% on room air"
+      },
+      "vascular_lower_limbs": {
+        "pulses": "Femoral pulses 2+ bilaterally, popliteal 1+ left, 2+ right, dorsalis pedis and posterior tibial pulses absent on left, 1+ on right.",
+        "capillary_refill": "Delayed on left foot (>3 seconds)",
+        "skin": "Cooler to touch on left foot, no trophic changes"
+      },
+      "other_findings": "Nil remarkable"
+    },
+    "initial_assessment": "Peripheral artery disease (PAD) in the left leg. Ankle-brachial index (ABI) and vascular ultrasound recommended. Advise smoking cessation (if applicable), exercise program, and potential medical management/revascularization.",
+    "raw_notes": "Homme de 50 ans, claudication intermittente de la jambe gauche depuis 6 mois. Douleur crampoïde au mollet après 100m de marche, soulagée par le repos. Antécédents d'hyperlipidémie. Examen : pouls périphériques diminués voire absents à gauche, remplissage capillaire retardé. Peau du pied gauche plus froide. Diagnostic : artériopathie oblitérante des membres inférieurs (AOMI). Recommande IPS et échographie Doppler, conseils de vie et discussion thérapeutique."
+  },
+  {
+    "id": "fultang_case_011",
+    "timestamp": "2024-10-16T10:15:00Z",
+    "patient_info": {
+      "age": 14,
+      "gender": "Male",
+      "past_medical_history": [],
+      "medications": [],
+      "allergies": []
+    },
+    "presenting_complaint": {
+      "chief_complaint": "Abdominal pain and fever",
+      "onset": "Last night",
+      "duration": "Approximately 12 hours, worsening",
+      "type_of_pain": "Initially periumbilical, now localized to right lower quadrant (RLQ)",
+      "radiation": "N/A",
+      "aggravating_factors": "Movement, coughing",
+      "alleviating_factors": "Lying still",
+      "associated_symptoms": ["Nausea", "Anorexia", "One episode of vomiting", "Fever 38.8°C"]
+    },
+    "physical_examination": {
+      "general_appearance": "Looks unwell, guarding abdomen",
+      "vitals": {
+        "blood_pressure": "110/70 mmHg",
+        "heart_rate": "100 bpm (regular)",
+        "respiratory_rate": "20 breaths/min",
+        "temperature": "38.8°C",
+        "oxygen_saturation": "99% on room air"
+      },
+      "abdominal": {
+        "inspection": "Flat, no visible distension",
+        "palpation": "Severe tenderness and rebound tenderness in RLQ (McBurney's point). Positive Psoas and Obturator signs.",
+        "auscultation": "Decreased bowel sounds"
+      },
+      "other_findings": "Nil remarkable"
+    },
+    "initial_assessment": "Acute appendicitis. Urgent surgical consultation required for appendectomy.",
+    "raw_notes": "Garçon de 14 ans, douleur abdominale et fièvre. Douleur débutée hier soir, périombilicale puis localisée en fosse iliaque droite (FID), aggravée par le mouvement. Nausées, anorexie, vomissements. Fièvre à 38.8°C. Examen : abdomen sensible avec défense et rebond en FID (point de McBurney), signes de Psoas et Obturateur positifs. Diagnostic : appendicite aiguë. Consultation chirurgicale urgente."
+  },
+  {
+    "id": "fultang_case_012",
+    "timestamp": "2024-10-16T11:40:00Z",
+    "patient_info": {
+      "age": 60,
+      "gender": "Female",
+      "past_medical_history": ["Hypertension", "Type 2 Diabetes"],
+      "medications": ["Metformin", "Lisinopril"],
+      "allergies": []
+    },
+    "presenting_complaint": {
+      "chief_complaint": "Sudden onset visual loss in right eye",
+      "onset": "This morning, upon waking up",
+      "duration": "Persistent since onset",
+      "type_of_pain": "No pain",
+      "radiation": "N/A",
+      "aggravating_factors": "N/A",
+      "alleviating_factors": "N/A",
+      "associated_symptoms": ["No headache", "No jaw claudication", "No scotomas or floaters"]
+    },
+    "physical_examination": {
+      "general_appearance": "Well-appearing, calm",
+      "vitals": {
+        "blood_pressure": "145/90 mmHg",
+        "heart_rate": "78 bpm (regular)",
+        "respiratory_rate": "16 breaths/min",
+        "temperature": "37.0°C",
+        "oxygen_saturation": "98% on room air"
+      },
+      "ophthalmological": {
+        "visual_acuity": "Right eye: hand movements only, Left eye: 20/20",
+        "pupils": "Right pupil sluggishly reactive to light, relative afferent pupillary defect (RAPD) present. Left pupil normal.",
+        "fundoscopy": "Right eye: 'cherry-red spot' at macula, pale retina. Left eye: normal fundus."
+      },
+      "neurological": "No focal neurological deficits",
+      "other_findings": "Nil remarkable"
+    },
+    "initial_assessment": "Central retinal artery occlusion (CRAO) in the right eye. Ocular emergency. Urgent ophthalmological consultation required. Rule out giant cell arteritis, carotid artery disease, and cardiac emboli.",
+    "raw_notes": "Patiente de 60 ans, perte visuelle soudaine et indolore de l'œil droit ce matin au réveil. Antécédents d'HTA et de diabète. Examen : acuité visuelle OD mouvements de la main seulement, OS 10/10. OD pupille sluggish, défect afférent pupillaire relatif (RAPD) positif. Fond d'œil OD : tache rouge cerise à la macula, rétine pâle. Diagnostic : occlusion de l'artère centrale de la rétine (OACR). Urgence ophtalmologique absolue."
+  },
+  {
+    "id": "fultang_case_013",
+    "timestamp": "2024-10-16T13:00:00Z",
+    "patient_info": {
+      "age": 40,
+      "gender": "Female",
+      "past_medical_history": ["Depression (well-controlled on medication)"],
+      "medications": ["Sertraline"],
+      "allergies": []
+    },
+    "presenting_complaint": {
+      "chief_complaint": "Fatigue and weight gain",
+      "onset": "Gradual, over the last year",
+      "duration": "Ongoing",
+      "type_of_pain": "N/A",
+      "radiation": "N/A",
+      "aggravating_factors": "N/A",
+      "alleviating_factors": "N/A",
+      "associated_symptoms": ["Constipation", "Dry skin", "Hair loss", "Cold intolerance", "Difficulty concentrating", "Hoarseness"]
+    },
+    "physical_examination": {
+      "general_appearance": "Tired-looking, slightly pale, Puffy face",
+      "vitals": {
+        "blood_pressure": "115/70 mmHg",
+        "heart_rate": "55 bpm (regular)",
+        "respiratory_rate": "14 breaths/min",
+        "temperature": "36.2°C",
+        "oxygen_saturation": "98% on room air"
+      },
+      "skin": "Dry, cool to touch",
+      "hair": "Sparse, brittle",
+      "neck": "No goiter on palpation",
+      "reflexes": "Delayed relaxation of ankle reflexes"
+    },
+    "initial_assessment": "Symptoms highly suggestive of hypothyroidism. Request thyroid function tests (TSH, Free T4) to confirm diagnosis and initiate thyroid hormone replacement if indicated.",
+    "raw_notes": "Femme de 40 ans, fatigue et prise de poids progressive depuis un an. Antécédents de dépression. Se plaint aussi de constipation, peau sèche, chute de cheveux, intolérance au froid, difficultés de concentration, voix rauque. Examen : visage bouffi, peau sèche et froide, bradycardie (FC 55). Réflexes achilléens à relaxation lente. Forte suspicion d'hypothyroïdie. Bilan thyroïdien (TSH, T4 libre) demandé."
+  },
+  {
+    "id": "fultang_case_014",
+    "timestamp": "2024-10-16T14:30:00Z",
+    "patient_info": {
+      "age": 5,
+      "gender": "Male",
+      "past_medical_history": [],
+      "medications": [],
+      "allergies": []
+    },
+    "presenting_complaint": {
+      "chief_complaint": "Persistent cough and difficulty breathing",
+      "onset": "Last 2 days, progressively worse",
+      "duration": "Ongoing",
+      "type_of_pain": "N/A",
+      "radiation": "N/A",
+      "aggravating_factors": "Activity, crying",
+      "alleviating_factors": "Rest, sitting upright",
+      "associated_symptoms": ["Low-grade fever (38.0°C)", "Runny nose", "Poor feeding", "Wheezing sound reported by parents"]
+    },
+    "physical_examination": {
+      "general_appearance": "Irritable, increased work of breathing, use of accessory muscles",
+      "vitals": {
+        "blood_pressure": "Not routinely taken in this age group",
+        "heart_rate": "130 bpm",
+        "respiratory_rate": "40 breaths/min",
+        "temperature": "38.0°C",
+        "oxygen_saturation": "92% on room air"
+      },
+      "respiratory": {
+        "inspection": "Nasal flaring, intercostal retractions, subcostal retractions",
+        "auscultation": "Diffuse inspiratory and expiratory wheezes, prolonged expiration",
+        "percussion": "Resonant"
+      },
+      "other_findings": "Nil remarkable"
+    },
+    "initial_assessment": "Acute asthmatic exacerbation or bronchiolitis. Needs oxygen therapy, bronchodilators (nebulized salbutamol), and systemic corticosteroids. Close monitoring for respiratory distress.",
+    "raw_notes": "Enfant de 5 ans, toux persistante et difficultés respiratoires depuis 2 jours, s'aggravant. Faible fièvre (38.0°C), écoulement nasal, mauvaise alimentation. Parents rapportent des sifflements. Examen : irritable, tirage intercostal et sous-costal, battement des ailes du nez. FR 40, FC 130, SpO2 92%. Auscultation : sibilants inspiratoires et expiratoires diffus, expiration prolongée. Diagnostic : exacerbation d'asthme ou bronchiolite. Oxygénothérapie, bronchodilatateurs, corticoïdes systémiques."
+  }
+]
