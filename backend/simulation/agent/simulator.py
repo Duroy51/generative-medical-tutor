@@ -27,7 +27,7 @@ class PatientSimulatorAgent:
             temperature=0.7,  # Un peu de créativité pour un dialogue plus naturel
             convert_system_message_to_human=True  # Bonne pratique pour Gemini
         )
-        
+
         # 2. Définition du Prompt Template
         # C'est le "scénario" que nous donnons à l'IA. C'est la partie la plus importante.
         prompt_template_str = """
