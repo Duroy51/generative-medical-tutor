@@ -1,0 +1,68 @@
+
+docteur@docteur-HP-ProBook-650-G1:~/Documents/Autres/generative-medical-tutor/frontend$ npm run build
+
+> Generative_medical_tutor@0.1.0 build
+> next build
+
+   ▲ Next.js 15.2.4
+   - Experiments (use with caution):
+     · proxyTimeout: 180000
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types    
+ ✓ Collecting page data    
+ ✓ Generating static pages (19/19)
+ ✓ Collecting build traces    
+ ✓ Finalizing page optimization    
+
+Route (app)                                 Size  First Load JS    
+┌ ○ /                                    5.38 kB         152 kB
+├ ○ /_not-found                            986 B         102 kB
+├ ○ /about                               4.19 kB         151 kB
+├ ○ /dashboard                           3.79 kB         113 kB
+├ ○ /dashboard/appointments              2.23 kB         103 kB
+├ ○ /dashboard/cas-medicaux              1.37 kB         102 kB
+├ ○ /dashboard/generator                 1.05 kB         102 kB
+├ ƒ /dashboard/generator/[id]            1.47 kB         102 kB
+├ ○ /dashboard/patients                  2.65 kB         112 kB
+├ ƒ /dashboard/patients/[id]               172 B         107 kB
+├ ○ /dashboard/patients/new              2.28 kB         113 kB
+├ ○ /dashboard/payments                  1.36 kB         102 kB
+├ ○ /dashboard/profiles                  2.62 kB         113 kB
+├ ○ /dashboard/statistiques               108 kB         209 kB
+├ ○ /dashboard/support                   1.23 kB         102 kB
+├ ○ /login                               4.56 kB         162 kB
+├ ○ /logout                               2.7 kB         116 kB
+└ ○ /register                            13.5 kB         167 kB
++ First Load JS shared by all             101 kB
+  ├ chunks/4bd1b696-8ff4165fc225492c.js  53.3 kB
+  ├ chunks/684-a6475c924cfb1ab3.js       45.8 kB
+  └ other shared chunks (total)          1.96 kB
+
+
+ƒ Middleware                             32.3 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+docteur@docteur-HP-ProBook-650-G1:~/Documents/Autres/generative-medical-tutor/frontend$ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
