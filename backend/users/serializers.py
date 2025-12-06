@@ -14,16 +14,14 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         fields = ('username', 'password', 'email', 'first_name', 'last_name')
 
     def create(self, validated_data):
-
+        # Passer le mot de passe directement dans create_user
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
+            password=validated_data['password'],  # <-- mot de passe correctement hashé ici
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', '')
         )
-
-        user.set_password(validated_data['password'])
-        user.save()
         return user
 
 

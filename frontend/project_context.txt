@@ -1,0 +1,4820 @@
+Project Context From: /home/mombo/generative-medical-tutor/frontend
+Generated On: Fri Dec  5 04:08:35 PM WAT 2025
+===============================================
+Ignored Directory Patterns: .* node_modules vendor build dist target __pycache__ .next cache target venv storage
+Ignored File Patterns: *.log *.jar *.pdf *.png *.jpg *.class *.sqlite *.csv project_context.txt package-lock.json yarn.lock composer.lock *.ico pnpm-lock.yaml
+===============================================
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/about/page.tsx
+
+// app/about/page.tsx (ou a-propos/page.tsx)
+"use client";
+
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  Stethoscope,
+  Brain,
+  Globe,
+  Heart,
+  Users,
+  Shield,
+  Zap,
+  Award,
+  TrendingUp,
+  MessageCircle,
+} from "lucide-react";
+
+export default function AboutPage() {
+  return (
+    <>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-indigo-50">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
+          <div className="max-w-7xl mx-auto px-6 py-24 lg:py-32">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-center max-w-4xl mx-auto"
+            >
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                MedCaseGen
+              </h1>
+              <p className="text-xl md:text-2xl mb-8 text-blue-100">
+                Le premier générateur africain de cas cliniques intelligents powered by IA
+              </p>
+              <p className="text-lg md:text-xl leading-relaxed max-w-3xl mx-auto opacity-95">
+                Conçu par et pour les professionnels de santé en Afrique francophone, MedCaseGen vous aide à créer instantanément des cas cliniques réalistes, adaptés au contexte camerounais et subsaharien.
+              </p>
+            </motion.div>
+
+            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {[
+                { icon: Brain, title: "IA contextualisée", desc: "Cas adaptés aux pathologies tropicales, ressources locales et contraintes réelles" },
+                { icon: Globe, title: "100% Afrique", desc: "Noms, quartiers, habitudes alimentaires, croyances et épidémiologie locale" },
+                { icon: Zap, title: "Instantané", desc: "Un cas complet en moins de 10 secondes, prêt à être utilisé en cours ou en examen" },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.2 + 0.6 }}
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-center border border-white/20"
+                >
+                  <item.icon className="w-12 h-12 mx-auto mb-4" />
+                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                  <p className="text-blue-100">{item.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Call to Action final */}
+        <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+          <div className="max-w-4xl mx-auto text-center px-6">
+            <h2 className="text-4xl font-bold mb-6">
+              Rejoignez la révolution de la formation médicale en Afrique
+            </h2>
+            <p className="text-xl mb-10 opacity-95">
+              Plus de 2 400 médecins, étudiants et formateurs font déjà confiance à MedCaseGen.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Link
+                href="/register"
+                className="bg-white text-blue-600 font-bold py-4 px-10 rounded-xl hover:bg-gray-100 transition text-lg shadow-lg"
+              >
+                Créer un compte gratuit
+              </Link>
+              <Link
+                href="/dashboard"
+                className="border-2 border-white font-bold py-4 px-10 rounded-xl hover:bg-white/10 transition text-lg backdrop-blur-sm"
+              >
+                Tester un cas gratuit
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
+    </>
+  );
+}// END OF FILE: app/about/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/(auth)/layout.tsx
+
+import type React from "react"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Authentification",
+  description: "Connectez-vous ou créez un compte pour accéder à votre espace",
+}
+
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <div className="h-full">
+      <div className="h-full">
+          {children}
+      </div>
+    </div>
+  )
+}// END OF FILE: app/(auth)/layout.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/(auth)/login/loading.tsx
+
+export default function Loading() {
+  return null
+}
+// END OF FILE: app/(auth)/login/loading.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/(auth)/login/page.tsx
+
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { AnimatePresence, motion } from 'framer-motion';
+import Link from 'next/link';
+import { toast } from 'sonner';
+import Confetti from 'react-confetti';
+
+import { useAuth } from '@/contexts/AuthContext';
+
+const ConnexionPage: React.FC = () => {
+  const { login } = useAuth();
+  const router = useRouter();
+
+  // STATES
+  const [loading, setLoading] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+
+  // --- Toggle show/hide password ---
+
+  const togglePassword = () => setShowPassword(!showPassword);
+
+  // --- Submit form ---
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error('Veuillez remplir tous les champs.');
+      return;
+    }
+    try {
+      setLoading(true);
+      const username = email.split('@')[0]; // Simple extraction du nom d'utilisateur depuis l'email
+      const res = await login(username, email);
+
+      if (!res.success) {
+        toast.error(res.error);
+        return;
+      }
+
+      setShowConfetti(true);
+      toast.success('Connexion réussie ! Bienvenue sur MedCaseGen 👋');
+
+      setTimeout(() => router.push('/dashboard'), 1500);
+    } catch {
+      toast.error('Erreur lors de la connexion');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="min-h-screen flex bg-white">
+      <div className="flex w-full">
+
+        {/* 60% — SECTION ILLUSTRATION */}
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.45 }}
+          className="hidden lg:flex flex-col justify-center items-center w-[70%]
+          relative bg-gradient-to-b from-blue-50 to-indigo-100 p-10"
+        >
+          {/* Section texte - 15% de l'espace */}
+          <div className="w-full flex flex-col justify-center items-center mb-6" style={{ height: '15%' }}>
+            <div className="max-w-lg text-center">
+              <h1 className="text-4xl font-bold text-blue-700 mb-4">
+                MedCaseGen
+              </h1>
+              <p className="text-blue-700/90 text-lg leading-relaxed">
+                Créez, analysez et gérez vos cas médicaux avec une IA développée
+                pour le monde clinique moderne.
+              </p>
+            </div>
+          </div>
+
+          {/* Section image - 85% de l'espace */}
+          <div className="w-full max-xxl relative" style={{ height: '85%' }}>
+            <Image
+              src="/images/medical-login.png"
+              alt="Illustration médicale"
+              fill
+              priority
+              className="object-cover"
+            />
+          </div>
+
+          <p className="mt-6 text-sm text-gray-600 text-center">
+            Plateforme sécurisée – données protégées
+          </p>
+        </motion.div>
+
+        {/* 40% — FORMULAIRE */}
+        <AnimatePresence>
+          <motion.div
+            key="login-form"
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            transition={{ duration: 0.35 }}
+            className="w-full lg:w-[40%] flex flex-col justify-center p-10 relative"
+          >
+            {showConfetti && (
+              <Confetti
+                width={typeof window !== 'undefined' ? window.innerWidth : 0}
+                height={typeof window !== 'undefined' ? window.innerHeight : 0}
+              />
+            )}
+
+            {/* HEADER */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-semibold text-blue-700">
+                Connexion
+              </h2>
+              <p className="text-gray-600 mt-1 text-sm">
+                Accédez à vos simulations et cas médicaux.
+              </p>
+            </div>
+
+            {/* FORM */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* EMAIL */}
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-1">
+                  Adresse email ou nom d'utilisateur
+                </label>
+                <div className="relative">
+                  <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full py-3 pl-10 pr-3 border border-gray-200 rounded-lg
+                    focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition"
+                    placeholder="exemple@gmail.com"
+                  />
+                </div>
+              </div>
+
+              {/* PASSWORD */}
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-1">
+                  Mot de passe
+                </label>
+                <div className="relative">
+                  <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full py-3 pl-10 pr-10 border border-gray-200 rounded-lg
+                    focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePassword}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+              </div>
+
+              {/* OPTIONS */}
+              <div className="flex justify-between text-sm">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={() => setRememberMe(!rememberMe)}
+                    className="h-4 w-4"
+                  />
+                  <span>Se souvenir de moi</span>
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-blue-700 hover:underline"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </div>
+
+              {/* BTN */}
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={loading}
+                className="w-full py-3 rounded-lg text-white font-semibold
+                bg-blue-600 hover:bg-blue-700 shadow-md transition"
+              >
+                {loading ? 'Connexion...' : 'Se connecter'}
+              </motion.button>
+            </form>
+
+            {/* FOOTER */}
+            <div className="mt-6 text-center text-sm">
+              <span className="text-gray-500">Pas encore de compte ? </span>
+              <Link href="/register" className="text-blue-700 hover:underline">
+                Créer un compte
+              </Link>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </main>
+  );
+};
+
+export default ConnexionPage;
+// END OF FILE: app/(auth)/login/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/(auth)/logout/page.tsx
+
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { LogOut, ArrowLeft, Loader2, Stethoscope } from 'lucide-react';
+import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+
+export default function LogoutPage() {
+  const router = useRouter();
+  const { logout } = useAuth();
+
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+
+    try {
+      const res = await logout();
+
+      if (!res.success) throw new Error(res.error);
+
+      toast.success('Déconnecté avec succès.');
+      setTimeout(() => router.push('/login'), 500);
+
+    } catch (err: any) {
+      toast.error('Erreur lors de la déconnexion.');
+      console.error('Logout error:', err);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (window.history.length > 1) router.back();
+    else router.push('/dashboard');
+  };
+
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-white p-6">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-blue-100 overflow-hidden">
+
+        {/* ==== Header ==== */}
+        <div className="px-6 py-8 text-center bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-r from-blue-200 to-indigo-200 flex items-center justify-center mb-4 shadow-inner">
+            <LogOut className="w-7 h-7 text-blue-700" />
+          </div>
+          <h2 className="text-2xl font-bold text-blue-700 mb-1">
+            Déconnexion
+          </h2>
+          <p className="text-sm text-blue-600/80">
+            Êtes-vous sûr de vouloir quitter MedCaseGen ?
+          </p>
+        </div>
+
+        {/* ==== Content ==== */}
+        <div className="px-6 py-6 border-t border-blue-100">
+
+          {/* Info session */}
+          <div className="bg-blue-50 rounded-lg p-4 mb-6 flex items-center gap-4 border border-blue-100">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-r from-blue-200 to-indigo-200 flex items-center justify-center flex-shrink-0 shadow-inner">
+              <Stethoscope className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-blue-800">Session active</p>
+              <p className="text-sm text-blue-600">
+                Vous êtes connecté à votre compte MedCaseGen
+              </p>
+            </div>
+          </div>
+
+          {/* Boutons */}
+          <div className="space-y-3">
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md ${
+                isLoggingOut
+                  ? 'bg-blue-300 cursor-not-allowed text-white'
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg'
+              }`}
+            >
+              {isLoggingOut ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Déconnexion en cours...
+                </>
+              ) : (
+                <>
+                  <LogOut className="h-5 w-5" />
+                  Confirmer la déconnexion
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleCancel}
+              disabled={isLoggingOut}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium border border-blue-200 bg-white text-blue-700 hover:bg-blue-50 transition-all duration-200"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              Annuler
+            </button>
+          </div>
+
+          <div className="mt-6 text-center">
+            <Link
+              href="/dashboard"
+              className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+            >
+              Retourner au tableau de bord
+            </Link>
+          </div>
+
+        </div>
+
+        {/* Footer */}
+        <div className="text-center py-4">
+          <div className="inline-flex items-center gap-2 text-blue-700">
+            <Stethoscope className="w-4 h-4" />
+            <span className="text-sm font-medium">MedCaseGen</span>
+          </div>
+        </div>
+        
+        {/* Message informatif */}
+        <p className="text-center text-xs text-blue-500/80 mt-6">
+          Vous serez redirigé vers la page de connexion après déconnexion.
+        </p>
+      </div>
+
+    </main>
+  );
+}
+// END OF FILE: app/(auth)/logout/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/(auth)/register/page.tsx
+
+'use client';
+
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { AnimatePresence, motion } from 'framer-motion';
+import Confetti from 'react-confetti';
+import { toast } from 'sonner';
+import { UserPlus } from 'lucide-react';
+
+import { useAuth } from '@/contexts/AuthContext';
+
+// === Composants réutilisables ===
+const InputField = ({ label, error, ...props }: any) => (
+  <div className="relative">
+    <label className="block text-gray-700 font-medium mb-1">{label}</label>
+    <input
+      {...props}
+      className={`w-full px-4 py-3 border rounded-lg text-sm focus:ring-2 focus:ring-blue-300 outline-none ${
+        error ? 'border-red-500' : 'border-gray-200'
+      }`}
+    />
+    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+  </div>
+);
+
+const SelectField = ({ label, error, options, ...props }: any) => (
+  <div>
+    <label className="block text-gray-700 font-medium mb-1">{label}</label>
+    <select
+      {...props}
+      className={`w-full px-4 py-3 border rounded-lg text-sm focus:ring-2 focus:ring-blue-300 outline-none ${
+        error ? 'border-red-500' : 'border-gray-200'
+      }`}
+    >
+      {options.map((o: any) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+  </div>
+);
+
+export default function InscriptionPageClient() {
+  const router = useRouter();
+  const { register } = useAuth();
+
+  const [loading, setLoading] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const [form, setForm] = useState({
+    username: '',
+    email: '',
+    first_name: '',
+    last_name: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const [errors, setErrors] = useState<any>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // ================= VALIDATION =================
+  const validate = () => {
+    const e: any = {};
+
+    if (!form.username.trim()) e.username = "Nom d'utilisateur requis";
+    if (!form.email) e.email = 'Email requis';
+    if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email invalide';
+    if (!form.first_name.trim()) e.first_name = 'Prénom requis';
+    if (!form.last_name.trim()) e.last_name = 'Nom requis';
+
+    if (!form.password) e.password = 'Mot de passe requis';
+    if (form.password.length < 6) e.password = 'Minimum 6 caractères';
+
+    if (!form.confirmPassword) e.confirmPassword = 'Confirmez le mot de passe';
+    if (form.password !== form.confirmPassword)
+      e.confirmPassword = 'Les mots de passe ne correspondent pas';
+
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  // ================= FORM SUBMIT =================
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return toast.error('Veuillez corriger les erreurs.');
+
+    setLoading(true);
+
+    try {
+      const res = await register({
+        username: form.username,
+        email: form.email,
+        password: form.password,
+        first_name: form.first_name,
+        last_name: form.last_name,
+      });
+
+      if (!res.success) throw new Error(res.error);
+
+      toast.success('Compte créé 🎉');
+      setShowConfetti(true);
+
+      // Rediriger vers login après un délai
+      setTimeout(() => {
+        if (res.message === 'redirect_to_login') {
+          router.push('/login');
+        } else {
+          // Ou rediriger vers la page d'accueil si connecté automatiquement
+          router.push('/dashboard');
+        }
+      }, 1800);
+
+    } catch (err: any) {
+      toast.error(err.message || 'Erreur lors de la création.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ================= HANDLE INPUT =================
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev: Record<string, string>) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  return (
+    <main className="min-h-screen w-full bg-blue-50 flex p-4">
+      <div className="w-full max-6xl bg-white rounded-xl shadow-xl overflow-hidden grid lg:grid-cols-2">
+
+        {/* ==== Illustration ==== */}
+        <div className="hidden lg:flex bg-gradient-to-b from-blue-100 to-indigo-100 p-10 flex-col">
+          <div className="h-[15%] flex flex-col justify-end items-center text-center mb-4">
+            <h2 className="text-4xl font-bold text-blue-700 mb-2">
+              Rejoignez MedCaseGen
+            </h2>
+            <p className="text-blue-700/90 text-lg">
+              Simulations médicales, cas cliniques et collaboration entre experts.
+            </p>
+          </div>
+
+          <div className="h-[85%] relative rounded-xl overflow-hidden shadow-xl">
+            <Image
+              src="/images/medical-bg.png"
+              alt="Illustration médicale"
+              fill
+              className="object-cover"
+            />
+          </div>
+        </div>
+
+        {/* ==== Formulaire ==== */}
+        <AnimatePresence>
+          <motion.div
+            key="form-side"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.35 }}
+            className="p-8 flex flex-col"
+          >
+            {showConfetti && (
+              <Confetti
+                width={typeof window !== 'undefined' ? window.innerWidth : 0}
+                height={typeof window !== 'undefined' ? window.innerHeight : 0}
+              />
+            )}
+
+            {/* Header */}
+            <div className="text-center lg:text-left mb-8">
+              <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <UserPlus className="w-6 h-6 text-blue-600" />
+                </div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+                  Créer un compte
+                </h1>
+              </div>
+              <p className="text-gray-600 text-sm">
+                Remplissez le formulaire pour créer votre compte
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4 flex-1">
+              <InputField
+                label="Prénom"
+                name="first_name"
+                type="text"
+                placeholder="Votre prénom"
+                value={form.first_name}
+                onChange={handleChange}
+                error={errors.first_name}
+              />
+              <InputField
+                label="Nom"
+                name="last_name"
+                type="text"
+                placeholder="Votre nom"
+                value={form.last_name}
+                onChange={handleChange}
+                error={errors.last_name}
+              />
+
+              <InputField
+                label="Nom d'utilisateur"
+                name="username"
+                type="text"
+                placeholder="Choisissez un nom d'utilisateur"
+                value={form.username}
+                onChange={handleChange}
+                error={errors.username}
+              />
+
+              <InputField
+                label="Adresse email"
+                name="email"
+                type="email"
+                placeholder="votre@email.com"
+                value={form.email}
+                onChange={handleChange}
+                error={errors.email}
+              />
+
+              {/* --- Password + confirm --- */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div className="relative">
+                  <InputField
+                    label="Mot de passe"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Min. 6 caractères"
+                    value={form.password}
+                    onChange={handleChange}
+                    error={errors.password}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-[42px] text-gray-500"
+                    onClick={() => setShowPassword(v => !v)}
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <InputField
+                    label="Confirmer mot de passe"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    error={errors.confirmPassword}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-[42px] text-gray-500"
+                    onClick={() => setShowConfirmPassword(v => !v)}
+                  >
+                    {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+              </div>
+
+              {/** 
+              <SelectField
+                label="Rôle"
+                name="role"
+                value={form.role}
+                onChange={handleChange}
+                options={[
+                  { value: '', label: 'Sélectionner un rôle' },
+                  { value: 'apprenant', label: 'Apprenant' },
+                  { value: 'expert', label: 'Expert' },
+                ]}
+                error={errors.role}
+              />
+              */}
+
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold shadow-md"
+                disabled={loading}
+                type="submit"
+              >
+                {loading ? 'Création...' : 'Créer mon compte'}
+              </motion.button>
+
+              <p className="text-sm text-gray-600 text-center">
+                Déjà inscrit ?{' '}
+                <button
+                  type="button"
+                  className="text-blue-600 hover:underline font-medium"
+                  onClick={() => router.push('/login')}
+                >
+                  Se connecter
+                </button>
+              </p>
+            </form>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </main>
+  );
+}
+// END OF FILE: app/(auth)/register/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/dashboard/antecedents/page.tsx
+
+"use client";
+
+import React, { useState } from "react";
+
+export default function AntecedentsPage() {
+ 
+  
+  return (
+    <div className="p-6 mt-20 max-w-6xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <h1 className="text-2xl font-bold text-primary">antecedents</h1>
+      </div>
+      
+    </div>
+  );
+}
+// END OF FILE: app/dashboard/antecedents/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/dashboard/categories/page.tsx
+
+"use client";
+
+import React, { useState } from "react";
+
+export default function CategoriesPage() {
+ 
+  
+  return (
+    <div className="p-6 mt-20 max-w-6xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <h1 className="text-2xl font-bold text-primary">categories</h1>
+      </div>
+      
+    </div>
+  );
+}
+// END OF FILE: app/dashboard/categories/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/dashboard/components/DraggableFloatingButton.tsx
+
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { FiSend } from 'react-icons/fi';
+import { MessageCircle, X, Plus, Clock } from 'lucide-react';
+
+type Actor = "apprenant" | "patient";
+
+type Message = {
+  id: string;
+  sender: Actor;
+  text: string;
+  name: string;
+  avatar: string;
+  time: string;
+  date: string;
+};
+
+type Conversation = {
+  id: string;
+  title: string;
+  date: string;
+  preview: string;
+};
+
+export default function DraggableFloatingButton() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef(null);
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputText, setInputText] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const [conversations] = useState<Conversation[]>([
+    {
+      id: '1',
+      title: 'Consultation du 28 Nov',
+      date: '28/11/2024',
+      preview: 'Douleur abdominale...'
+    },
+    {
+      id: '2',
+      title: 'Suivi patient A.',
+      date: '27/11/2024',
+      preview: 'Contrôle post-opératoire...'
+    },
+    {
+      id: '3',
+      title: 'Urgence respiratoire',
+      date: '26/11/2024',
+      preview: 'Difficulté à respirer...'
+    }
+  ]);
+
+  const [activeConversation, setActiveConversation] = useState<string | null>(null);
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  useEffect(scrollToBottom, [messages]);
+
+  // timezone helper
+  const getTimeInfo = () => {
+    const now = new Date();
+    return {
+      time: now.toLocaleTimeString('fr-FR', {
+        timeZone: 'Africa/Douala',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      date: now.toLocaleDateString('fr-FR', { timeZone: 'Africa/Douala' })
+    };
+  };
+
+  // Position initiale bas droite
+  useEffect(() => {
+    const updatePosition = () => {
+      setPosition({
+        x: window.innerWidth - 80,
+        y: window.innerHeight - 80
+      });
+    };
+    
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    
+    return () => window.removeEventListener('resize', updatePosition);
+  }, []);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+    const newX = e.clientX - dragStart.x;
+    const newY = e.clientY - dragStart.y;
+
+    const maxX = window.innerWidth - 60;
+    const maxY = window.innerHeight - 60;
+    
+    setPosition({
+      x: Math.max(0, Math.min(newX, maxX)),
+      y: Math.max(0, Math.min(newY, maxY))
+    });
+  };
+  const handleMouseUp = () => setIsDragging(false);
+
+  useEffect(() => {
+    if (!isDragging) return;
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragStart]);
+
+  const handleClick = () => {
+    if (!isDragging) setIsModalOpen(true);
+  };
+
+  /** 💬 Sending Message */
+  const handleSend = async () => {
+    if (!inputText.trim()) return;
+
+    const { time, date } = getTimeInfo();
+
+    const newMsg: Message = {
+      id: Date.now().toString(),
+      sender: "apprenant",
+      name: "Vous",
+      avatar: "/images/medical-bg.png",
+      text: inputText,
+      time,
+      date
+    };
+
+    setMessages(prev => [...prev, newMsg]);
+    setInputText('');
+    setLoading(true);
+
+    try {
+      await new Promise(res => setTimeout(res, 1200));
+
+      const { time: t2, date: d2 } = getTimeInfo();
+
+      const patientResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "patient",
+        name: "Patient simulé",
+        avatar: "/images/avatar-medical.png",
+        text: "Merci, je comprends votre question. Voici ma réponse comme patient.",
+        time: t2,
+        date: d2
+      };
+
+      setMessages(prev => [...prev, patientResponse]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** Entrée ENTER = envoyer */
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  /** Nouvelle conversation */
+  const handleNewConversation = () => {
+    setActiveConversation(null);
+    setMessages([]);
+  };
+
+  /** Sélection conversation */
+  const handleSelectConversation = (id: string) => {
+    setActiveConversation(id);
+
+    const { time, date } = getTimeInfo();
+
+    // Messages simulés avec avatars + noms
+    setMessages([
+      {
+        id: "m1",
+        sender: "apprenant",
+        name: "Vous",
+        avatar: "/images/medical-bg.png",
+        text: "Bonjour, comment vous sentez-vous aujourd'hui ?",
+        time,
+        date
+      },
+      {
+        id: "m2",
+        sender: "patient",
+        name: "Patient simulé",
+        avatar: "/images/avatar-medical.png",
+        text: "Bonjour docteur, j’ai toujours cette douleur à l'abdomen.",
+        time,
+        date
+      },
+    ]);
+  };
+
+  return (
+    <>
+      {/* Bouton flottant draggable */}
+      <button
+        ref={buttonRef}
+        onMouseDown={handleMouseDown}
+        onDoubleClick={handleClick}
+        style={{
+          position: 'fixed',
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          cursor: isDragging ? 'grabbing' : 'grab'
+        }}
+        className="w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50 relative"
+      >
+        <svg width="24" height="24" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <circle cx="12" cy="5" r="2"/>
+        </svg>
+      </button>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-6xl h-[85vh] flex overflow-hidden">
+
+            {/* Sidebar Conversations */}
+            <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
+              <div className="p-4 border-b">
+                <button
+                  onClick={handleNewConversation}
+                  className="w-full bg-blue-600 text-white py-2 rounded-lg flex items-center justify-center gap-2"
+                >
+                  <Plus/> Nouvelle conversation
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-2">
+                {conversations.map(conv => (
+                  <button
+                    key={conv.id}
+                    onClick={() => handleSelectConversation(conv.id)}
+                    className={`block w-full text-left p-3 rounded-md mb-2 ${
+                      activeConversation === conv.id
+                        ? "bg-blue-100 border-l-4 border-blue-600"
+                        : "hover:bg-gray-100 border-l-4 border-transparent"
+                    }`}
+                  >
+                    <div className="font-semibold">{conv.title}</div>
+                    <div className="text-xs text-gray-500 flex gap-1"><Clock size={12}/>{conv.date}</div>
+                    <div className="text-xs text-gray-600 truncate">{conv.preview}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Zone chat */}
+            <div className="flex-1 flex flex-col">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white flex justify-between p-4">
+                <div>
+                  <h2 className="text-xl font-bold">Assistant Patient Virtuel</h2>
+                  <p className="text-sm text-blue-100">Pose tes questions ici</p>
+                </div>
+
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 rounded hover:bg-blue-900/40"
+                >
+                  <X size={24}/>
+                </button>
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                {messages.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-gray-400">
+                    <div className="text-center">
+                      <MessageCircle className="mx-auto mb-4" size={44}/>
+                      <p>Aucun message</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {messages.map(msg => (
+                      <div key={msg.id} className={`flex flex-col ${msg.sender === "apprenant" ? "items-end" : "items-start"}`}>
+                        
+                        <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
+                          {msg.sender === "patient" && <img src={msg.avatar} className="w-6 h-6 rounded-full border" />}
+                          <span className="font-semibold">{msg.name}</span>
+                          {msg.sender === "apprenant" && <img src={msg.avatar} className="w-6 h-6 rounded-full border" />}
+                        </div>
+
+                        <div
+                          className={`max-w-xs lg:max-w-md xl:max-w-lg px-4 py-3 rounded-lg whitespace-pre-line ${
+                            msg.sender === "apprenant"
+                              ? "bg-blue-600 text-white"
+                              : "bg-white border border-gray-200 text-gray-800"
+                          }`}
+                        >
+                          {msg.text}
+                        </div>
+
+                        <span className="text-[11px] text-gray-500 mt-1">
+                          {msg.date} — {msg.time}
+                        </span>
+                      </div>
+                    ))}
+                    {loading && (
+                      <div className="flex justify-start">
+                        <div className="bg-white border px-4 py-3 rounded-lg flex gap-2">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-300"></div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div ref={messagesEndRef}/>
+                  </div>
+                )}
+              </div>
+
+              {/* Input */}
+              <div className="border-t p-4 bg-white">
+                <div className="flex gap-3">
+                  <textarea
+                    className="flex-1 border rounded-lg p-3 resize-none outline-none focus:ring-blue-500 focus:ring"
+                    rows={3}
+                    placeholder="Écrire au patient..."
+                    onKeyDown={handleKeyPress}
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                  />
+                  <button
+                    onClick={handleSend}
+                    disabled={!inputText.trim() || loading}
+                    className="bg-blue-600 text-white p-4 rounded-lg flex items-center justify-center disabled:opacity-50"
+                  >
+                    <FiSend/>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+// END OF FILE: app/dashboard/components/DraggableFloatingButton.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/dashboard/components/Topbar.tsx
+
+"use client";
+
+import React, { useState } from "react";
+import { usePathname } from "next/navigation";
+import {
+  Bell,
+  Search,
+  Settings,
+  ChevronDown,
+  LogOut,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
+// Configuration des pages avec titres médicalisés
+const pageConfig: Record<string, { title: string; description: string }> = {
+  "/dashboard": {
+    title: "Accueil",
+    description: "Tableau de bord médical et aperçu général.",
+  },
+  "/dashboard/orders": {
+    title: "Commandes",
+    description: "Historique et suivi des commandes médicales.",
+  },
+  "/dashboard/tables": {
+    title: "Réservations",
+    description: "Gestion des créneaux et planification.",
+  },
+  "/dashboard/favorites": {
+    title: "Mes Favoris",
+    description: "Vos examens, cas ou documents enregistrés.",
+  },
+  "/dashboard/profiles": {
+    title: "Profil",
+    description: "Informations personnelles et compte utilisateur.",
+  },
+};
+
+export default function Topbar() {
+  const pathname = usePathname();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // Fonction de fallback si page non définie
+  const getDefaultPageConfig = (pathname: string) => {
+    const segments = pathname.split("/").filter(Boolean);
+    const lastSegment =
+      segments[segments.length - 1] || "Dashboard";
+
+    const title = lastSegment
+      .split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+
+    return {
+      title,
+      description: `Gestion de ${title.toLowerCase()}`,
+    };
+  };
+
+  const currentPage =
+    pageConfig[pathname] || getDefaultPageConfig(pathname);
+
+  return (
+    <header
+      className="fixed top-0 right-0 z-30 h-20 bg-white dark:bg-gray-900 border-b border-blue-100 shadow-sm dark:shadow-blue-900/20 backdrop-blur-md"
+      style={{ left: "288px" }}
+    >
+      <div className="h-full px-8">
+        <div className="flex items-center justify-between h-full">
+
+          {/* --- SECTION GAUCHE --- */}
+          <div className="flex flex-col justify-center min-w-[30%]">
+            <h1 className="text-2xl font-bold text-blue-700 dark:text-blue-300 leading-tight truncate">
+              {currentPage.title}
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 truncate mt-1">
+              {currentPage.description}
+            </p>
+          </div>
+
+          {/* --- BARRE DE RECHERCHE (centrée) --- */}
+          <div className="hidden md:flex flex-1 justify-center px-10">
+            <div className="relative w-full max-w-lg">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400" />
+              <input
+                aria-label="Recherche"
+                type="text"
+                placeholder="Rechercher un patient, un dossier, un examen..."
+                className="pl-10 pr-4 py-2 w-full rounded-lg border border-blue-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* --- SECTION DROITE : Avatar + Actions --- */}
+          <div className="flex items-center gap-6 min-w-[260px] justify-end">
+
+            {/* Sélecteur de langue */}
+            <div>
+              <select
+                className="border border-blue-200 dark:border-gray-700 rounded-md px-2 py-1 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-white shadow-sm"
+              >
+                <option value="fr">🇫🇷 Français</option>
+                <option value="en">🇬🇧 English</option>
+              </select>
+            </div>
+
+            {/* Profil */}
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center gap-3 pl-4 border-l border-blue-100 dark:border-gray-700"
+              >
+                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-200 dark:border-blue-600 shadow-md">
+                  <Image
+                    src="/images/avatar-medical.png"
+                    alt="Avatar utilisateur"
+                    width={40}
+                    height={40}
+                    className="object-cover"
+                  />
+                </div>
+
+                <div className="hidden xl:block text-right">
+                  <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    André
+                  </div>
+                  <div className="text-xs text-blue-500 dark:text-blue-300">
+                    Apprenant
+                  </div>
+                </div>
+
+                <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500 hidden xl:block" />
+              </button>
+
+              {/* Menu déroulant */}
+              {isProfileOpen && (
+                <div className="absolute right-0 top-full mt-3 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2">
+                  <Link href="/logout">
+                    <button className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 flex items-center gap-2 transition">
+                      <LogOut className="w-4 h-4" />
+                      Déconnexion
+                    </button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </header>
+  );
+}
+// END OF FILE: app/dashboard/components/Topbar.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/dashboard/diagnostiques/page.tsx
+
+"use client";
+
+import React, { useState } from "react";
+
+export default function DiagnostiquesPage() {
+ 
+  
+  return (
+    <div className="p-6 mt-20 max-w-6xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <h1 className="text-2xl font-bold text-primary">diagnostiques</h1>
+      </div>
+      
+    </div>
+  );
+}
+// END OF FILE: app/dashboard/diagnostiques/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/dashboard/examens/page.tsx
+
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { toast } from 'sonner';
+import { FiSend } from 'react-icons/fi';
+
+type Message = {
+  id: string;
+  sender: 'apprenant' | 'patient';
+  text: string;
+};
+
+// Mock du cas
+const MOCK_CASE = {
+  title: 'Douleurs thoraciques aiguës',
+  summary: 'Patient de 55 ans présentant des douleurs thoraciques irradiant vers le bras gauche.'
+};
+
+export default function SimulationPage() {
+  const router = useRouter();
+  const params = useParams(); // { sessionId: string }
+  const { sessionId } = params;
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputText, setInputText] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!inputText.trim()) return;
+
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      sender: 'apprenant',
+      text: inputText.trim()
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+    setInputText('');
+    setLoading(true);
+
+    try {
+      // Simuler appel backend pour générer réponse du patient
+      await new Promise(res => setTimeout(res, 1500));
+
+      const patientResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'patient',
+        text: 'Merci pour votre question. Voici la réponse du patient simulé.'
+      };
+
+      setMessages(prev => [...prev, patientResponse]);
+    } catch (err) {
+      toast.error('Erreur lors de la génération de la réponse.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleEndSession = () => {
+    toast('Session terminée ! Redirection vers le feedback...');
+    router.push(`/feedback/${sessionId}`);
+  };
+
+  return (
+    <div className="flex mt-13 flex-col h-screen p-4 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-sky-800">{MOCK_CASE.title}</h1>
+        <p className="text-gray-600 mt-1">{MOCK_CASE.summary}</p>
+      </div>
+
+      {/* Chat history */}
+      <div className="flex-1 overflow-y-auto border border-gray-200 rounded-lg p-4 bg-gray-50">
+        {messages.map(msg => (
+          <div key={msg.id} className={`mb-3 flex ${msg.sender === 'apprenant' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`p-3 rounded-lg max-w-xs ${
+              msg.sender === 'apprenant' ? 'bg-blue-600 text-white' : 'bg-white text-gray-800'
+            }`}>
+              {msg.text}
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div className="text-gray-500 italic mb-3">Le patient réfléchit...</div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input & actions */}
+      <div className="mt-4 flex gap-2 items-center">
+        <textarea
+          className="flex-1 border border-gray-300 rounded-lg p-2 resize-none focus:ring-2 focus:ring-sky-400 focus:border-sky-500 outline-none"
+          placeholder="Posez votre question au patient..."
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          onKeyDown={handleKeyPress}
+          rows={2}
+        />
+        <button
+          onClick={handleSend}
+          className="bg-sky-600 hover:bg-sky-700 text-white p-3 rounded-lg flex items-center justify-center"
+          disabled={loading}
+        >
+          <FiSend className="w-5 h-5" />
+        </button>
+      </div>
+
+      <div className="mt-4 text-right">
+        <button
+          onClick={handleEndSession}
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md"
+        >
+          Terminer la session
+        </button>
+      </div>
+    </div>
+  );
+}
+// END OF FILE: app/dashboard/examens/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/dashboard/layout.tsx
+
+// app/dashboard/layout.tsx
+"use client";
+
+import React, { ReactNode, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { Home, Users, UserCircle, Calendar, Heart, BarChart3, DollarSign, HelpCircle, ChevronLeft, ChevronRight, Menu, FileText, ChevronDown, LogOut } from "lucide-react";
+import { motion, LayoutGroup } from "framer-motion";
+import { Stethoscope, Pill, AlertCircle, History, Activity } from "lucide-react"; // icônes médicales supplémentaires
+
+import DraggableFloatingButton from "./components/DraggableFloatingButton";
+import Topbar from "./components/Topbar";
+
+type NavItem = {
+  title: string;
+  href: string;
+  icon: React.ElementType;
+  badge?: number;
+  description?: string;
+};
+
+type SidebarProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+
+const cx = (...classes: Array<string | false | null | undefined>) =>
+  classes.filter(Boolean).join(" ");
+
+// --- Navigation adaptée au thème médical ---
+
+const navItems: NavItem[] = [
+  {
+    title: "Tableau de bord",
+    href: "/dashboard",
+    icon: Home,
+    description: "Vue d'ensemble clinique et indicateurs",
+  },
+  {
+    title: "Cas cliniques en Catégories",
+    href: "/dashboard/categories",
+    icon: FileText, // ou HeartPulse si tu veux quelque chose d’imagerie médicale
+    description: "Gestion, analyse et suivi des cas cliniques",
+  },
+  {
+    title: "Examens complémentaires",
+    href: "/dashboard/examens",
+    icon: Stethoscope, // ou FlaskConical / Microscope selon ta préférence
+    description: "Résultats biologiques, imagerie et analyses",
+  },
+  {
+    title: "Traitements en cours",
+    href: "/dashboard/traiements",
+    icon: Pill, // Lucide : Pill ou Syringe
+    description: "Médications, posologies et suivi thérapeutique",
+  },
+  {
+    title: "Diagnostiques",
+    href: "/dashboard/diagnostiques",
+    icon: AlertCircle,
+    description: "Conclusions cliniques et diagnostics différentiels",
+  },
+  {
+    title: "Antécédents médicaux",
+    href: "/dashboard/antecedents",
+    icon: History,
+    description: "Pathologies passées, allergies et interventions",
+  },
+  {
+    title: "Symptômes",
+    href: "/dashboard/symptomes",
+    icon: Heart,
+    description: "Plaintes patient, manifestations et durée",
+  },
+];
+
+/**
+
+const navItems: NavItem[] = [
+  {
+    title: "Tableau de bord",
+    href: "/dashboard",
+    icon: Home,
+    description: "Vue d'ensemble clinique et indicateurs",
+  },
+  {
+    title: "Patients",
+    href: "/dashboard/patients",
+    icon: Users,
+    badge: 3,
+    description: "Liste des patients, dossiers et suivi",
+  },
+  {
+    title: "Rendez-vous",
+    href: "/dashboard/appointments",
+    icon: Calendar,
+    description: "Planning, créneaux et gestion des RDV",
+  },
+  {
+    title: "Dossiers de génération",
+    href: "/dashboard/generator",
+    icon: Heart,
+    description: "Dossiers ou cas marqués comme favoris",
+  },
+  {
+    title: "Les cas médicaux",
+    href: "/dashboard/cas-medicaux",
+    icon: FileText,
+    description: "Accédez à tous vos cas médicaux et dossiers patients",
+  },
+  {
+    title: "Statistiques",
+    href: "/dashboard/statistiques",
+    icon: BarChart3,
+    description: "Performance clinique et indicateurs",
+  },
+];
+
+*/
+
+
+function Sidebar({ children, className }: SidebarProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
+
+  // NOTE: Expanded width = w-72 (18rem = 288px) to match Topbar left: "288px"
+  const expandedWidth = "w-72"; // 18rem
+  const collapsedWidth = "w-20"; // 5rem
+
+  return (
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-gray-900">
+      {/* Topbar (fixé) */}
+      <Topbar />
+      <DraggableFloatingButton />
+
+      {/* Mobile menu button */}
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <button
+          onClick={() => setIsMobileOpen(true)}
+          className="p-2.5 rounded-lg bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-transform active:scale-95"
+          aria-label="Ouvrir le menu"
+        >
+          <Menu className="w-6 h-6 text-sky-700 dark:text-sky-300" />
+        </button>
+      </div>
+
+      <div className="flex flex-1 gap-1 md:gap-4 lg:gap-6 overflow-hidden">
+        {/* Sidebar Desktop */}
+        <aside
+          className={cx(
+            "hidden md:flex flex-col transition-all duration-300 ease-out fixed left-0 top-0 bottom-0 h-screen z-40",
+            isCollapsed ? collapsedWidth : expandedWidth,
+            "bg-gradient-to-b from-sky-800 via-sky-900 to-slate-900 text-white",
+            "shadow-2xl border-r border-sky-900/30",
+            "overflow-y-auto",
+            className
+          )}
+          // On ajoute padding pour s'aligner au Topbar : Topbar est fixé et overlay, mais ici on laisse le scrolling complet
+        >
+          {/* Brand */}
+          <div className="flex items-center justify-between p-4 border-b border-sky-700/30 flex-shrink-0">
+            {!isCollapsed ? (
+              <Link href="/dashboard" className="flex items-center gap-3 group">
+                <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center shadow-md">
+                  {/* Petit logo textuel médical */}
+                  <span className="text-white font-bold text-lg">HC</span>
+                </div>
+                <div className="overflow-hidden">
+                  <div className="text-white text-sm font-bold leading-tight">
+                    Clinique Pro
+                  </div>
+                  <div className="text-sky-200 text-xs">Dashboard médical</div>
+                </div>
+              </Link>
+            ) : (
+              <Link href="/dashboard" className="flex items-center justify-center w-full">
+                <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center shadow-md">
+                  <span className="text-white font-bold text-sm">HC</span>
+                </div>
+              </Link>
+            )}
+
+            <button
+              onClick={() => setIsCollapsed((p) => !p)}
+              className="p-1.5 rounded-lg hover:bg-white/10 transition-colors active:scale-95"
+              aria-label={isCollapsed ? "Étendre la sidebar" : "Réduire la sidebar"}
+            >
+              {isCollapsed ? (
+                <ChevronRight className="w-4 h-4 text-sky-200" />
+              ) : (
+                <ChevronLeft className="w-4 h-4 text-sky-200" />
+              )}
+            </button>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto p-3 space-y-2">
+            <LayoutGroup>
+              {/* Primary navigation */}
+              <div className="space-y-1.5">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive =
+                    pathname === item.href || pathname?.startsWith(item.href + "/");
+
+                  return (
+                    <div key={item.href} className="relative group">
+                      {isActive && !isCollapsed && (
+                        <motion.div
+                          layoutId="sidebar-active-med"
+                          className="absolute inset-0 rounded-lg bg-sky-700/20 border border-sky-600/20"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        />
+                      )}
+
+                      <Link
+                        href={item.href}
+                        className={cx(
+                          "relative z-10 flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                          isActive
+                            ? "text-sky-50 bg-sky-900/30"
+                            : "text-sky-200 hover:text-white hover:bg-sky-900/20"
+                        )}
+                        aria-current={isActive ? "page" : undefined}
+                        title={item.description}
+                      >
+                        <Icon
+                          className={cx(
+                            "w-6 h-6 flex-shrink-0 transition-colors duration-200",
+                            isActive ? "text-sky-300" : "text-sky-300/70"
+                          )}
+                        />
+
+                        {!isCollapsed && (
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span
+                                className={cx(
+                                  "text-sm font-medium transition-colors",
+                                  isActive ? "text-white" : "text-sky-100"
+                                )}
+                              >
+                                {item.title}
+                              </span>
+                              {item.badge ? (
+                                <motion.span
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="ml-2 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold bg-rose-500 text-white shadow"
+                                >
+                                  {item.badge}
+                                </motion.span>
+                              ) : null}
+                            </div>
+                            {item.description && (
+                              <div className="text-xs text-sky-200 mt-1 line-clamp-1">
+                                {item.description}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Divider */}
+              <div className="my-3 border-t border-sky-700/30"></div>
+
+              {/* Secondary navigation
+              {!isCollapsed && (
+                <div className="px-3 py-2 text-xs font-semibold text-sky-200 uppercase tracking-wider">
+                  Opérations
+                </div>
+              )} */}
+
+            </LayoutGroup>
+          </nav>
+
+          {/* Footer de la sidebar - profil / déconnexion */}
+          <div className="p-4 border-t border-sky-700/20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-white/5 flex items-center justify-center">
+                {/* avatar placeholder; Topbar affichera avatar réel */}
+                <span className="text-white font-semibold text-sm">Dr</span>
+              </div>
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-white">Dr. André</div>
+                  <div className="text-xs text-sky-200">Cardiologue</div>
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  setIsLoggingOut(true);
+                  // Simuler logout (remplace par ta logique réelle)
+                  setTimeout(() => {
+                    setIsLoggingOut(false);
+                    router.push("/logout");
+                  }, 600);
+                }}
+                className="p-2 rounded-md hover:bg-white/5 transition-colors"
+                aria-label="Se déconnecter"
+              >
+                {isLoggingOut ? (
+                  <svg
+                    className="animate-spin w-5 h-5 text-white"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.2" />
+                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" />
+                  </svg>
+                ) : (
+                  <LogOut className="w-5 h-5 text-sky-200" />
+                )}
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        {/* Mobile Drawer (simple) */}
+        {isMobileOpen && (
+          <div className="md:hidden fixed inset-0 z-50">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black"
+              onClick={() => setIsMobileOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="relative w-72 h-full bg-white shadow-xl overflow-y-auto"
+            >
+              <div className="p-4 flex items-center justify-between border-b">
+                <div className="font-bold text-sky-800">Clinique Pro</div>
+                <button onClick={() => setIsMobileOpen(false)} className="p-2 rounded-md">
+                  <ChevronDown className="w-5 h-5 text-sky-700" />
+                </button>
+              </div>
+            </motion.aside>
+          </div>
+        )}
+
+        {/* Main Content */}
+        <main
+          className={cx(
+            "flex-1 overflow-y-auto bg-slate-50 dark:bg-gray-900 p-4 md:p-6 lg:p-8 transition-all duration-300",
+            isCollapsed ? "md:ml-20" : "md:ml-72"
+          )}
+        >
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default function DashboardLayout({ children }: { children: ReactNode }) {
+  return <Sidebar>{children}</Sidebar>;
+}
+// END OF FILE: app/dashboard/layout.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/dashboard/page.tsx
+
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import Confetti from "react-confetti";
+import { toast } from "sonner";
+
+type MedicalCase = {
+  id: string;
+  title: string;
+  summary: string;
+  description: string;
+  image: string;
+};
+
+type MedicalCategory = {
+  id: string;
+  name: string;
+  cases: MedicalCase[];
+};
+
+const MEDICAL_CATEGORIES: MedicalCategory[] = [
+  {
+    id: "c1",
+    name: "Cardiologie",
+    cases: [
+      {
+        id: "cas1",
+        title: "Infarctus aigu du myocarde",
+        summary: "Douleurs thoraciques irradiant au bras gauche.",
+        description: "Patient masculin de 57 ans, tabagique, douleur thoracique depuis 2h avec sueurs et nausées. ECG suspect ST+ antérieur.",
+        image: "/images/Cardiologie.png",
+        },
+      {
+        id: "cas2",
+        title: "Insuffisance cardiaque",
+        summary:
+          "Dyspnée d’effort, orthopnée, œdéme des membres inférieurs.",
+        description:
+          "Fatigue progressive depuis 10 jours, prise de poids, crépitants bilatéraux, tachycardie légère.",
+        image: "/images/Cardiologie_1.png",
+      },
+    ],
+  },
+  {
+    id: "c2",
+    name: "Pneumologie",
+    cases: [
+      {
+        id: "cas3",
+        title: "Asthme sévère",
+        summary: "Sifflements expiratoires, dyspnée, crise nocturne.",
+        description:
+          "Exacerbation asthmatique après infection virale, débit expiratoire bas, oxygénation 90%.",
+        image:
+          "https://upload.wikimedia.org/wikipedia/commons/7/75/Asthma_diagram.png",
+      },
+      {
+        id: "cas4",
+        title: "Pneumonie communautaire",
+        summary: "Fièvre, toux productive purulente.",
+        description:
+          "Syndrome infectieux, douleur basithoracique droite, suspicion pneumocoque.",
+        image: "/images/Pneumonie.png",
+      },
+    ],
+  },
+  {
+    id: "c3",
+    name: "Neurologie",
+    cases: [
+      {
+        id: "cas5",
+        title: "AVC ischémique",
+        summary: "Déficit moteur brutal, trouble du langage.",
+        description:
+          "Patient hypertendu, apparition brutale il y a 45 min, score NIHSS = 8, suspicion ACM gauche.",
+        image: "/images/Pneumonie_1.png",
+      },
+      {
+        id: "cas6",
+        title: "Épilepsie généralisée",
+        summary: "Crises tonico-cloniques, post-critique.",
+        description:
+          "Patient 19 ans, crises répétées, pas de fièvre, examen neuro normal en intercritique.",
+        image:
+          "https://upload.wikimedia.org/wikipedia/commons/e/e0/EEG_normal.svg",
+      },
+    ],
+  },
+];
+
+export default function DashboardPage() {
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<MedicalCategory | null>(null);
+  const [activeMode, setActiveMode] = useState<"garde" | "entrainement">("garde");
+  const [userName, setUserName] = useState("Marie");
+
+  const handleNextPatient = () => {
+    toast("Simulation d'un patient aléatoire lancée !");
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2500);
+  };
+
+  return (
+    <div className="w-full mt-20 max-w-7xl mx-auto relative pb-10">
+      {showConfetti && (
+        <Confetti width={window.innerWidth} height={window.innerHeight} />
+      )}
+
+      {/* HEADER */}
+      <div className="mt-6 mb-4 flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-sky-700 dark:text-sky-300">
+            Bonjour {userName} 👋
+          </h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Aperçu clinique — entraînement et cas à traiter
+          </p>
+        </div>
+      </div>
+
+      {/* MODE */}
+      <div className="flex gap-4 mb-6">
+        <button
+          className={`px-4 py-2 rounded-md ${
+            activeMode === "garde"
+              ? "bg-sky-600 text-white"
+              : "bg-gray-100 dark:bg-gray-700 dark:text-white"
+          }`}
+          onClick={() => setActiveMode("garde")}
+        >
+          Garde de Nuit
+        </button>
+
+        <button
+          className={`px-4 py-2 rounded-md ${
+            activeMode === "entrainement"
+              ? "bg-sky-600 text-white"
+              : "bg-gray-100 dark:bg-gray-700 dark:text-white"
+          }`}
+          onClick={() => setActiveMode("entrainement")}
+        >
+          Entraînement Ciblé
+        </button>
+      </div>
+
+      {/* MODE GARDE */}
+      {activeMode === "garde" && (
+        <div className="mb-8">
+          <button
+            onClick={handleNextPatient}
+            className="bg-sky-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-sky-700 transition"
+          >
+            Prochain Patient
+          </button>
+        </div>
+      )}
+
+      {/* MODE ENTRAINEMENT */}
+      {activeMode === "entrainement" && (
+        <>
+          <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-3">
+            Catégories médicales
+          </h3>
+
+          <div className="flex gap-3 flex-wrap">
+            {MEDICAL_CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-2 rounded-md border ${
+                  selectedCategory?.id === cat.id
+                    ? "bg-sky-600 text-white border-transparent"
+                    : "bg-sky-100 text-sky-800 hover:bg-sky-200"
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+
+          {/* CARDS */}
+          {selectedCategory && (
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {selectedCategory.cases.map((c) => (
+                <div
+                  key={c.id}
+                  className="bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden hover:-translate-y-1 hover:shadow-xl transition"
+                >
+                  <div className="relative h-40 w-full">
+                    <Image
+                      src={c.image}
+                      alt={c.title}
+                      fill
+                      className="object-cover"
+                      priority={true}
+                    />
+                  </div>
+
+                  <div className="p-4">
+                    <h4 className="text-lg font-semibold text-slate-800 dark:text-white">
+                      {c.title}
+                    </h4>
+
+                    <p className="text-sm mt-1 text-slate-500 dark:text-slate-300">
+                      {c.summary}
+                    </p>
+
+                    <p className="text-sm mt-3 text-slate-600 dark:text-slate-400 line-clamp-3">
+                      {c.description}
+                    </p>
+
+                    <button
+                      className="mt-4 w-full rounded-md bg-sky-600 text-white p-2 hover:bg-sky-700 transition"
+                      onClick={() => toast(`Simulation lancée : ${c.title}`)}
+                    >
+                      Lancer la Simulation
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+// END OF FILE: app/dashboard/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/dashboard/symptomes/page.tsx
+
+
+"use client";
+
+import React, { useState, useMemo } from "react";
+
+
+export default function SymptomesPage() {
+
+  return (
+    <div className="p-6 mt-20 max-w-6xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <h1 className="text-2xl font-bold text-primary">symptomes</h1>
+      </div>
+   
+
+    </div>
+  );
+}
+// END OF FILE: app/dashboard/symptomes/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/dashboard/traiements/page.tsx
+
+
+"use client";
+
+import React, { useState, useMemo } from "react";
+
+export default function TraiementsPage() {
+
+  return (
+    <div className="p-6 mt-20 max-w-6xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <h1 className="text-2xl font-bold text-primary">traiements</h1>
+      </div>
+   
+
+    </div>
+  );
+}
+// END OF FILE: app/dashboard/traiements/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/error.tsx
+
+// app/error.tsx — Boundary d’erreur globale professionnelle
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  AlertCircle,
+  Home,
+  ArrowLeft,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
+
+export default function GlobalError({ error }: { error: Error }) {
+  const router = useRouter();
+  const [showDetails, setShowDetails] = useState(false);
+
+  useEffect(() => {
+    console.error('🔥 Global error caught:', error);
+  }, [error]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-6">
+      <div className="max-w-2xl w-full bg-white border border-red-200 shadow-lg rounded-2xl p-8 text-center">
+        {/* Icône d’erreur */}
+        <div className="flex justify-center mb-4">
+          <div className="bg-red-100 text-red-600 p-4 rounded-full">
+            <AlertCircle size={40} />
+          </div>
+        </div>
+
+        {/* Titre principal */}
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+          Oups ! Une erreur s’est produite
+        </h1>
+        <p className="text-gray-600 mb-6">
+          Nous avons rencontré un problème lors du chargement de cette page.  
+          Vous pouvez essayer de revenir en arrière ou de retourner à l’accueil.
+        </p>
+
+        {/* Actions principales */}
+        <div className="flex flex-col sm:flex-row justify-center gap-3 mb-6">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-full font-medium transition"
+          >
+            <ArrowLeft size={18} />
+            Retour
+          </button>
+          <button
+            onClick={() => router.push('/')}
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-medium transition"
+          >
+            <Home size={18} />
+            Accueil
+          </button>
+        </div>
+
+        {/* Bouton pour afficher les détails */}
+        <div className="mt-4">
+          <button
+            onClick={() => setShowDetails((prev) => !prev)}
+            className="flex items-center justify-center gap-2 mx-auto text-sm text-gray-600 hover:text-gray-800 transition"
+          >
+            {showDetails ? (
+              <>
+                <ChevronUp size={16} />
+                Masquer les détails techniques
+              </>
+            ) : (
+              <>
+                <ChevronDown size={16} />
+                Afficher les détails techniques
+              </>
+            )}
+          </button>
+
+          {showDetails && (
+            <pre className="mt-4 text-left bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 overflow-auto max-h-64">
+              {error?.message || 'Aucun message disponible.'}
+              {error?.stack && (
+                <>
+                  {'\n\n'}Trace :
+                  {'\n'}
+                  {error.stack}
+                </>
+              )}
+            </pre>
+          )}
+        </div>
+
+        {/* Footer info */}
+        <p className="mt-8 text-xs text-gray-400">
+          Si le problème persiste, contactez l’équipe technique.
+        </p>
+      </div>
+    </div>
+  );
+}
+// END OF FILE: app/error.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/globals.css
+
+/* app/globals.css */
+/* Fichier CSS global avec variables pour thèmes clair/sombre et échelle de texte */
+/* Utilise Tailwind CSS pour les utilitaires */
+/* Variables CSS personnalisées pour thèmes et échelle de texte */
+
+
+@import "tailwindcss";
+
+
+
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+
+@import 'leaflet/dist/leaflet.css';
+// END OF FILE: app/globals.css
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/layout.tsx
+
+// app/layout.tsx
+import './globals.css';
+import type { Metadata } from 'next';
+import { Toaster } from 'sonner';
+
+import { AuthProvider } from '@/contexts/AuthContext'
+
+export const metadata: Metadata = {
+  title: 'Generative medical tutor',
+  description: "Plateforme de ...",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="fr" className="h-full">
+      <body className="h-full flex flex-col">
+        <main id="main" className="flex-1">
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </main>
+        <Toaster position="top-right" richColors />
+      </body>
+    </html>
+  );
+}
+// END OF FILE: app/layout.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/loading.tsx
+
+// app/loading.tsx — skeleton global / loader
+export default function Loading() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center p-6">
+      <div className="w-full max-w-4xl animate-pulse space-y-4">
+        <div className="h-8 bg-surface rounded w-3/5" />
+        <div className="h-6 bg-surface rounded w-2/3" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div className="h-48 bg-surface rounded" />
+          <div className="h-48 bg-surface rounded" />
+          <div className="h-48 bg-surface rounded" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// END OF FILE: app/loading.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/page.tsx
+
+// app/page.tsx — Page d'accueil professionnelle du Générateur de Cas Médicaux
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { ArrowRight,Stethoscope,
+  Brain,
+  Globe,
+  Heart,
+  Users,
+  Shield,
+  Zap,
+  Award,
+  TrendingUp,
+  MessageCircle, FileText, Activity, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
+import Image from "next/image";
+
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+
+export default function HomePage() {
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--background)', color: 'var(--text)' }} >
+      <Header />
+      {/* Section Hero */}
+      <section className="flex flex-col items-center justify-center text-center py-24 px-6 md:px-10">
+        <motion.h1
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl md:text-6xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent leading-tight mb-4"
+        >
+          Générateur de Cas Médicaux
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="text-lg md:text-xl text-gray-600 max-w-2xl mb-8"
+        >
+          Créez des cas cliniques interactifs, précis et personnalisés pour la
+          formation médicale, l’évaluation des étudiants et la simulation
+          clinique.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="flex flex-col sm:flex-row items-center gap-4"
+        >
+          <Link href="/dashboard/generator">
+            <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-full transition text-lg shadow-sm">
+              <Sparkles size={20} />
+              Lancer le générateur
+              <ArrowRight size={18} />
+            </button>
+          </Link>
+
+          <Link href="/about">
+            <button className="flex items-center gap-2 border border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 rounded-full transition text-lg">
+              En savoir plus
+            </button>
+          </Link>
+        </motion.div>
+      </section>
+
+      {/* Mission & Vision */}
+      <section className="py-20 px-6">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+              Notre mission
+            </h2>
+            <p className="text-lg text-gray-700 leading-relaxed mb-6">
+              Former la prochaine génération de médecins africains avec des outils pédagogiques <span className="font-bold text-blue-600">réalistes, modernes et culturellement pertinents</span>.
+            </p>
+            <p className="text-lg text-gray-700 leading-relaxed">
+              Trop souvent, les étudiants en médecine en Afrique étudient sur des cas européens ou américains qui ne reflètent pas leur future réalité quotidienne : paludisme grave, drépanocytose, VIH, tuberculose, HTA non contrôlée, accouchements à risque, etc.
+            </p>
+            <p className="text-lg text-gray-700 leading-relaxed mt-6">
+              MedCaseGen change cela en générant des milliers de cas cliniques <strong>100 % adaptés au terrain africain</strong>.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="relative h-96 rounded-2xl overflow-hidden shadow-2xl"
+          >
+            <Image
+              src="/images/medical-bg.png" // tu peux remplacer par une vraie photo
+              alt="Équipe médicale africaine en formation"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute bottom-6 left-6 text-white">
+              <p className="text-2xl font-bold">Formation médicale africaine</p>
+              <p className="opacity-90">Pour l'Afrique, par l'Afrique</p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Chiffres clés */}
+      <section className="py-20 bg-blue-600 text-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-4xl font-bold text-center mb-16">
+            MedCaseGen en chiffres
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+            {[
+              { value: "15 000+", label: "Cas générés" },
+              { value: "8", label: "Pays utilisateurs" },
+              { value: "96,8%", label: "Précision diagnostique IA" },
+              { value: "2 400+", label: "Utilisateurs actifs" },
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="text-center"
+              >
+                <p className="text-5xl font-bold mb-2">{stat.value}</p>
+                <p className="text-blue-100 text-lg">{stat.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Fonctionnalités clés */}
+      <section className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">
+            Pourquoi choisir MedCaseGen ?
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              { icon: Heart, title: "Cas hyper-réalistes", desc: "Noms camerounais/congolais/sénégalais, quartiers réels, habitudes locales, croyances traditionnelles intégrées" },
+              { icon: Shield, title: "Validé par des médecins africains", desc: "Chaque cas est revu par notre comité médical basé à Yaoundé, Douala et Dakar" },
+              { icon: Users, title: "Pour tous les niveaux", desc: "Externes, internes, résidents, formateurs, préparations ECOS/concours" },
+              { icon: Award, title: "Mode examen blanc", desc: "Cas chronométrés avec correction automatique et explication détaillée" },
+              { icon: TrendingUp, title: "Mise à jour épidémiologique", desc: "Données actualisées : choléra, rougeole, Ebola, paludisme résistant, etc." },
+              { icon: MessageCircle, title: "Communauté active", desc: "Partage de cas, discussions, défis cliniques entre utilisateurs" },
+            ].map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-100"
+              >
+                <feature.icon className="w-12 h-12 text-blue-600 mb-4" />
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Section Fonctionnalités */}
+      <section className="py-16 px-6 md:px-10 bg-gradient-to-b from-white to-blue-50 border-t border-blue-100">
+        <div className="max-w-5xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-10">
+            Pourquoi utiliser le Générateur de Cas Médicaux ?
+          </h2>
+
+          <div className="grid gap-10 md:grid-cols-3 text-left">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition"
+            >
+              <div className="bg-blue-100 text-blue-700 w-12 h-12 flex items-center justify-center rounded-xl mb-4">
+                <Brain size={24} />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Cas intelligents</h3>
+              <p className="text-gray-600 text-sm">
+                Génération de cas cliniques cohérents grâce à l’intelligence
+                artificielle, adaptés au niveau d’étude ou à la spécialité.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition"
+            >
+              <div className="bg-green-100 text-green-700 w-12 h-12 flex items-center justify-center rounded-xl mb-4">
+                <FileText size={24} />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">
+                Support pédagogique
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Permet aux enseignants de créer rapidement des supports
+                d’évaluation, des QCM ou des cas de simulation réalistes.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition"
+            >
+              <div className="bg-indigo-100 text-indigo-700 w-12 h-12 flex items-center justify-center rounded-xl mb-4">
+                <Activity size={24} />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Formation continue</h3>
+              <p className="text-gray-600 text-sm">
+                Idéal pour la mise à jour des connaissances médicales et
+                l’autoformation basée sur des cas réalistes.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+        <Footer />
+    </div>
+  );
+}
+// END OF FILE: app/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/support/page.tsx
+
+"use client";
+
+import React, { useState } from "react";
+
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+const FAQ_LIST: FAQItem[] = [
+  {
+    question: "Comment créer un nouveau patient ?",
+    answer:
+      "Pour créer un nouveau patient, cliquez sur 'Patients' dans le menu, puis sur 'Nouveau Patient'. Remplissez le formulaire et sauvegardez.",
+  },
+  {
+    question: "Comment générer un cas médical ?",
+    answer:
+      "Allez dans 'Générateur', sélectionnez un patient ou créez-en un nouveau, puis remplissez les informations du cas et sauvegardez.",
+  },
+  {
+    question: "Comment gérer les paiements ?",
+    answer:
+      "Dans la section 'Facturation', vous pouvez consulter les paiements, filtrer par patient ou date et suivre le statut de chaque transaction.",
+  },
+  {
+    question: "Comment contacter le support ?",
+    answer:
+      "Vous pouvez envoyer un message directement via le formulaire de contact ci-dessous, ou consulter nos guides et FAQ pour assistance rapide.",
+  },
+];
+
+export default function SupportPage() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [message, setMessage] = useState("");
+
+  const toggleFAQ = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
+  const handleSendMessage = () => {
+    if (message.trim() === "") return alert("Veuillez saisir un message.");
+    alert("Message envoyé au support : " + message);
+    setMessage("");
+  };
+
+  return (
+    <div className="p-6 mt-20 max-w-4xl mx-auto space-y-8">
+      <h1 className="text-2xl font-bold text-primary">Centre d'aide & Support</h1>
+
+      {/* FAQ */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Questions fréquentes</h2>
+        {FAQ_LIST.map((faq, index) => (
+          <div
+            key={index}
+            className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 cursor-pointer transition hover:shadow-md"
+            onClick={() => toggleFAQ(index)}
+          >
+            <div className="flex justify-between items-center">
+              <span className="font-medium text-gray-800 dark:text-gray-100">{faq.question}</span>
+              <span className="text-gray-500">{openIndex === index ? "−" : "+"}</span>
+            </div>
+            {openIndex === index && (
+              <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm">{faq.answer}</p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Contact Form */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Envoyer un message au support</h2>
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Votre message..."
+          className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          rows={4}
+        ></textarea>
+        <button
+          onClick={handleSendMessage}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+        >
+          Envoyer
+        </button>
+      </div>
+    </div>
+  );
+}
+// END OF FILE: app/support/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/test/note.txt
+
+
+docteur@docteur-HP-ProBook-650-G1:~/Documents/Autres/generative-medical-tutor/frontend$ npm run build
+
+> Generative_medical_tutor@0.1.0 build
+> next build
+
+   ▲ Next.js 15.2.4
+   - Experiments (use with caution):
+     · proxyTimeout: 180000
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types    
+ ✓ Collecting page data    
+ ✓ Generating static pages (19/19)
+ ✓ Collecting build traces    
+ ✓ Finalizing page optimization    
+
+Route (app)                                 Size  First Load JS    
+┌ ○ /                                    5.38 kB         152 kB
+├ ○ /_not-found                            986 B         102 kB
+├ ○ /about                               4.19 kB         151 kB
+├ ○ /dashboard                           3.79 kB         113 kB
+├ ○ /dashboard/appointments              2.23 kB         103 kB
+├ ○ /dashboard/cas-medicaux              1.37 kB         102 kB
+├ ○ /dashboard/generator                 1.05 kB         102 kB
+├ ƒ /dashboard/generator/[id]            1.47 kB         102 kB
+├ ○ /dashboard/patients                  2.65 kB         112 kB
+├ ƒ /dashboard/patients/[id]               172 B         107 kB
+├ ○ /dashboard/patients/new              2.28 kB         113 kB
+├ ○ /dashboard/payments                  1.36 kB         102 kB
+├ ○ /dashboard/profiles                  2.62 kB         113 kB
+├ ○ /dashboard/statistiques               108 kB         209 kB
+├ ○ /dashboard/support                   1.23 kB         102 kB
+├ ○ /login                               4.56 kB         162 kB
+├ ○ /logout                               2.7 kB         116 kB
+└ ○ /register                            13.5 kB         167 kB
++ First Load JS shared by all             101 kB
+  ├ chunks/4bd1b696-8ff4165fc225492c.js  53.3 kB
+  ├ chunks/684-a6475c924cfb1ab3.js       45.8 kB
+  └ other shared chunks (total)          1.96 kB
+
+
+ƒ Middleware                             32.3 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+docteur@docteur-HP-ProBook-650-G1:~/Documents/Autres/generative-medical-tutor/frontend$ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// END OF FILE: app/test/note.txt
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/app/test/page.tsx
+
+
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { MessageCircle, X, Plus, Clock } from 'lucide-react';
+import { FiSend, FiPlus, FiMic, FiPaperclip } from 'react-icons/fi';
+
+type Actor = "apprenant" | "patient";
+
+type Message = {
+  id: string;
+  sender: Actor;
+  text?: string;
+  name: string;
+  avatar: string;
+  time: string;
+  date: string;
+  fileUrl?: string;
+  fileName?: string;
+  audioUrl?: string;
+};
+
+type Conversation = {
+  id: string;
+  title: string;
+  date: string;
+  preview: string;
+};
+
+export default function DraggableFloatingButton() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef(null);
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputText, setInputText] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Pour désactiver le bouton “envoyer” tant que le patient n’a pas répondu
+  const [canSend, setCanSend] = useState(true);
+
+  useEffect(() => {
+    if (messages.length === 0) return;
+
+    const last = messages[messages.length - 1];
+
+    // Si le dernier message vient de l’apprenant ⇒ verrouille
+    if (last.sender === "apprenant") {
+      setCanSend(false);
+    } else {
+      // Sinon le patient a répondu ⇒ autorise
+      setCanSend(true);
+    }
+  }, [messages]);
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Dans votre composant, ajoutez ces states et fonctions
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // le hook useEffect corrigé pour fermer le menu en cliquant ailleurs  
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setIsDropdownOpen(false);
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
+  // Fonction pour l'enregistrement audio
+  const handleAudioRecord = async () => {
+    try {
+      // Vérifier si le navigateur supporte l'API MediaRecorder
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("L'enregistrement audio n'est pas supporté sur ce navigateur");
+        return;
+      }
+
+      // Demander l'autorisation d'accéder au microphone
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // Créer un MediaRecorder
+      let mediaRecorder: MediaRecorder | null = null;
+      mediaRecorder = new MediaRecorder(stream);
+  
+      const audioChunks: BlobPart[] = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        // Créer un blob audio
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        
+        // Créer un URL pour l'audio
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
+        // Ici vous pouvez envoyer l'audio au serveur ou le traiter
+        console.log("Audio enregistré:", audioUrl);
+        
+        // Pour l'instant, on crée un lien de téléchargement
+        const { time, date } = getTimeInfo();
+
+        const newAudioMsg: Message = {
+          id: Date.now().toString(),
+          sender: "apprenant",
+          name: "Vous",
+          avatar: "/images/medical-bg.png",
+          time,
+          date,
+          audioUrl
+        };
+
+        setMessages(prev => [...prev, newAudioMsg]);
+
+        
+        // Libérer les ressources
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      // Démarrer l'enregistrement
+      mediaRecorder.start();
+      
+      // Arrêter après 10 secondes (pour l'exemple)
+      setTimeout(() => {
+        if (mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+        }
+      }, 10000);
+
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement audio:", error);
+      alert("Erreur d'accès au microphone");
+    }
+  };
+
+  // Fonction pour l'ajout de fichier
+  // Déclencher le click sur l'input file caché
+  const handleFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+
+  // Gérer la sélection de fichier
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Vérifier la taille du fichier (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Le fichier est trop volumineux. Taille maximale: 10MB");
+      return;
+    }
+
+    // Vérifier le type de fichier
+    const allowedTypes = [
+      'image/jpeg', 
+      'image/png', 
+      'image/gif',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      alert("Type de fichier non supporté. Formats acceptés: images, PDF, Word");
+      return;
+    }
+
+    // formats images autorisés
+    const imageTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/gif"];
+    const isImage = imageTypes.includes(file.type);
+
+  // Si c’est une image → ENVOI DIRECT
+  // mais ca bloque quand on veut envoyer un autre message car la verification du dernier
+  // message bloque l'envoi
+
+  /** 
+  if (isImage) {
+    const { time, date } = getTimeInfo();
+    const fileUrl = URL.createObjectURL(file);
+
+    const newMsg: Message = {
+      id: Date.now().toString(),
+      sender: "apprenant",
+      name: "Vous",
+      avatar: "/images/medical-bg.png",
+      time,
+      date,
+      fileUrl,
+      fileName: file.name,
+    };
+
+    setMessages(prev => [...prev, newMsg]);
+    return; // aucune autre action
+  }*/
+
+    setSelectedFile(file);
+    // Ici vous pouvez envoyer le fichier au serveur
+    console.log("Fichier sélectionné:", file);
+    
+    // Pour l'instant, on affiche juste les infos
+    alert(`Fichier sélectionné: ${file.name}\nTaille: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+
+  };
+
+
+
+  const [conversations] = useState<Conversation[]>([
+    {
+      id: '1',
+      title: 'Consultation du 28 Nov',
+      date: '28/11/2024',
+      preview: 'Douleur abdominale...'
+    },
+    {
+      id: '2',
+      title: 'Suivi patient A.',
+      date: '27/11/2024',
+      preview: 'Contrôle post-opératoire...'
+    },
+    {
+      id: '3',
+      title: 'Urgence respiratoire',
+      date: '26/11/2024',
+      preview: 'Difficulté à respirer...'
+    }
+  ]);
+
+  const [activeConversation, setActiveConversation] = useState<string | null>(null);
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(scrollToBottom, [messages]);
+
+  // timezone helper
+  const getTimeInfo = () => {
+    const now = new Date();
+    return {
+      time: now.toLocaleTimeString('fr-FR', {
+        timeZone: 'Africa/Douala',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      date: now.toLocaleDateString('fr-FR', { timeZone: 'Africa/Douala' })
+    };
+  };
+
+  // Position initiale du bouton en bas à droite au chargement
+  useEffect(() => {
+    const updatePosition = () => {
+      setPosition({
+        x: window.innerWidth - 80,
+        y: window.innerHeight - 80
+      });
+    };
+    
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    
+    return () => window.removeEventListener('resize', updatePosition);
+  }, []);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+    const newX = e.clientX - dragStart.x;
+    const newY = e.clientY - dragStart.y;
+
+    const maxX = window.innerWidth - 60;
+    const maxY = window.innerHeight - 60;
+    
+    setPosition({
+      x: Math.max(0, Math.min(newX, maxX)),
+      y: Math.max(0, Math.min(newY, maxY))
+    });
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  useEffect(() => {
+    if (!isDragging) return;
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragStart]);
+
+  const handleClick = () => {
+    if (!isDragging) setIsModalOpen(true);
+  };
+
+  /** 💬 Sending Message */
+  const handleSend = async () => {
+    if (!canSend) return; // 🚨 stop
+    if (!inputText.trim() && !selectedFile) return;
+
+    const { time, date } = getTimeInfo();
+
+    let fileUrl: string | undefined = undefined;
+    let fileName: string | undefined = undefined;
+
+    if (selectedFile) {
+      fileUrl = URL.createObjectURL(selectedFile);
+      fileName = selectedFile.name;
+    }
+
+    const newMsg: Message = {
+      id: Date.now().toString(),
+      sender: "apprenant",
+      name: "Vous",
+      avatar: "/images/medical-bg.png",
+      text: inputText.trim() || undefined,
+      time,
+      date,
+      fileUrl,
+      fileName
+    };
+
+    setMessages(prev => [...prev, newMsg]);
+    setInputText('');
+    setSelectedFile(null); // reset
+    setLoading(true);
+
+
+    try {
+      await new Promise(res => setTimeout(res, 4000));
+
+      const { time: t2, date: d2 } = getTimeInfo();
+
+      const patientResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "patient",
+        name: "Patient simulé",
+        avatar: "/images/avatar-medical.png",
+        text: "Merci, je comprends votre question. Voici ma réponse comme patient.",
+        time: t2,
+        date: d2
+      };
+
+      setMessages(prev => [...prev, patientResponse]);
+    } catch (err) {
+      console.error('Erreur lors de la génération de la réponse.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** Entrée ENTER = envoyer */
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  /** Nouvelle conversation */
+  const handleNewConversation = () => {
+    setActiveConversation(null);
+    setMessages([]);
+  };
+
+  /** Sélection conversation */
+  const handleSelectConversation = (id: string) => {
+    setActiveConversation(id);
+
+    const { time, date } = getTimeInfo();
+
+    // Simuler le chargement de messages pour cette conversation
+    // Messages simulés avec avatars + noms
+    setMessages([
+      {
+        id: "m1",
+        sender: "apprenant",
+        name: "Vous",
+        avatar: "/images/medical-bg.png",
+        text: "Bonjour, comment vous sentez-vous aujourd'hui ?",
+        time,
+        date
+      },
+      {
+        id: "m2",
+        sender: "patient",
+        name: "Patient simulé",
+        avatar: "/images/avatar-medical.png",
+        text: "Bonjour docteur, j’ai toujours cette douleur à l'abdomen.",
+        time,
+        date
+      },
+    ]);
+  };
+
+  return (
+    <>
+      {/* Bouton flottant draggable */}
+      <button
+        ref={buttonRef}
+        onMouseDown={handleMouseDown}
+        onDoubleClick={handleClick}
+        style={{
+          position: 'fixed',
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          cursor: isDragging ? 'grabbing' : 'grab'
+        }}
+        className="w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50 relative"
+      >
+        <div className="absolute inset-0 rounded-full border-2 border-transparent">
+          <svg 
+            className="w-full h-full animate-spin" 
+            style={{ animationDuration: '3s' }}
+            viewBox="0 0 100 100"
+          >
+            <path
+              d="M50,15 A35,35 0 1,1 50,85 A35,35 0 1,1 50,15 M50,20 A30,30 0 1,0 50,80 A30,30 0 1,0 50,20 Z"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinejoin="round"
+              strokeDasharray="5,10"
+            />
+          </svg>
+        </div>
+        
+        <svg 
+          width="24" 
+          height="24" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="2"
+        >
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <circle cx="12" cy="5" r="2"/>
+          <circle cx="8" cy="15" r="1"/>
+          <circle cx="16" cy="15" r="1"/>
+          <line x1="8" y1="8" x2="8" y2="11"/>
+          <line x1="16" y1="8" x2="16" y2="11"/>
+        </svg>
+      </button>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-6xl h-[85vh] flex overflow-hidden">
+
+            {/* Sidebar Conversations */}
+            <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
+              {/* Header sidebar */}
+              <div className="p-4 border-b">
+                <button
+                  onClick={handleNewConversation}
+                  className="w-full bg-blue-600 text-white py-2 rounded-lg flex items-center justify-center gap-2"
+                >
+                  <Plus/> Nouvelle conversation
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-2">
+                {conversations.map(conv => (
+                  <button
+                    key={conv.id}
+                    onClick={() => handleSelectConversation(conv.id)}
+                    className={`block w-full text-left p-3 rounded-md mb-2 ${
+                      activeConversation === conv.id
+                        ? "bg-blue-100 border-l-4 border-blue-600"
+                        : "hover:bg-gray-100 border-l-4 border-transparent"
+                    }`}
+                  >
+                    <div className="font-semibold">{conv.title}</div>
+                    <div className="text-xs text-gray-500 flex gap-1"><Clock size={12}/>{conv.date}</div>
+                    <div className="text-xs text-gray-600 truncate">{conv.preview}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Zone chat */}
+            <div className="flex-1 flex flex-col">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white flex justify-between p-4">
+                <div>
+                  <h2 className="text-xl font-bold">Assistant Patient Virtuel</h2>
+                  <p className="text-sm text-blue-100">Pose tes questions ici</p>
+                </div>
+
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 rounded-xl transition-colors hover:bg-red-500"
+                >
+                  <X size={24}/>
+                </button>
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                {messages.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-gray-400">
+                    <div className="text-center">
+                      <MessageCircle size={48} className="mx-auto mb-4 opacity-50" />
+                      <p>Aucun message pour le moment</p>
+                      <p className="text-sm">Commencez une conversation avec le patient</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {messages.map(msg => (
+                      <div key={msg.id} className={`flex flex-col ${msg.sender === "apprenant" ? "items-end" : "items-start"}`}>
+                        
+                        <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
+                          {msg.sender === "patient" && <img src={msg.avatar} className="w-6 h-6 rounded-full border" />}
+                          <span className="font-semibold">{msg.name}</span>
+                          {msg.sender === "apprenant" && <img src={msg.avatar} className="w-6 h-6 rounded-full border" />}
+                        </div>
+
+                        <div
+                          className={`max-w-xs lg:max-w-md xl:max-w-lg px-4 py-3 rounded-lg whitespace-pre-line ${
+                            msg.sender === "apprenant"
+                              ? "bg-blue-600 text-white"
+                              : "bg-white border border-gray-200 text-gray-800"
+                          }`}
+                        >
+                          {msg.text}
+                        </div>
+
+                        <span className="text-[11px] text-gray-500 mt-1">
+                          {msg.date} — {msg.time}
+                        </span>
+
+                        {msg.fileUrl && (
+                          <div className="mt-2">
+                            {msg.fileUrl.startsWith("blob:") || msg.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                              <img
+                                src={msg.fileUrl}
+                                alt={msg.fileName}
+                                className="max-w-[220px] rounded-lg border"
+                              />
+                            ) : (
+                              <a
+                                href={msg.fileUrl}
+                                target="_blank"
+                                className="underline text-blue-600"
+                              > {/** className="underline text-blue-600 text-sm" */}
+                                📎 {msg.fileName}
+                              </a>
+                            )}
+                          </div>
+                        )}
+
+                        {msg.audioUrl && (
+                          <audio controls className="mt-2 w-60">
+                            <source src={msg.audioUrl} type="audio/wav" />
+                          </audio>
+                        )}
+
+                      </div>
+                    ))}
+                    {loading && (
+                      <div className="flex justify-start">
+                        <div className="bg-white border px-4 py-3 rounded-lg flex gap-2">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-300"></div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div ref={messagesEndRef}/>
+                  </div>
+                )}
+              </div>
+
+              {/* Input */}
+              <div className="border-t p-4 bg-white">
+                {/* Zone de saisie */}
+                <div className="flex gap-3 items-end">
+                  <textarea
+                    className="flex-1 border rounded-lg p-3 resize-none outline-none focus:ring-blue-500 focus:ring"
+                    rows={3}
+                    placeholder="Écrire au patient..."
+                    onKeyDown={handleKeyPress}
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                  />
+                  
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx"
+                    className="hidden"
+                  />
+
+                  {!canSend && (
+                    <p className="text-xs text-gray-500 mb-2">
+                    ⏳ Attente de la réponse du patient...
+                    </p>
+                  )}
+
+                  <div className="flex flex-col gap-2">
+                    {/* Menu déroulant pour les options */}
+                    <div className="flex-shrink-0 relative">
+                      <div className="relative">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsDropdownOpen(!isDropdownOpen);
+                          }}
+                          className="bg-gray-600 text-white p-4 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors"
+                        >
+                          <FiPlus className="w-5 h-5" />
+                        </button>
+                        
+                        {isDropdownOpen && (
+                          <div className="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-lg shadow-lg border z-50">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAudioRecord();
+                                setIsDropdownOpen(false);
+                              }}
+                              className="flex items-center gap-3 w-full p-3 hover:bg-gray-100 rounded-t-lg transition-colors text-left"
+                            >
+                              <FiMic className="w-4 h-4 flex-shrink-0" />
+                              <span className="text-sm">Enregistrement audio</span>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleFileUpload();
+                                setIsDropdownOpen(false);
+                              }}
+                              className="flex items-center gap-3 w-full p-3 hover:bg-gray-100 rounded-b-lg transition-colors text-left"
+                            >
+                              <FiPaperclip className="w-4 h-4 flex-shrink-0" />
+                              <span className="text-sm">Ajouter un fichier</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Bouton d'envoi */}
+                    <button
+                      onClick={handleSend}
+                      disabled={!inputText.trim() || !canSend || loading}
+                      className={`bg-blue-600 text-white p-4 rounded-lg flex items-center justify-center disabled:opacity-50 hover:bg-blue-700 transition-colors ${
+                        !canSend ? "opacity-40 cursor-not-allowed" : ""
+                    }`}
+                    >
+                      <FiSend className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+// END OF FILE: app/test/page.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/components/footer.tsx
+
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Globe, Mail, Phone, Stethoscope } from "lucide-react";
+
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className="bg-gradient-to-b from-white to-blue-50 text-gray-800 py-12 border-t border-blue-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8 mb-10">
+          {/* Brand */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="md:col-span-2"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Stethoscope className="w-6 h-6 text-blue-600" />
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                MedCaseGen
+              </h3>
+            </div>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Plateforme innovante de génération de cas médicaux interactifs 
+              pour l'apprentissage, la simulation et l'évaluation clinique.
+            </p>
+          </motion.div>
+
+          {/* Navigation */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.06 }}
+          >
+            <h4 className="text-lg font-semibold text-blue-700 mb-3">Navigation</h4>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li>
+                <Link href="/" className="hover:text-blue-600 transition-colors duration-200">
+                  Accueil
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard/generator" className="hover:text-blue-600 transition-colors duration-200">
+                  Générateur
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard" className="hover:text-blue-600 transition-colors duration-200">
+                  Tableau de bord
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="hover:text-blue-600 transition-colors duration-200">
+                  À propos
+                </Link>
+              </li>
+            </ul>
+          </motion.div>
+
+          {/* Ressources */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.09 }}
+          >
+            <h4 className="text-lg font-semibold text-blue-700 mb-3">Ressources</h4>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li>
+                <Link href="/dashboard/cas-medicaux" className="hover:text-blue-600 transition-colors duration-200">
+                  Cas médicaux
+                </Link>
+              </li>
+              <li>
+                <Link href="/documentation" className="hover:text-blue-600 transition-colors duration-200">
+                  Documentation
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:text-blue-600 transition-colors duration-200">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link href="/support" className="hover:text-blue-600 transition-colors duration-200">
+                  Support
+                </Link>
+              </li>
+            </ul>
+          </motion.div>
+
+          {/* Contact */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.12 }}
+          >
+            <h4 className="text-lg font-semibold text-blue-700 mb-3">Contact</h4>
+            <div className="flex flex-col gap-3 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-blue-600" />
+                <span>+237 690 00 00 00</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-blue-600" />
+                <a
+                  href="mailto:contact@medcasegen.com"
+                  className="hover:text-blue-600 transition-colors duration-200"
+                >
+                  contact@medcasegen.com
+                </a>
+              </div>
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-blue-600" />
+                <a
+                  href="https://medcasegen.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-600 transition-colors duration-200"
+                >
+                  www.medcasegen.com
+                </a>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Separator */}
+        <hr className="border-blue-200 mb-6" />
+
+        {/* Bottom row */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600"
+        >
+          <div>
+            © {currentYear} MedCaseGen — Tous droits réservés.
+          </div>
+
+          <div className="flex gap-6">
+            <Link
+              href="/privacy"
+              className="hover:text-blue-600 transition-colors duration-200"
+            >
+              Confidentialité
+            </Link>
+            <Link
+              href="/terms"
+              className="hover:text-blue-600 transition-colors duration-200"
+            >
+              Conditions
+            </Link>
+            <Link
+              href="/cookies"
+              className="hover:text-blue-600 transition-colors duration-200"
+            >
+              Cookies
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    </footer>
+  );
+}// END OF FILE: components/footer.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/components/header.tsx
+
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import {
+  Menu as MenuIcon,
+  X as XIcon,
+  LayoutDashboard,
+  Stethoscope,
+  FileText,
+  Phone,
+  Info,
+  LogIn,
+  UserPlus,
+} from 'lucide-react';
+import clsx from 'clsx';
+import { useRouter } from 'next/navigation';
+
+export default function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [language, setLanguage] = useState<'fr' | 'en'>('fr');
+  const router = useRouter();
+
+  const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev);
+
+  return (
+    <header className="fixed top-0 w-full bg-white/85 backdrop-blur-sm z-50 border-b border-blue-100 transition-all">
+      <div className="w-full max-w-screen-2xl mx-auto flex items-center justify-between py-3 px-6 md:py-4 md:px-10">
+
+        {/* Logo et titre */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="relative w-18 h-12">
+              <Image
+                src="/images/logo.png"
+                alt="Générateur de cas médicaux"
+                fill
+                className="object-contain rounded-md"
+                priority
+              />
+            </div>
+            <span className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent leading-tight">
+              Cas Medicaux
+            </span>
+          </Link>
+        </div>
+
+        {/* Navigation desktop */}
+        <nav className="hidden md:flex items-center gap-8 text-gray-700 font-medium">
+          <Link href="/" className="hover:text-blue-600 transition flex items-center gap-1">
+            <LayoutDashboard size={16} /> Accueil
+          </Link>
+          <Link href="/dashboard/generator" className="hover:text-blue-600 transition flex items-center gap-1">
+            <Stethoscope size={16} /> Générateur
+          </Link>
+          <Link href="/dashboard/cas-medicaux" className="hover:text-blue-600 transition flex items-center gap-1">
+            <FileText size={16} /> Cas Médicaux
+          </Link>
+        </nav>
+
+        {/* Actions desktop */}
+        <div className="hidden md:flex items-center gap-4">
+          <Link href="/login">
+            <button className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition">
+              <LogIn size={16} /> Connexion
+            </button>
+          </Link>
+          <Link href="/register">
+            <button className="flex items-center gap-2 border border-blue-600 text-blue-600 px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-50 transition">
+              <UserPlus size={16} /> S’inscrire
+            </button>
+          </Link>
+
+          {/* Sélecteur de langue */}
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as 'fr' | 'en')}
+            className="border border-gray-300 rounded-md px-2 py-1 text-sm ml-3"
+          >
+            <option value="fr">🇫🇷 Français</option>
+            <option value="en">🇬🇧 English</option>
+          </select>
+        </div>
+
+        {/* Bouton menu mobile */}
+        <div className="flex items-center gap-3 md:hidden">
+          <button
+            onClick={toggleMobileMenu}
+            className="p-2 rounded-md border border-blue-200 hover:bg-blue-50 transition"
+            aria-label="Ouvrir le menu"
+          >
+            {mobileMenuOpen ? <XIcon size={22} /> : <MenuIcon size={22} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Menu mobile */}
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{
+          opacity: mobileMenuOpen ? 1 : 0,
+          height: mobileMenuOpen ? 'auto' : 0,
+        }}
+        transition={{ duration: 0.2 }}
+        className={clsx(
+          'md:hidden bg-white border-t border-blue-100 overflow-hidden',
+          { hidden: !mobileMenuOpen }
+        )}
+      >
+        <div className="p-4 space-y-4">
+          <nav className="flex flex-col gap-3 text-gray-700 font-medium">
+            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
+              <LayoutDashboard size={16} /> Accueil
+            </Link>
+            <Link href="/generator" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
+              <Stethoscope size={16} /> Générateur
+            </Link>
+            <Link href="/cases" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
+              <FileText size={16} /> Cas Médicaux
+            </Link>
+            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
+              <Phone size={16} /> Contact
+            </Link>
+            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
+              <Info size={16} /> À propos
+            </Link>
+          </nav>
+
+          {/* Boutons mobile */}
+          <div className="flex flex-col gap-2 pt-3 border-t border-gray-200">
+            <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+              <button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition">
+                <LogIn size={16} /> Connexion
+              </button>
+            </Link>
+            <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+              <button className="w-full flex items-center justify-center gap-2 border border-blue-600 text-blue-600 px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-50 transition">
+                <UserPlus size={16} /> S’inscrire
+              </button>
+            </Link>
+
+            {/* Sélecteur langue */}
+            <div className="pt-2">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as 'fr' | 'en')}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="fr">🇫🇷 Français</option>
+                <option value="en">🇬🇧 English</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </header>
+  );
+}
+// END OF FILE: components/header.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/contexts/AuthContext.tsx
+
+'use client';
+
+import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import * as ApiService from '@/lib/ApiService';
+import { toast } from 'sonner';
+
+interface User {
+  id: string;
+  username: string;
+  password: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+}
+
+type LoginResult = { success: boolean; user?: User; error?: string; message?: string };
+type GenericResult = { success: boolean; error?: any };
+
+interface AuthContextType {
+  user: User | null;
+  isLoading: boolean;
+  login: (username: string, password: string) => Promise<LoginResult>;
+  register: (userData: {
+    username: string;
+    password: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  }) => Promise<LoginResult>;
+  logout: () => Promise<GenericResult>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // ==========
+  // RESTORE SESSION ON MOUNT
+  // ==========
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+    setIsLoading(false);
+  }, []);
+
+  // ==========
+  // LOGIN - CORRIGÉ (seulement username et password)
+  // ==========
+  /**
+  const login = async (username: string, password: string): Promise<LoginResult> => {
+    console.log('[Auth] login...');
+    setIsLoading(true);
+
+    try {
+      // 1. Login pour obtenir le token
+      const loginRes = await ApiService.login(username, password);
+      const { access } = loginRes.data;
+
+      if (!access) {
+        throw new Error('Token non reçu');
+      }
+
+      // Stocker le token
+      ApiService.storeToken(access);
+      
+      // 2. Récupérer les infos utilisateur
+      const userRes = await ApiService.getCurrentUser();
+      const userData = userRes.data;
+
+      const user: User = {
+        id: userData.id,
+        username: userData.username,
+        password: '',
+        email: userData.email,
+        first_name: userData.first_name,
+        last_name: userData.last_name
+      };
+
+      setUser(user);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      toast.success('Connexion réussie');
+      return { success: true, user };
+
+    } catch (error: any) {
+      console.error('[Auth] login error:', error);
+      const msg = error.response?.data?.detail || 'Nom d\'utilisateur ou mot de passe incorrect';
+      toast.error(msg);
+      return { success: false, error: msg };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+ */
+
+  // ==========
+  // LOGIN - Adapté pour la réponse JWT standard
+  // ==========
+  const login = async (username: string, password: string): Promise<LoginResult> => {
+    console.log('[Auth] login...', { username, password });
+    setIsLoading(true);
+
+    try {
+      // AJOUT: Log des données envoyées
+      console.log('📤 Données envoyées:', { username, password });
+      
+      const res = await ApiService.login(username, password);
+
+      console.log('📥 Réponse reçue:', res.data);
+      const { access, refresh } = res.data;
+
+      if (!access) {
+        throw new Error('Token non reçu');
+      }
+
+      // Stocker le token
+      ApiService.storeToken(access);
+      
+      // Récupérer les infos utilisateur via une autre endpoint ou les stocker dans le token
+      // Pour l'instant, créons un objet user basique
+      const user: User = {
+        id: '4', // Vous devrez récupérer l'ID depuis le token ou une autre endpoint
+        username: username,
+        password: '', // Ne pas stocker le mot de passe
+        email: '', // À récupérer via une autre endpoint
+        first_name: '',
+        last_name: ''
+      };
+
+      setUser(user);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      toast.success('Connexion réussie');
+      return { success: true, user };
+
+    } catch (error: any) {
+      console.error('[Auth] login error:', error);
+      const msg = error.response?.data?.detail || 'Nom d\'utilisateur ou mot de passe incorrect';
+      toast.error(msg);
+      return { success: false, error: msg };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  // ==========
+  // REGISTER - CORRIGÉ
+  // ==========
+  const register = async (userData: {
+    username: string;
+    password: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  }): Promise<LoginResult> => {
+
+    console.log('[Auth] register...');
+    setIsLoading(true);
+
+    try {
+      // Inscription seulement
+      const registerRes = await ApiService.register(userData);
+      console.log('✅ Inscription réussie:', registerRes.data);
+
+      const { username, email, first_name, last_name } = registerRes.data;
+
+      // Créer un objet user basique (sans connexion automatique)
+      const user: User = {
+        id: 'pending', // ID temporaire
+        username: username,
+        email: email,
+        first_name: first_name,
+        last_name: last_name,
+        password: ''
+      };
+
+      toast.success('Inscription réussie ! Vous pouvez maintenant vous connecter.');
+      
+      // Retourner success mais sans connecter l'utilisateur
+      return { 
+        success: true, 
+        user,
+        message: 'redirect_to_login' // Flag pour rediriger
+      };
+
+    } catch (error: any) {
+      console.error('[Auth] register error:', error);
+      
+      let msg = "Erreur lors de l'inscription";
+      
+      if (error.response?.data) {
+        console.log('📋 Données erreur:', error.response.data);
+        
+        // Gestion des erreurs de validation Django
+        if (error.response.data.username) {
+          msg = `Nom d'utilisateur: ${error.response.data.username}`;
+        } else if (error.response.data.email) {
+          msg = `Email: ${error.response.data.email}`;
+        } else if (error.response.data.password) {
+          msg = `Mot de passe: ${error.response.data.password}`;
+        } else if (error.response.data.non_field_errors) {
+          msg = error.response.data.non_field_errors;
+        }
+      }
+      
+      toast.error(msg);
+      return { success: false, error: msg };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  // ==========
+  // LOGOUT
+  // ==========
+  const logout = async (): Promise<GenericResult> => {
+    console.log('[Auth] logout...');
+    setIsLoading(true);
+
+    try {
+      await ApiService.logout();
+      ApiService.clearToken();
+
+      setUser(null);
+      localStorage.removeItem('user');
+
+      toast.success('Déconnexion réussie');
+      return { success: true };
+
+    } catch (error: any) {
+      const msg = error.response?.data?.error || 'Erreur lors de la déconnexion';
+      toast.error(msg);
+      return { success: false, error: msg };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{ user, isLoading, login, register, logout }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth doit être utilisé dans un AuthProvider');
+  return ctx;
+}// END OF FILE: contexts/AuthContext.tsx
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/.gitignore
+
+# @generated expo-cli sync-2b81b286409207a5da26e14c78851eb30d8ccbdb
+# The following patterns were generated by expo-cli
+
+expo-env.d.ts
+# @end expo-cli
+node_modules
+.vscode/
+.next/
+.idea/
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+.env
+.env/
+*.env/
+
+# typescript
+*.tsbuildinfo
+
+// END OF FILE: .gitignore
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/lib/ApiService.js
+
+import axios from 'axios';
+import Cookies from 'js-cookie';
+
+const API_BASE_URL = 'http://localhost:8000/api';
+
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 25000,
+});
+
+// Intercepteur pour ajouter le token
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Intercepteur réponse
+apiClient.interceptors.response.use(
+  (response) => {
+    console.log("RÉPONSE RECUE ←", response.status, response.config.url);
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      clearToken();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Gestion des tokens
+const TOKEN_KEY = 'auth-token';
+
+export const storeToken = (token) => {
+  try {
+    if (token) {
+      Cookies.set(TOKEN_KEY, token, { 
+        expires: 7, 
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'  // Changé à 'lax' pour mieux fonctionner avec CORS
+      });
+    }
+  } catch (e) {
+    console.error("Erreur stockage token", e);
+  }
+};
+
+export const getToken = () => {
+  return Cookies.get(TOKEN_KEY) || null;
+};
+
+export const clearToken = () => {
+  Cookies.remove(TOKEN_KEY);
+};
+
+// ==============================================
+// Endpoints API
+// ==============================================
+
+/**
+ * Login utilisateur
+ */
+export const login = (username, password) => {
+  console.log('🔐 Données envoyées au login:', { username, password }); // AJOUTEZ CETTE LIGNE
+  return apiClient.post('/users/token/', { 
+    username, 
+    password 
+  });
+};
+
+/**
+ * Register utilisateur - CORRIGÉ
+ */
+export const register = (userData) => {
+  // Envoie directement l'objet userData, pas encapsulé dans {Data}
+  return apiClient.post('/users/register/', userData);
+};
+
+/**
+ * Logout
+ */
+export const logout = () => {
+  return apiClient.post('/auth/logout');
+};
+
+export default apiClient;// END OF FILE: lib/ApiService.js
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/middleware.ts
+
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+const protectedRoutes = [ '/logout', '/dashboard', ];
+
+// '/dashboard/generator','/dashboard/cas-medicaux',
+const authRoutes = ['/login', '/register',];
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const token = request.cookies.get('auth-token')?.value;
+
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
+  const isAuthRoute = authRoutes.includes(pathname);
+
+  if (isProtectedRoute && !token) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  /**
+  if (isAuthRoute && token) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+   */
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+};
+
+/**
+ * - Le middleware vérifie le cookie `auth-token`, qui est maintenant créé par `/api/auto-login`.
+*/// END OF FILE: middleware.ts
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/next.config.ts
+
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'iywhbpfquqcejlklujzl.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+    minimumCacheTTL: 60,
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    formats: ['image/webp','image/avif'],
+    // <- IMPORTANT : bypass de l'optimiseur Next.js
+    unoptimized: true,
+  },
+  experimental: {
+    proxyTimeout: 180000, // vous pouvez garder
+  },
+};
+
+export default nextConfig;// END OF FILE: next.config.ts
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/next-env.d.ts
+
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+// END OF FILE: next-env.d.ts
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/package.json
+
+{
+  "name": "Generative_medical_tutor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend pour la plateforme Generative medical tutor",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@radix-ui/react-slider": "^1.2.3",
+    "@react-google-maps/api": "^2.20.6",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.57.4",
+    "@types/qrcode": "^1.5.5",
+    "axios": "^1.12.2",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.6.2",
+    "gsap": "^3.12.7",
+    "install": "^0.13.0",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.486.0",
+    "next": "15.2.4",
+    "npm": "^11.2.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0",
+    "react-confetti": "^6.4.0",
+    "react-dom": "^19.0.0",
+    "react-icons": "^5.5.0",
+    "react-leaflet": "^5.0.0",
+    "recharts": "^2.15.1",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/js-cookie": "^3.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+// END OF FILE: package.json
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/postcss.config.mjs
+
+const config = {
+  plugins: ["@tailwindcss/postcss"],
+};
+
+export default config;
+// END OF FILE: postcss.config.mjs
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/public/file.svg
+
+[Non-text file (e.g., binary, data, compressed) - Contents omitted]
+// END OF FILE: public/file.svg
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/public/globe.svg
+
+[Non-text file (e.g., binary, data, compressed) - Contents omitted]
+// END OF FILE: public/globe.svg
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/public/next.svg
+
+[Non-text file (e.g., binary, data, compressed) - Contents omitted]
+// END OF FILE: public/next.svg
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/public/translations/en.json
+
+{
+  "app": {
+    "brand_title": "Business Partnership",
+    "brand_description": "National platform connecting local businesses with foreign partners — equipment, financing, advisory support and market access.",
+    "language_label": "Language:",
+    "navigation": "Navigation",
+    "nav": {
+      "home": "Home",
+      "domains": "Domains",
+      "companies": "Companies",
+      "needs": "Needs",
+      "matches": "Matches"
+    },
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "main_navigation": "Main navigation",
+    "contact": "Contact",
+    "shortcuts": "Shortcuts",
+    "register": "Register",
+    "login": "Sign in",
+    "privacy": "Privacy",
+    "copyright": "Business Partnership — MINEPAT. All rights reserved.",
+  
+    "hero": {
+      "title": "Connect your local business with international partners",
+      "subtitle": "The platform that facilitates business partnerships between Cameroonian companies and foreign investors",
+      "cta_register": "Register my company",
+      "cta_register_aria": "Register my company",
+      "cta_explore": "Explore opportunities",
+      "cta_explore_aria": "Explore opportunities"
+    },
+    "features": {
+      "title": "Why choose Business Partnership?",
+      "card_local": {
+        "title": "For local businesses",
+        "desc": "Access equipment, financing, market outlets and advice to grow your business and reach new markets."
+      },
+      "card_foreign": {
+        "title": "For foreign partners",
+        "desc": "Discover promising investment opportunities and collaborate with dynamic Cameroonian companies."
+      },
+      "card_targeting": {
+        "title": "Precise targeting",
+        "desc": "Find exactly what you need thanks to our intelligent navigation system by domains and sectors."
+      }
+    },
+    "how": {
+      "title": "How does it work?",
+      "steps": [
+        {
+          "title": "Choose a domain",
+          "desc": "Select from 8 strategic domains: Equipment, Financing, Market Outlets, Packaging, Raw Materials, Knowledge Sharing, Advisory Support, Training"
+        },
+        {
+          "title": "Specify your need",
+          "desc": "Browse sub-domains to refine your search according to your specific needs and identify ideal partners"
+        },
+        {
+          "title": "Contact companies",
+          "desc": "Access full company contact details and initiate mutually beneficial partnerships"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to grow your business?",
+      "subtitle": "Join our community of entrepreneurs and investors now",
+      "button": "Get started now",
+      "button_aria": "Get started now"
+    },
+
+    "error": {
+      "title": "Oops! An error occurred",
+      "subtitle": "Something isn't working as expected",
+      "description": "We apologize for the inconvenience. Our team has been notified and is working to resolve the issue. In the meantime, you can return to the homepage or go back to the previous page.",
+      "return_home": "Return to homepage",
+      "go_back": "Previous page",
+      "technical_details": "Technical details",
+      "error_message_label": "Error message:",
+      "stack_trace_label": "Stack trace:",
+      "no_message": "No error message available",
+      "still_problem": "Still having issues?",
+      "contact_support": "Contact our support"
+    },
+
+    "registers": {
+      "header": {
+        "title": "Create an account",
+        "subtitle": "Choose the registration type that suits you. Join our platform to develop your business partnerships and access new opportunities."
+      },
+      "local": {
+        "title": "Local company",
+        "subtitle": "Based in Cameroon",
+        "description": "Create your company profile, publish your needs and connect with international partners to grow your business.",
+        "what_you_can_do_title": "What you can do",
+        "bullet": {
+          "kyc": "Create your company profile with secure KYC verification",
+          "publish_needs": "Publish your needs (financing, equipment, raw materials, etc.)",
+          "visible_to_foreign": "Be visible to foreign companies and investors",
+          "access_opportunities": "Access partnership opportunities and advisory support"
+        },
+        "cta_register": "Register now",
+        "cta_more": "Learn more",
+        "cta_more_aria": "More information about local company registration"
+      },
+      "foreign": {
+        "title": "Foreign company",
+        "subtitle": "International partner",
+        "description": "Suppliers, equipment providers, financiers or consultants: collaborate with dynamic Cameroonian companies and access new markets.",
+        "what_you_can_do_title": "What you can do",
+        "bullet": {
+          "secure_process": "Secure process with fast verification and approval",
+          "upload_offers": "Upload your documents and showcase your equipment offers",
+          "access_profiles": "Access detailed profiles of local companies",
+          "propose_services": "Offer your services and initiate collaborations"
+        },
+        "cta_register": "Register now",
+        "cta_more": "Learn more",
+        "cta_more_aria": "More information about foreign company registration"
+      },
+      "additional": {
+        "title": "Why register on our platform?",
+        "description": "Our platform facilitates connections between local and international companies. Benefit from a secure process, increased visibility and growth opportunities tailored to your needs.",
+        "benefit": {
+          "secure_process": "Secure process",
+          "dedicated_support": "Dedicated support",
+          "international_network": "International network"
+        }
+      },
+      "footer": {
+        "help_text": "Need help or information?",
+        "contact_us": "Contact our team"
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+    
+  },
+  "auth": {
+    "section": "🔐 Auth Context",
+    "isAuthenticated": "Is Authenticated",
+    "isGuest": "Is Guest",
+    "profile": "Profile",
+    "noProfile": "None",
+    "loginTest": "Login Test",
+    "logout": "Logout",
+    "updateProfile": "Update Profile"
+  },
+  "language": {
+    "section": "🌐 Language Context",
+    "current": "Current Language",
+    "fr": "FR",
+    "en": "EN",
+    "note": "Change the language → Check localStorage and server (if connected)."
+  },
+  "textSize": {
+    "section": "📝 Text Size Context",
+    "current": "Current Text Size",
+    "scale": "Scale",
+    "testText": "Test text (changes the size).",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "note": "Observe the applied CSS var --text-scale."
+  },
+  "theme": {
+    "section": "🎨 Theme Context",
+    "selected": "Selected theme",
+    "effective": "Effective theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Toggle",
+    "note": "Change → Check classes on <html> (dev tools). Test system by changing OS theme."
+  }
+}
+// END OF FILE: public/translations/en.json
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/public/translations/fr.json
+
+{
+  "app": {
+    "brand_title": "Business Partnership",
+    "brand_description": "Plateforme nationale de mise en relation entre entreprises locales et partenaires étrangers — équipements, financement, appui-conseil et débouchés.",
+    "language_label": "Langue :",
+    "navigation": "Navigation",
+    "nav": {
+      "home": "Accueil",
+      "domains": "Domaines",
+      "companies": "Entreprises",
+      "needs": "Besoins",
+      "matches": "Matches"
+    },
+    "open_menu": "Ouvrir le menu",
+    "close_menu": "Fermer le menu",
+    "logout": "Déconnexion",
+    "dashboard": "Tableau de bord",
+    "main_navigation": "Navigation principale",
+    "contact": "Contact",
+    "shortcuts": "Raccourcis",
+    "register": "S'inscrire",
+    "login": "Se connecter",
+    "privacy": "Confidentialité",
+    "copyright": "Business Partnership — MINEPAT. Tous droits réservés.",
+  
+    "hero": {
+    "title": "Connectez votre entreprise locale avec des partenaires internationaux",
+    "subtitle": "La plateforme qui facilite les partenariats commerciaux entre les entreprises camerounaises et les investisseurs étrangers",
+    "cta_register": "Inscrire mon entreprise",
+    "cta_register_aria": "Inscrire mon entreprise",
+    "cta_explore": "Explorer les opportunités",
+    "cta_explore_aria": "Explorer les opportunités"
+  },
+  "features": {
+    "title": "Pourquoi choisir Business Partnership ?",
+    "card_local": {
+      "title": "Pour les entreprises locales",
+      "desc": "Accédez à des équipements, financements, débouchés et conseils pour développer votre activité et atteindre de nouveaux marchés."
+    },
+    "card_foreign": {
+      "title": "Pour les partenaires étrangers",
+      "desc": "Découvrez des opportunités d'investissement prometteuses et collaborez avec des entreprises camerounaises dynamiques."
+    },
+    "card_targeting": {
+      "title": "Ciblage précis",
+      "desc": "Trouvez exactement ce que vous cherchez grâce à notre système de navigation intelligent par domaines et secteurs."
+    }
+  },
+  "how": {
+    "title": "Comment ça marche ?",
+    "steps": [
+      {
+        "title": "Choisissez un domaine",
+        "desc": "Sélectionnez parmi 8 domaines stratégiques : Équipements, Financement, Débouchés, Emballages, Matières premières, Partage d'expérience, Appui-conseil, Formation"
+      },
+      {
+        "title": "Précisez votre besoin",
+        "desc": "Naviguez dans les sous-domaines pour affiner votre recherche selon vos besoins spécifiques et identifier les partenaires idéaux"
+      },
+      {
+        "title": "Contactez les entreprises",
+        "desc": "Accédez aux coordonnées complètes des entreprises et initiez des partenariats mutuellement bénéfiques"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Prêt à développer votre activité ?",
+    "subtitle": "Rejoignez dès maintenant notre communauté d'entrepreneurs et d'investisseurs",
+    "button": "Commencer maintenant",
+    "button_aria": "Commencer maintenant"
+  },
+
+  "error": {
+    "title": "Oups ! Une erreur est survenue",
+    "subtitle": "Quelque chose ne fonctionne pas comme prévu",
+    "description": "Nous sommes désolés pour ce désagrément. Notre équipe a été notifiée et travaille à résoudre le problème. En attendant, vous pouvez retourner à la page d'accueil ou revenir à la page précédente.",
+    "return_home": "Retour à l'accueil",
+    "go_back": "Page précédente",
+    "technical_details": "Détails techniques",
+    "error_message_label": "Message d'erreur :",
+    "stack_trace_label": "Stack trace :",
+    "no_message": "Aucun message d'erreur disponible",
+    "still_problem": "Le problème persiste ?",
+    "contact_support": "Contactez notre support"
+  },
+
+  "registers": {
+    "header": {
+      "title": "Créer un compte",
+      "subtitle": "Choisissez le type d'inscription qui vous correspond. Rejoignez notre plateforme pour développer vos partenariats commerciaux et accéder à de nouvelles opportunités."
+    },
+    "local": {
+      "title": "Entreprise locale",
+      "subtitle": "Basée au Cameroun",
+      "description": "Créez votre fiche entreprise, publiez vos besoins et connectez-vous avec des partenaires internationaux pour développer votre activité.",
+      "what_you_can_do_title": "Ce que vous pouvez faire",
+      "bullet": {
+        "kyc": "Créer votre profil d'entreprise avec validation KYC sécurisée",
+        "publish_needs": "Publier vos besoins (financement, équipements, matières premières, etc.)",
+        "visible_to_foreign": "Être visible par les entreprises étrangères et investisseurs",
+        "access_opportunities": "Accéder aux opportunités de partenariat et conseils"
+      },
+      "cta_register": "S'inscrire maintenant",
+      "cta_more": "En savoir plus",
+      "cta_more_aria": "Plus d'informations sur l'inscription entreprise locale"
+    },
+    "foreign": {
+      "title": "Entreprise étrangère",
+      "subtitle": "Partenaire international",
+      "description": "Fournisseurs, équipementiers, financeurs ou consultants : collaborez avec des entreprises camerounaises dynamiques et accédez à de nouveaux marchés.",
+      "what_you_can_do_title": "Ce que vous pouvez faire",
+      "bullet": {
+        "secure_process": "Processus sécurisé avec validation et approbation rapide",
+        "upload_offers": "Télécharger vos documents et présenter vos offres d'équipements",
+        "access_profiles": "Accéder aux profils détaillés des entreprises locales",
+        "propose_services": "Proposer vos services et initier des collaborations"
+      },
+      "cta_register": "S'inscrire maintenant",
+      "cta_more": "En savoir plus",
+      "cta_more_aria": "Plus d'informations sur l'inscription entreprise étrangère"
+    },
+    "additional": {
+      "title": "Pourquoi s'inscrire sur notre plateforme ?",
+      "description": "Notre plateforme facilite les connexions entre entreprises locales et internationales. Bénéficiez d'un processus sécurisé, d'une visibilité accrue et d'opportunités de croissance adaptées à vos besoins.",
+      "benefit": {
+        "secure_process": "Processus sécurisé",
+        "dedicated_support": "Support dédié",
+        "international_network": "Réseau international"
+      }
+    },
+    "footer": {
+      "help_text": "Besoin d'aide ou de renseignements ?",
+      "contact_us": "Contactez notre équipe"
+    }
+  }
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  },
+  "auth": {
+    "section": "🔐 Auth Context",
+    "isAuthenticated": "Est Authentifié",
+    "isGuest": "Est Invité",
+    "profile": "Profil",
+    "noProfile": "Aucun",
+    "loginTest": "Login Test",
+    "logout": "Logout",
+    "updateProfile": "Update Profile"
+  },
+  "language": {
+    "section": "🌐 Language Context",
+    "current": "Langue Actuelle",
+    "fr": "FR",
+    "en": "EN",
+    "note": "Change la langue → Vérifie localStorage et serveur (si connecté)."
+  },
+  "textSize": {
+    "section": "📝 Text Size Context",
+    "current": "Taille de Texte Actuelle",
+    "scale": "Échelle",
+    "testText": "Texte de test (change la taille).",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "note": "Observe le CSS var --text-scale appliqué."
+  },
+  "theme": {
+    "section": "🎨 Theme Context",
+    "selected": "Thème Sélectionné",
+    "effective": "Thème Effectif",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Toggle",
+    "note": "Change → Vérifie classes sur <html> (inspect dev tools). Teste system en changeant OS theme."
+  }
+} // END OF FILE: public/translations/fr.json
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/public/vercel.svg
+
+[Non-text file (e.g., binary, data, compressed) - Contents omitted]
+// END OF FILE: public/vercel.svg
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/public/window.svg
+
+[Non-text file (e.g., binary, data, compressed) - Contents omitted]
+// END OF FILE: public/window.svg
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/README.md
+
+
+// END OF FILE: README.md
+
+//---> PATH: /home/mombo/generative-medical-tutor/frontend/tsconfig.json
+
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+// END OF FILE: tsconfig.json
+
