@@ -73,7 +73,7 @@ export const clearToken = () => {
  * Login utilisateur
  */
 export const login = (username, password) => {
-  console.log('🔐 Données envoyées au login:', { username, password }); // AJOUTEZ CETTE LIGNE
+  console.log('🔐 Données envoyées au login:', { username, password }); 
   return apiClient.post('/users/token/', { 
     username, 
     password 
@@ -86,6 +86,53 @@ export const login = (username, password) => {
 export const register = (userData) => {
   // Envoie directement l'objet userData, pas encapsulé dans {Data}
   return apiClient.post('/users/register/', userData);
+};
+
+/**
+ * Envoie un message à une session de simulation
+ * @param {number} sessionId - ID de la session de simulation
+ * @param {string} message - Contenu du message
+ */
+export const sendSimulationMessage = async (sessionId, message) => {
+  try {
+    const response = await apiClient.post(`/simulations/${sessionId}/message/`, {
+      content: message
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erreur lors de l\'envoi du message:', error);
+    throw error;
+  }
+};
+
+/**
+ * Démarre une nouvelle session de simulation
+ * @param {number} caseId - ID du cas clinique
+ */
+export const startSimulation = async (caseId) => {
+  try {
+    const response = await apiClient.post('/simulations/start/', {
+      case_id: caseId
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erreur lors du démarrage de la simulation:', error);
+    throw error;
+  }
+};
+
+/**
+ * Récupère les détails d'une session de simulation
+ * @param {number} sessionId - ID de la session
+ */
+export const getSimulationSession = async (sessionId) => {
+  try {
+    const response = await apiClient.get(`/simulations/${sessionId}/`);
+    return response.data;
+  } catch (error) {
+    console.error('Erreur lors de la récupération de la session:', error);
+    throw error;
+  }
 };
 
 /**
