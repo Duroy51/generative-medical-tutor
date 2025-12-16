@@ -1,371 +1,385 @@
+
+
 // app/dashboard/layout.tsx
 "use client";
 
 import React, { ReactNode, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Users, UserCircle, Calendar, Heart, BarChart3, DollarSign, HelpCircle, ChevronLeft, ChevronRight, Menu, FileText, ChevronDown, LogOut } from "lucide-react";
+import { 
+  Home, 
+  UserCircle, 
+  FileText, 
+  MessageSquare, 
+  History, 
+  Stethoscope, 
+  HelpCircle, 
+  ChevronLeft, 
+  ChevronRight, 
+  Menu, 
+  LogOut,
+  BookOpen,
+  UserPlus,
+  Settings,
+  BarChart
+} from "lucide-react";
 import { motion, LayoutGroup } from "framer-motion";
-import { Stethoscope, Pill, AlertCircle, History, Activity } from "lucide-react"; // icônes médicales supplémentaires
-
-import DraggableFloatingButton from "./components/DraggableFloatingButton";
-import Topbar from "./components/Topbar";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 type NavItem = {
   title: string;
   href: string;
   icon: React.ElementType;
-  badge?: number;
   description?: string;
-};
-
-type SidebarProps = {
-  children: React.ReactNode;
-  className?: string;
+  role?: string; // Si certaines routes sont r�serv�es � certains r�les
 };
 
 const cx = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(" ");
 
-// --- Navigation adaptée au thème médical ---
-
+// --- Navigation adapt�e � MedCaseGen ---
 const navItems: NavItem[] = [
   {
     title: "Tableau de bord",
     href: "/dashboard",
     icon: Home,
-    description: "Vue d'ensemble clinique et indicateurs",
+    description: "Vue d'ensemble de vos simulations",
   },
   {
-    title: "Cas cliniques en Catégories",
-    href: "/dashboard/categories",
-    icon: FileText, // ou HeartPulse si tu veux quelque chose d’imagerie médicale
-    description: "Gestion, analyse et suivi des cas cliniques",
+    title: "Cas cliniques",
+    href: "/dashboard/cases",
+    icon: BookOpen,
+    description: "Parcourir les cas disponibles",
   },
   {
-    title: "Examens complémentaires",
+    title: "Mes simulations",
+    href: "/dashboard/simulations",
+    icon: MessageSquare,
+    description: "Historique de vos simulations",
+  },
+  {
+    title: "Nouvelle simulation",
     href: "/dashboard/examens",
-    icon: Stethoscope, // ou FlaskConical / Microscope selon ta préférence
-    description: "Résultats biologiques, imagerie et analyses",
-  },
-  {
-    title: "Traitements en cours",
-    href: "/dashboard/traiements",
-    icon: Pill, // Lucide : Pill ou Syringe
-    description: "Médications, posologies et suivi thérapeutique",
-  },
-  {
-    title: "Diagnostiques",
-    href: "/dashboard/diagnostiques",
-    icon: AlertCircle,
-    description: "Conclusions cliniques et diagnostics différentiels",
-  },
-  {
-    title: "Antécédents médicaux",
-    href: "/dashboard/antecedents",
-    icon: History,
-    description: "Pathologies passées, allergies et interventions",
-  },
-  {
-    title: "Symptômes",
-    href: "/dashboard/symptomes",
-    icon: Heart,
-    description: "Plaintes patient, manifestations et durée",
+    icon: Stethoscope,
+    description: "D�marrer une nouvelle simulation",
   },
 ];
 
-/**
-
-const navItems: NavItem[] = [
+// Items pour les experts
+const expertNavItems: NavItem[] = [
   {
-    title: "Tableau de bord",
-    href: "/dashboard",
-    icon: Home,
-    description: "Vue d'ensemble clinique et indicateurs",
-  },
-  {
-    title: "Patients",
-    href: "/dashboard/patients",
-    icon: Users,
-    badge: 3,
-    description: "Liste des patients, dossiers et suivi",
-  },
-  {
-    title: "Rendez-vous",
-    href: "/dashboard/appointments",
-    icon: Calendar,
-    description: "Planning, créneaux et gestion des RDV",
-  },
-  {
-    title: "Dossiers de génération",
-    href: "/dashboard/generator",
-    icon: Heart,
-    description: "Dossiers ou cas marqués comme favoris",
-  },
-  {
-    title: "Les cas médicaux",
-    href: "/dashboard/cas-medicaux",
+    title: "Cr�er un cas",
+    href: "/dashboard/create-case",
     icon: FileText,
-    description: "Accédez à tous vos cas médicaux et dossiers patients",
+    description: "Cr�er un nouveau cas clinique",
+    role: "EXPERT"
+  },
+  {
+    title: "G�rer les cas",
+    href: "/dashboard/manage-cases",
+    icon: Settings,
+    description: "Mod�rer et g�rer les cas",
+    role: "EXPERT"
   },
   {
     title: "Statistiques",
-    href: "/dashboard/statistiques",
-    icon: BarChart3,
-    description: "Performance clinique et indicateurs",
+    href: "/dashboard/analytics",
+    icon: BarChart,
+    description: "Analyses et rapports",
+    role: "EXPERT"
   },
 ];
 
-*/
-
-
-function Sidebar({ children, className }: SidebarProps) {
+function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
 
-  // NOTE: Expanded width = w-72 (18rem = 288px) to match Topbar left: "288px"
-  const expandedWidth = "w-72"; // 18rem
-  const collapsedWidth = "w-20"; // 5rem
+  const expandedWidth = "w-72";
+  const collapsedWidth = "w-20";
+
+  // Filtrer les items en fonction du r�le
+  const getFilteredNavItems = () => {
+    const baseItems = [...navItems];
+    if (user?.role === "EXPERT") {
+      baseItems.push(...expertNavItems);
+    }
+    return baseItems;
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      toast.success("D�connexion r�ussie");
+      router.push("/login");
+    } catch (error) {
+      toast.error("Erreur lors de la d�connexion");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-gray-900">
-      {/* Topbar (fixé) */}
-      <Topbar />
-      <DraggableFloatingButton />
-
+    <div className="min-h-screen flex bg-gray-50">
       {/* Mobile menu button */}
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setIsMobileOpen(true)}
-          className="p-2.5 rounded-lg bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-transform active:scale-95"
+          className="p-2.5 rounded-lg bg-white shadow-md border border-gray-200 hover:shadow-lg transition-transform active:scale-95"
           aria-label="Ouvrir le menu"
         >
-          <Menu className="w-6 h-6 text-sky-700 dark:text-sky-300" />
+          <Menu className="w-6 h-6 text-blue-600" />
         </button>
       </div>
 
-      <div className="flex flex-1 gap-1 md:gap-4 lg:gap-6 overflow-hidden">
-        {/* Sidebar Desktop */}
-        <aside
-          className={cx(
-            "hidden md:flex flex-col transition-all duration-300 ease-out fixed left-0 top-0 bottom-0 h-screen z-40",
-            isCollapsed ? collapsedWidth : expandedWidth,
-            "bg-gradient-to-b from-sky-800 via-sky-900 to-slate-900 text-white",
-            "shadow-2xl border-r border-sky-900/30",
-            "overflow-y-auto",
-            className
+      {/* Sidebar Desktop */}
+      <aside
+        className={cx(
+          "hidden md:flex flex-col transition-all duration-300 ease-out",
+          "bg-gradient-to-b from-blue-900 to-blue-800 text-white",
+          "shadow-2xl",
+          "overflow-y-auto h-screen sticky top-0",
+          isCollapsed ? collapsedWidth : expandedWidth
+        )}
+      >
+        {/* Brand Header */}
+        <div className="flex items-center justify-between p-6 border-b border-blue-700">
+          {!isCollapsed ? (
+            <Link href="/dashboard" className="flex items-center gap-3 group">
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
+                <Stethoscope className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <div className="text-white font-bold text-lg">MedCaseGen</div>
+                <div className="text-blue-200 text-xs">Simulation m�dicale</div>
+              </div>
+            </Link>
+          ) : (
+            <Link href="/dashboard" className="flex items-center justify-center w-full">
+              <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                <Stethoscope className="w-5 h-5 text-white" />
+              </div>
+            </Link>
           )}
-          // On ajoute padding pour s'aligner au Topbar : Topbar est fixé et overlay, mais ici on laisse le scrolling complet
-        >
-          {/* Brand */}
-          <div className="flex items-center justify-between p-4 border-b border-sky-700/30 flex-shrink-0">
-            {!isCollapsed ? (
-              <Link href="/dashboard" className="flex items-center gap-3 group">
-                <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center shadow-md">
-                  {/* Petit logo textuel médical */}
-                  <span className="text-white font-bold text-lg">HC</span>
-                </div>
-                <div className="overflow-hidden">
-                  <div className="text-white text-sm font-bold leading-tight">
-                    Clinique Pro
-                  </div>
-                  <div className="text-sky-200 text-xs">Dashboard médical</div>
-                </div>
-              </Link>
+
+          <button
+            onClick={() => setIsCollapsed((p) => !p)}
+            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+            aria-label={isCollapsed ? "�tendre la sidebar" : "R�duire la sidebar"}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="w-4 h-4 text-blue-200" />
             ) : (
-              <Link href="/dashboard" className="flex items-center justify-center w-full">
-                <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center shadow-md">
-                  <span className="text-white font-bold text-sm">HC</span>
-                </div>
-              </Link>
+              <ChevronLeft className="w-4 h-4 text-blue-200" />
             )}
+          </button>
+        </div>
 
-            <button
-              onClick={() => setIsCollapsed((p) => !p)}
-              className="p-1.5 rounded-lg hover:bg-white/10 transition-colors active:scale-95"
-              aria-label={isCollapsed ? "Étendre la sidebar" : "Réduire la sidebar"}
-            >
-              {isCollapsed ? (
-                <ChevronRight className="w-4 h-4 text-sky-200" />
-              ) : (
-                <ChevronLeft className="w-4 h-4 text-sky-200" />
-              )}
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-3 space-y-2">
-            <LayoutGroup>
-              {/* Primary navigation */}
-              <div className="space-y-1.5">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive =
-                    pathname === item.href || pathname?.startsWith(item.href + "/");
-
-                  return (
-                    <div key={item.href} className="relative group">
-                      {isActive && !isCollapsed && (
-                        <motion.div
-                          layoutId="sidebar-active-med"
-                          className="absolute inset-0 rounded-lg bg-sky-700/20 border border-sky-600/20"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        />
-                      )}
-
-                      <Link
-                        href={item.href}
-                        className={cx(
-                          "relative z-10 flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                          isActive
-                            ? "text-sky-50 bg-sky-900/30"
-                            : "text-sky-200 hover:text-white hover:bg-sky-900/20"
-                        )}
-                        aria-current={isActive ? "page" : undefined}
-                        title={item.description}
-                      >
-                        <Icon
-                          className={cx(
-                            "w-6 h-6 flex-shrink-0 transition-colors duration-200",
-                            isActive ? "text-sky-300" : "text-sky-300/70"
-                          )}
-                        />
-
-                        {!isCollapsed && (
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <span
-                                className={cx(
-                                  "text-sm font-medium transition-colors",
-                                  isActive ? "text-white" : "text-sky-100"
-                                )}
-                              >
-                                {item.title}
-                              </span>
-                              {item.badge ? (
-                                <motion.span
-                                  initial={{ scale: 0 }}
-                                  animate={{ scale: 1 }}
-                                  className="ml-2 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold bg-rose-500 text-white shadow"
-                                >
-                                  {item.badge}
-                                </motion.span>
-                              ) : null}
-                            </div>
-                            {item.description && (
-                              <div className="text-xs text-sky-200 mt-1 line-clamp-1">
-                                {item.description}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </Link>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Divider */}
-              <div className="my-3 border-t border-sky-700/30"></div>
-
-              {/* Secondary navigation
-              {!isCollapsed && (
-                <div className="px-3 py-2 text-xs font-semibold text-sky-200 uppercase tracking-wider">
-                  Opérations
-                </div>
-              )} */}
-
-            </LayoutGroup>
-          </nav>
-
-          {/* Footer de la sidebar - profil / déconnexion */}
-          <div className="p-4 border-t border-sky-700/20">
+        {/* User Info */}
+        {!isCollapsed && user && (
+          <div className="p-4 border-b border-blue-700">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-white/5 flex items-center justify-center">
-                {/* avatar placeholder; Topbar affichera avatar réel */}
-                <span className="text-white font-semibold text-sm">Dr</span>
+              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                <UserCircle className="w-6 h-6 text-white" />
               </div>
-              {!isCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-white">Dr. André</div>
-                  <div className="text-xs text-sky-200">Cardiologue</div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-white truncate">
+                  {user.first_name && user.last_name 
+                    ? `${user.first_name} ${user.last_name}`
+                    : user.username}
                 </div>
-              )}
-              <button
-                onClick={() => {
-                  setIsLoggingOut(true);
-                  // Simuler logout (remplace par ta logique réelle)
-                  setTimeout(() => {
-                    setIsLoggingOut(false);
-                    router.push("/logout");
-                  }, 600);
-                }}
-                className="p-2 rounded-md hover:bg-white/5 transition-colors"
-                aria-label="Se déconnecter"
-              >
-                {isLoggingOut ? (
-                  <svg
-                    className="animate-spin w-5 h-5 text-white"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.2" />
-                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" />
-                  </svg>
-                ) : (
-                  <LogOut className="w-5 h-5 text-sky-200" />
-                )}
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        {/* Mobile Drawer (simple) */}
-        {isMobileOpen && (
-          <div className="md:hidden fixed inset-0 z-50">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black"
-              onClick={() => setIsMobileOpen(false)}
-            />
-            <motion.aside
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="relative w-72 h-full bg-white shadow-xl overflow-y-auto"
-            >
-              <div className="p-4 flex items-center justify-between border-b">
-                <div className="font-bold text-sky-800">Clinique Pro</div>
-                <button onClick={() => setIsMobileOpen(false)} className="p-2 rounded-md">
-                  <ChevronDown className="w-5 h-5 text-sky-700" />
-                </button>
+                <div className="text-xs text-blue-200">
+                  {user.role === "EXPERT" ? "Expert" : "Apprenant"}
+                </div>
               </div>
-            </motion.aside>
+            </div>
           </div>
         )}
 
-        {/* Main Content */}
-        <main
-          className={cx(
-            "flex-1 overflow-y-auto bg-slate-50 dark:bg-gray-900 p-4 md:p-6 lg:p-8 transition-all duration-300",
-            isCollapsed ? "md:ml-20" : "md:ml-72"
-          )}
-        >
-          {children}
-        </main>
-      </div>
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2">
+          <LayoutGroup>
+            {getFilteredNavItems().map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+
+              return (
+                <div key={item.href} className="relative group">
+                  {isActive && !isCollapsed && (
+                    <motion.div
+                      layoutId="sidebar-active"
+                      className="absolute inset-0 rounded-lg bg-blue-700"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+
+                  <Link
+                    href={item.href}
+                    className={cx(
+                      "relative z-10 flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200",
+                      isActive
+                        ? "text-white"
+                        : "text-blue-100 hover:text-white hover:bg-blue-700/50"
+                    )}
+                    aria-current={isActive ? "page" : undefined}
+                    title={item.description}
+                  >
+                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    
+                    {!isCollapsed && (
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium">{item.title}</div>
+                        {item.description && (
+                          <div className="text-xs text-blue-200/70 mt-0.5 line-clamp-1">
+                            {item.description}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </Link>
+                </div>
+              );
+            })}
+          </LayoutGroup>
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-blue-700">
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-blue-100 hover:text-white hover:bg-blue-700/50 transition-colors disabled:opacity-50"
+          >
+            {isLoggingOut ? (
+              <>
+                <div className="w-5 h-5 border-2 border-blue-200 border-t-transparent rounded-full animate-spin" />
+                {!isCollapsed && <span>D�connexion...</span>}
+              </>
+            ) : (
+              <>
+                <LogOut className="w-5 h-5" />
+                {!isCollapsed && <span>Se d�connecter</span>}
+              </>
+            )}
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile Drawer */}
+      {isMobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50">
+          <div 
+            className="absolute inset-0 bg-black/50" 
+            onClick={() => setIsMobileOpen(false)} 
+          />
+          <motion.aside
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            className="relative w-80 h-full bg-white shadow-xl overflow-y-auto"
+          >
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Stethoscope className="w-8 h-8 text-blue-600" />
+                  <div>
+                    <div className="font-bold text-gray-900">MedCaseGen</div>
+                    <div className="text-sm text-gray-500">Simulation m�dicale</div>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsMobileOpen(false)}
+                  className="p-2 rounded-lg hover:bg-gray-100"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+            </div>
+
+            {/* User Info Mobile */}
+            {user && (
+              <div className="p-4 border-b">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <UserCircle className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      {user.first_name && user.last_name 
+                        ? `${user.first_name} ${user.last_name}`
+                        : user.username}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {user.role === "EXPERT" ? "Expert" : "Apprenant"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Navigation Mobile */}
+            <nav className="p-4 space-y-2">
+              {getFilteredNavItems().map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cx(
+                      "flex items-center gap-3 px-3 py-3 rounded-lg transition-colors",
+                      isActive
+                        ? "bg-blue-50 text-blue-600"
+                        : "text-gray-700 hover:bg-gray-50"
+                    )}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <div>
+                      <div className="font-medium">{item.title}</div>
+                      {item.description && (
+                        <div className="text-sm text-gray-500">{item.description}</div>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div className="p-4 border-t">
+              <button
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+              >
+                <LogOut className="w-5 h-5" />
+                <span>Se d�connecter</span>
+              </button>
+            </div>
+          </motion.aside>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <main
+        className={cx(
+          "flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 transition-all duration-300",
+          "md:ml-0", // Nous utilisons sticky sidebar au lieu de margin
+          isCollapsed ? "md:pl-20" : "md:pl-72"
+        )}
+      >
+        {children}
+      </main>
     </div>
   );
 }
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
-  return <Sidebar>{children}</Sidebar>;
-}
+export default DashboardLayout;

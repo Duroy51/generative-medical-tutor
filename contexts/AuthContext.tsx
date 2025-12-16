@@ -1,3 +1,5 @@
+// AuthContext.tsx - Ajoutez le rôle
+
 'use client';
 
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
@@ -11,6 +13,7 @@ interface User {
   email: string;
   first_name: string;
   last_name: string;
+  role?: string; // Ajoutez cette ligne
 }
 
 type LoginResult = { success: boolean; user?: User; error?: string; message?: string };
@@ -51,64 +54,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ==========
   // LOGIN - CORRIGÉ (seulement username et password)
   // ==========
-  /**
-  const login = async (username: string, password: string): Promise<LoginResult> => {
-    console.log('[Auth] login...');
-    setIsLoading(true);
 
-    try {
-      // 1. Login pour obtenir le token
-      const loginRes = await ApiService.login(username, password);
-      const { access } = loginRes.data;
-
-      if (!access) {
-        throw new Error('Token non reçu');
-      }
-
-      // Stocker le token
-      ApiService.storeToken(access);
-      
-      // 2. Récupérer les infos utilisateur
-      const userRes = await ApiService.getCurrentUser();
-      const userData = userRes.data;
-
-      const user: User = {
-        id: userData.id,
-        username: userData.username,
-        password: '',
-        email: userData.email,
-        first_name: userData.first_name,
-        last_name: userData.last_name
-      };
-
-      setUser(user);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      toast.success('Connexion réussie');
-      return { success: true, user };
-
-    } catch (error: any) {
-      console.error('[Auth] login error:', error);
-      const msg = error.response?.data?.detail || 'Nom d\'utilisateur ou mot de passe incorrect';
-      toast.error(msg);
-      return { success: false, error: msg };
-    } finally {
-      setIsLoading(false);
-    }
-  };
- */
-
-  // ==========
-  // LOGIN - Adapté pour la réponse JWT standard
-  // ==========
   const login = async (username: string, password: string): Promise<LoginResult> => {
     console.log('[Auth] login...', { username, password });
     setIsLoading(true);
 
     try {
-      // AJOUT: Log des données envoyées
-      console.log('📤 Données envoyées:', { username, password });
-      
+      // Appel API
       const res = await ApiService.login(username, password);
 
       console.log('📥 Réponse reçue:', res.data);
@@ -121,32 +73,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Stocker le token
       ApiService.storeToken(access);
       
-      // Récupérer les infos utilisateur via une autre endpoint ou les stocker dans le token
-      // Pour l'instant, créons un objet user basique
-      const user: User = {
-        id: '4', // Vous devrez récupérer l'ID depuis le token ou une autre endpoint
-        username: username,
-        password: '', // Ne pas stocker le mot de passe
-        email: '', // À récupérer via une autre endpoint
-        first_name: '',
-        last_name: ''
-      };
+      // Décoder le token JWT pour récupérer les infos utilisateur
+      try {
+        const tokenPayload = JSON.parse(atob(access.split('.')[1]));
+        console.log('🔓 Token décodé:', tokenPayload);
+        
+        const user: User = {
+          id: tokenPayload.user_id || 'unknown', // Vérifiez si votre token contient user_id
+          username: tokenPayload.username || username,
+          password: '', // Ne jamais stocker
+          email: tokenPayload.email || '', // Si présent dans le token
+          first_name: tokenPayload.first_name || '',
+          last_name: tokenPayload.last_name || '',
+          role: tokenPayload.role || 'APPRENANT' // Ajout du rôle
+        };
 
-      setUser(user);
-      localStorage.setItem('user', JSON.stringify(user));
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
 
-      toast.success('Connexion réussie');
-      return { success: true, user };
+        toast.success('Connexion réussie');
+        return { success: true, user };
+
+      } catch (decodeError) {
+        console.error('Erreur décodage token:', decodeError);
+        // Créer un utilisateur basique si échec du décodage
+        const user: User = {
+          id: 'unknown',
+          username: username,
+          password: '',
+          email: '',
+          first_name: '',
+          last_name: '',
+          role: 'APPRENANT'
+        };
+
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        toast.success('Connexion réussie');
+        return { success: true, user };
+      }
 
     } catch (error: any) {
       console.error('[Auth] login error:', error);
-      const msg = error.response?.data?.detail || 'Nom d\'utilisateur ou mot de passe incorrect';
+      
+      let msg = 'Nom d\'utilisateur ou mot de passe incorrect';
+      
+      // Messages d'erreur plus détaillés
+      if (error.response?.data) {
+        if (error.response.data.detail) {
+          msg = error.response.data.detail;
+        } else if (error.response.data.non_field_errors) {
+          msg = error.response.data.non_field_errors[0];
+        }
+      }
+      
       toast.error(msg);
       return { success: false, error: msg };
     } finally {
       setIsLoading(false);
     }
   };
+
+
   // ==========
   // REGISTER - CORRIGÉ
   // ==========

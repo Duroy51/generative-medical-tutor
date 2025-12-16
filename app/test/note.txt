@@ -60,6 +60,20 @@ docteur@docteur-HP-ProBook-650-G1:~/Documents/Autres/generative-medical-tutor/fr
 
 
 
+| Action            | Méthode | Route                        |
+| ----------------- | ------- | ---------------------------- |
+| Login             | POST    | `/users/token/`              |
+| Register          | POST    | `/users/register/`           |
+| Cas cliniques     | GET     | `/cases/`                    |
+| Détail cas        | GET     | `/cases/{id}/`               |
+| Mes simulations   | GET     | `/simulations/`              |
+| Start simulation  | POST    | `/simulations/start/`        |
+| Détail simulation | GET     | `/simulations/{id}/`         |
+| Chat IA           | POST    | `/simulations/{id}/message/` |
+
+
+
+
 
 
 

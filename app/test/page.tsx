@@ -1,687 +1,568 @@
+"use client";
 
-'use client';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { 
+  Search, 
+  Filter, 
+  Stethoscope, 
+  Clock, 
+  User, 
+  Activity,
+  Heart,
+  Brain,
+  AlertCircle,
+  ChevronRight,
+  Star,
+  BookOpen
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
+import * as ApiService from "@/lib/ApiService";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Plus, Clock } from 'lucide-react';
-import { FiSend, FiPlus, FiMic, FiPaperclip } from 'react-icons/fi';
+// Types
+interface ClinicalCase {
+  id: number;
+  case_title: string;
+  case_summary: string;
+  patient_age: number;
+  patient_gender: string;
+  specialty: string;
+  difficulty_level: string;
+  estimated_time: number;
+  author?: {
+    username: string;
+  };
+  symptoms?: Array<{
+    id: number;
+    nom: string;
+  }>;
+}
 
-type Actor = "apprenant" | "patient";
+// Composant Carte de cas
+const CaseCard = ({ caseData, onClick }: { caseData: ClinicalCase; onClick: () => void }) => {
+  const getDifficultyColor = (level: string) => {
+    switch (level.toLowerCase()) {
+      case 'débutant':
+        return 'bg-green-100 text-green-800';
+      case 'intermédiaire':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'avancé':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
-type Message = {
-  id: string;
-  sender: Actor;
-  text?: string;
-  name: string;
-  avatar: string;
-  time: string;
-  date: string;
-  fileUrl?: string;
-  fileName?: string;
-  audioUrl?: string;
+  const getSpecialtyIcon = (specialty: string) => {
+    switch (specialty.toLowerCase()) {
+      case 'cardiologie':
+        return <Heart className="w-4 h-4" />;
+      case 'neurologie':
+        return <Brain className="w-4 h-4" />;
+      case 'urgences':
+        return <AlertCircle className="w-4 h-4" />;
+      default:
+        return <Stethoscope className="w-4 h-4" />;
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      onClick={onClick}
+      className="bg-white rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden group"
+    >
+      <div className="p-5">
+        {/* En-tête avec titre et difficulté */}
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex items-center gap-2">
+            {getSpecialtyIcon(caseData.specialty)}
+            <h3 className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors line-clamp-1">
+              {caseData.case_title}
+            </h3>
+          </div>
+          <span className={`text-xs font-medium px-3 py-1 rounded-full ${getDifficultyColor(caseData.difficulty_level)}`}>
+            {caseData.difficulty_level}
+          </span>
+        </div>
+
+        {/* Description */}
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          {caseData.case_summary}
+        </p>
+
+        {/* Métadonnées */}
+        <div className="flex flex-wrap gap-3 text-sm text-gray-500 mb-4">
+          <div className="flex items-center gap-1">
+            <User className="w-4 h-4" />
+            <span>{caseData.patient_age} ans • {caseData.patient_gender === 'M' ? '♂' : '♀'}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock className="w-4 h-4" />
+            <span>{caseData.estimated_time || 15} min</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Activity className="w-4 h-4" />
+            <span className="capitalize">{caseData.specialty}</span>
+          </div>
+        </div>
+
+        {/* Symptômes */}
+        {caseData.symptoms && caseData.symptoms.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-1 text-xs font-medium text-gray-700 mb-2">
+              <AlertCircle className="w-3 h-3" />
+              <span>Symptômes principaux</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {caseData.symptoms.slice(0, 3).map((symptom) => (
+                <span 
+                  key={symptom.id}
+                  className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full"
+                >
+                  {symptom.nom}
+                </span>
+              ))}
+              {caseData.symptoms.length > 3 && (
+                <span className="text-xs text-gray-500 px-2 py-1">
+                  +{caseData.symptoms.length - 3} autres
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Bouton Démarrer */}
+        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+          {caseData.author && (
+            <span className="text-xs text-gray-500">
+              Par {caseData.author.username}
+            </span>
+          )}
+          <button className="flex items-center gap-1 text-primary hover:text-primary-dark font-medium text-sm group">
+            <span>Commencer la simulation</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
 };
 
-type Conversation = {
-  id: string;
-  title: string;
-  date: string;
-  preview: string;
+// Composant Filtre
+const FilterSidebar = ({ 
+  filters, 
+  setFilters,
+  specialties,
+  difficultyLevels 
+}: { 
+  filters: any;
+  setFilters: (filters: any) => void;
+  specialties: string[];
+  difficultyLevels: string[];
+}) => {
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sticky top-24">
+      <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+        <Filter className="w-5 h-5" />
+        Filtres
+      </h3>
+
+      {/* Recherche */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Rechercher
+        </label>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Symptôme, spécialité..."
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+        </div>
+      </div>
+
+      {/* Spécialités */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Spécialité
+        </label>
+        <div className="space-y-2">
+          {specialties.map((specialty) => (
+            <label key={specialty} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filters.specialties.includes(specialty)}
+                onChange={(e) => {
+                  const newSpecialties = e.target.checked
+                    ? [...filters.specialties, specialty]
+                    : filters.specialties.filter((s: string) => s !== specialty);
+                  setFilters({ ...filters, specialties: newSpecialties });
+                }}
+                className="rounded text-primary focus:ring-primary"
+              />
+              <span className="text-sm text-gray-700">{specialty}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Niveau de difficulté */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Niveau
+        </label>
+        <div className="space-y-2">
+          {difficultyLevels.map((level) => (
+            <label key={level} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filters.difficulty.includes(level)}
+                onChange={(e) => {
+                  const newDifficulty = e.target.checked
+                    ? [...filters.difficulty, level]
+                    : filters.difficulty.filter((d: string) => d !== level);
+                  setFilters({ ...filters, difficulty: newDifficulty });
+                }}
+                className="rounded text-primary focus:ring-primary"
+              />
+              <span className="text-sm text-gray-700">{level}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Réinitialiser */}
+      <button
+        onClick={() => setFilters({
+          search: "",
+          specialties: [],
+          difficulty: [],
+          duration: "all"
+        })}
+        className="w-full py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+      >
+        Réinitialiser les filtres
+      </button>
+    </div>
+  );
 };
 
-export default function DraggableFloatingButton() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const buttonRef = useRef(null);
-
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputText, setInputText] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  // Pour désactiver le bouton “envoyer” tant que le patient n’a pas répondu
-  const [canSend, setCanSend] = useState(true);
-
-  useEffect(() => {
-    if (messages.length === 0) return;
-
-    const last = messages[messages.length - 1];
-
-    // Si le dernier message vient de l’apprenant ⇒ verrouille
-    if (last.sender === "apprenant") {
-      setCanSend(false);
-    } else {
-      // Sinon le patient a répondu ⇒ autorise
-      setCanSend(true);
-    }
-  }, [messages]);
-
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  // Dans votre composant, ajoutez ces states et fonctions
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // le hook useEffect corrigé pour fermer le menu en cliquant ailleurs  
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setIsDropdownOpen(false);
-    };
-
-    if (isDropdownOpen) {
-      document.addEventListener('click', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [isDropdownOpen]);
-
-  // Fonction pour l'enregistrement audio
-  const handleAudioRecord = async () => {
-    try {
-      // Vérifier si le navigateur supporte l'API MediaRecorder
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("L'enregistrement audio n'est pas supporté sur ce navigateur");
-        return;
-      }
-
-      // Demander l'autorisation d'accéder au microphone
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
-      // Créer un MediaRecorder
-      let mediaRecorder: MediaRecorder | null = null;
-      mediaRecorder = new MediaRecorder(stream);
+export default function ClinicalCasesPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [cases, setCases] = useState<ClinicalCase[]>([]);
+  const [filteredCases, setFilteredCases] = useState<ClinicalCase[]>([]);
   
-      const audioChunks: BlobPart[] = [];
+  // État des filtres
+  const [filters, setFilters] = useState({
+    search: "",
+    specialties: [] as string[],
+    difficulty: [] as string[],
+    duration: "all"
+  });
 
-      mediaRecorder.ondataavailable = (event) => {
-        audioChunks.push(event.data);
-      };
+  // Données pour les filtres
+  const specialties = ["Cardiologie", "Neurologie", "Pédiatrie", "Urgences", "Médecine générale", "Chirurgie"];
+  const difficultyLevels = ["Débutant", "Intermédiaire", "Avancé"];
 
-      mediaRecorder.onstop = () => {
-        // Créer un blob audio
-        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-        
-        // Créer un URL pour l'audio
-        const audioUrl = URL.createObjectURL(audioBlob);
-        
-        // Ici vous pouvez envoyer l'audio au serveur ou le traiter
-        console.log("Audio enregistré:", audioUrl);
-        
-        // Pour l'instant, on crée un lien de téléchargement
-        const { time, date } = getTimeInfo();
-
-        const newAudioMsg: Message = {
-          id: Date.now().toString(),
-          sender: "apprenant",
-          name: "Vous",
-          avatar: "/images/medical-bg.png",
-          time,
-          date,
-          audioUrl
-        };
-
-        setMessages(prev => [...prev, newAudioMsg]);
-
-        
-        // Libérer les ressources
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      // Démarrer l'enregistrement
-      mediaRecorder.start();
-      
-      // Arrêter après 10 secondes (pour l'exemple)
-      setTimeout(() => {
-        if (mediaRecorder.state === 'recording') {
-          mediaRecorder.stop();
-        }
-      }, 10000);
-
-    } catch (error) {
-      console.error("Erreur lors de l'enregistrement audio:", error);
-      alert("Erreur d'accès au microphone");
-    }
-  };
-
-  // Fonction pour l'ajout de fichier
-  // Déclencher le click sur l'input file caché
-  const handleFileUpload = () => {
-    fileInputRef.current?.click();
-  };
-
-
-  // Gérer la sélection de fichier
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Vérifier la taille du fichier (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert("Le fichier est trop volumineux. Taille maximale: 10MB");
-      return;
-    }
-
-    // Vérifier le type de fichier
-    const allowedTypes = [
-      'image/jpeg', 
-      'image/png', 
-      'image/gif',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ];
-
-    if (!allowedTypes.includes(file.type)) {
-      alert("Type de fichier non supporté. Formats acceptés: images, PDF, Word");
-      return;
-    }
-
-    // formats images autorisés
-    const imageTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/gif"];
-    const isImage = imageTypes.includes(file.type);
-
-  // Si c’est une image → ENVOI DIRECT
-  // mais ca bloque quand on veut envoyer un autre message car la verification du dernier
-  // message bloque l'envoi
-
-  /** 
-  if (isImage) {
-    const { time, date } = getTimeInfo();
-    const fileUrl = URL.createObjectURL(file);
-
-    const newMsg: Message = {
-      id: Date.now().toString(),
-      sender: "apprenant",
-      name: "Vous",
-      avatar: "/images/medical-bg.png",
-      time,
-      date,
-      fileUrl,
-      fileName: file.name,
-    };
-
-    setMessages(prev => [...prev, newMsg]);
-    return; // aucune autre action
-  }*/
-
-    setSelectedFile(file);
-    // Ici vous pouvez envoyer le fichier au serveur
-    console.log("Fichier sélectionné:", file);
-    
-    // Pour l'instant, on affiche juste les infos
-    alert(`Fichier sélectionné: ${file.name}\nTaille: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-
-  };
-
-
-
-  const [conversations] = useState<Conversation[]>([
-    {
-      id: '1',
-      title: 'Consultation du 28 Nov',
-      date: '28/11/2024',
-      preview: 'Douleur abdominale...'
-    },
-    {
-      id: '2',
-      title: 'Suivi patient A.',
-      date: '27/11/2024',
-      preview: 'Contrôle post-opératoire...'
-    },
-    {
-      id: '3',
-      title: 'Urgence respiratoire',
-      date: '26/11/2024',
-      preview: 'Difficulté à respirer...'
-    }
-  ]);
-
-  const [activeConversation, setActiveConversation] = useState<string | null>(null);
-
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(scrollToBottom, [messages]);
-
-  // timezone helper
-  const getTimeInfo = () => {
-    const now = new Date();
-    return {
-      time: now.toLocaleTimeString('fr-FR', {
-        timeZone: 'Africa/Douala',
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
-      date: now.toLocaleDateString('fr-FR', { timeZone: 'Africa/Douala' })
-    };
-  };
-
-  // Position initiale du bouton en bas à droite au chargement
+  // Charger les cas cliniques
   useEffect(() => {
-    const updatePosition = () => {
-      setPosition({
-        x: window.innerWidth - 80,
-        y: window.innerHeight - 80
-      });
-    };
-    
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    
-    return () => window.removeEventListener('resize', updatePosition);
+    loadClinicalCases();
   }, []);
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setIsDragging(true);
-    setDragStart({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
-    });
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
-    const newX = e.clientX - dragStart.x;
-    const newY = e.clientY - dragStart.y;
-
-    const maxX = window.innerWidth - 60;
-    const maxY = window.innerHeight - 60;
-    
-    setPosition({
-      x: Math.max(0, Math.min(newX, maxX)),
-      y: Math.max(0, Math.min(newY, maxY))
-    });
-  };
-
-  const handleMouseUp = () => setIsDragging(false);
-
+  // Filtrer les cas quand les filtres changent
   useEffect(() => {
-    if (!isDragging) return;
-    
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, dragStart]);
+    let result = cases;
 
-  const handleClick = () => {
-    if (!isDragging) setIsModalOpen(true);
-  };
-
-  /** 💬 Sending Message */
-  const handleSend = async () => {
-    if (!canSend) return; // 🚨 stop
-    if (!inputText.trim() && !selectedFile) return;
-
-    const { time, date } = getTimeInfo();
-
-    let fileUrl: string | undefined = undefined;
-    let fileName: string | undefined = undefined;
-
-    if (selectedFile) {
-      fileUrl = URL.createObjectURL(selectedFile);
-      fileName = selectedFile.name;
+    // Filtre par recherche
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      result = result.filter(cas => 
+        cas.case_title.toLowerCase().includes(searchLower) ||
+        cas.case_summary.toLowerCase().includes(searchLower) ||
+        cas.symptoms?.some(s => s.nom.toLowerCase().includes(searchLower)) ||
+        cas.specialty.toLowerCase().includes(searchLower)
+      );
     }
 
-    const newMsg: Message = {
-      id: Date.now().toString(),
-      sender: "apprenant",
-      name: "Vous",
-      avatar: "/images/medical-bg.png",
-      text: inputText.trim() || undefined,
-      time,
-      date,
-      fileUrl,
-      fileName
-    };
+    // Filtre par spécialité
+    if (filters.specialties.length > 0) {
+      result = result.filter(cas => 
+        filters.specialties.includes(cas.specialty)
+      );
+    }
 
-    setMessages(prev => [...prev, newMsg]);
-    setInputText('');
-    setSelectedFile(null); // reset
-    setLoading(true);
+    // Filtre par difficulté
+    if (filters.difficulty.length > 0) {
+      result = result.filter(cas => 
+        filters.difficulty.includes(cas.difficulty_level)
+      );
+    }
 
+    setFilteredCases(result);
+  }, [cases, filters]);
 
+  const loadClinicalCases = async () => {
     try {
-      await new Promise(res => setTimeout(res, 4000));
-
-      const { time: t2, date: d2 } = getTimeInfo();
-
-      const patientResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: "patient",
-        name: "Patient simulé",
-        avatar: "/images/avatar-medical.png",
-        text: "Merci, je comprends votre question. Voici ma réponse comme patient.",
-        time: t2,
-        date: d2
-      };
-
-      setMessages(prev => [...prev, patientResponse]);
-    } catch (err) {
-      console.error('Erreur lors de la génération de la réponse.');
+      setLoading(true);
+      const response = await ApiService.getClinicalCases();
+      setCases(response.data);
+      setFilteredCases(response.data);
+    } catch (error: any) {
+      console.error("Erreur chargement cas cliniques:", error);
+      toast.error("Erreur lors du chargement des cas cliniques");
+      
+      // Données de démo en cas d'erreur
+      const demoCases: ClinicalCase[] = [
+        {
+          id: 1,
+          case_title: "Douleur thoracique aiguë",
+          case_summary: "Patient de 52 ans présentant une douleur thoracique constrictive avec irradiation au bras gauche",
+          patient_age: 52,
+          patient_gender: "M",
+          specialty: "Cardiologie",
+          difficulty_level: "Intermédiaire",
+          estimated_time: 20,
+          symptoms: [
+            { id: 1, nom: "Douleur thoracique" },
+            { id: 2, nom: "Dyspnée" },
+            { id: 3, nom: "Sueurs" }
+          ]
+        },
+        {
+          id: 2,
+          case_title: "Céphalées sévères",
+          case_summary: "Femme de 34 ans avec céphalées brutales et vomissements",
+          patient_age: 34,
+          patient_gender: "F",
+          specialty: "Neurologie",
+          difficulty_level: "Avancé",
+          estimated_time: 25,
+          symptoms: [
+            { id: 4, nom: "Céphalée" },
+            { id: 5, nom: "Vomissements" },
+            { id: 6, nom: "Photophobie" }
+          ]
+        },
+        {
+          id: 3,
+          case_title: "Dyspnée d'effort",
+          case_summary: "Homme de 68 ans avec essoufflement progressif à l'effort",
+          patient_age: 68,
+          patient_gender: "M",
+          specialty: "Cardiologie",
+          difficulty_level: "Débutant",
+          estimated_time: 15,
+          symptoms: [
+            { id: 7, nom: "Dyspnée" },
+            { id: 8, nom: "Fatigue" },
+            { id: 9, nom: "Œdèmes" }
+          ]
+        },
+        {
+          id: 4,
+          case_title: "Douleur abdominale",
+          case_summary: "Patient de 28 ans avec douleur épigastrique et nausées",
+          patient_age: 28,
+          patient_gender: "M",
+          specialty: "Urgences",
+          difficulty_level: "Intermédiaire",
+          estimated_time: 18,
+          symptoms: [
+            { id: 10, nom: "Douleur abdominale" },
+            { id: 11, nom: "Nausées" },
+            { id: 12, nom: "Fièvre" }
+          ]
+        }
+      ];
+      setCases(demoCases);
+      setFilteredCases(demoCases);
     } finally {
       setLoading(false);
     }
   };
 
-  /** Entrée ENTER = envoyer */
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+  const handleCaseClick = (caseId: number) => {
+    router.push(`/cases/${caseId}`);
+  };
+
+  const handleStartSimulation = async (caseId: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Empêche le click sur la carte
+    try {
+      toast.loading("Démarrage de la simulation...");
+      const response = await ApiService.startSimulation(caseId);
+      toast.dismiss();
+      toast.success("Simulation démarrée !");
+      router.push(`/simulations/${response.data.id}`);
+    } catch (error: any) {
+      toast.dismiss();
+      toast.error("Erreur lors du démarrage de la simulation");
+      console.error("Erreur démarrage simulation:", error);
     }
   };
 
-  /** Nouvelle conversation */
-  const handleNewConversation = () => {
-    setActiveConversation(null);
-    setMessages([]);
-  };
-
-  /** Sélection conversation */
-  const handleSelectConversation = (id: string) => {
-    setActiveConversation(id);
-
-    const { time, date } = getTimeInfo();
-
-    // Simuler le chargement de messages pour cette conversation
-    // Messages simulés avec avatars + noms
-    setMessages([
-      {
-        id: "m1",
-        sender: "apprenant",
-        name: "Vous",
-        avatar: "/images/medical-bg.png",
-        text: "Bonjour, comment vous sentez-vous aujourd'hui ?",
-        time,
-        date
-      },
-      {
-        id: "m2",
-        sender: "patient",
-        name: "Patient simulé",
-        avatar: "/images/avatar-medical.png",
-        text: "Bonjour docteur, j’ai toujours cette douleur à l'abdomen.",
-        time,
-        date
-      },
-    ]);
-  };
-
   return (
-    <>
-      {/* Bouton flottant draggable */}
-      <button
-        ref={buttonRef}
-        onMouseDown={handleMouseDown}
-        onDoubleClick={handleClick}
-        style={{
-          position: 'fixed',
-          left: `${position.x}px`,
-          top: `${position.y}px`,
-          cursor: isDragging ? 'grabbing' : 'grab'
-        }}
-        className="w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50 relative"
-      >
-        <div className="absolute inset-0 rounded-full border-2 border-transparent">
-          <svg 
-            className="w-full h-full animate-spin" 
-            style={{ animationDuration: '3s' }}
-            viewBox="0 0 100 100"
-          >
-            <path
-              d="M50,15 A35,35 0 1,1 50,85 A35,35 0 1,1 50,15 M50,20 A30,30 0 1,0 50,80 A30,30 0 1,0 50,20 Z"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinejoin="round"
-              strokeDasharray="5,10"
-            />
-          </svg>
-        </div>
-        
-        <svg 
-          width="24" 
-          height="24" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2"
-        >
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <circle cx="12" cy="5" r="2"/>
-          <circle cx="8" cy="15" r="1"/>
-          <circle cx="16" cy="15" r="1"/>
-          <line x1="8" y1="8" x2="8" y2="11"/>
-          <line x1="16" y1="8" x2="16" y2="11"/>
-        </svg>
-      </button>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-2xl w-full max-w-6xl h-[85vh] flex overflow-hidden">
-
-            {/* Sidebar Conversations */}
-            <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
-              {/* Header sidebar */}
-              <div className="p-4 border-b">
-                <button
-                  onClick={handleNewConversation}
-                  className="w-full bg-blue-600 text-white py-2 rounded-lg flex items-center justify-center gap-2"
-                >
-                  <Plus/> Nouvelle conversation
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-2">
-                {conversations.map(conv => (
-                  <button
-                    key={conv.id}
-                    onClick={() => handleSelectConversation(conv.id)}
-                    className={`block w-full text-left p-3 rounded-md mb-2 ${
-                      activeConversation === conv.id
-                        ? "bg-blue-100 border-l-4 border-blue-600"
-                        : "hover:bg-gray-100 border-l-4 border-transparent"
-                    }`}
-                  >
-                    <div className="font-semibold">{conv.title}</div>
-                    <div className="text-xs text-gray-500 flex gap-1"><Clock size={12}/>{conv.date}</div>
-                    <div className="text-xs text-gray-600 truncate">{conv.preview}</div>
-                  </button>
-                ))}
-              </div>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-primary to-primary-dark text-white py-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-4">
+                Cas Cliniques
+              </h1>
+              <p className="text-blue-100 text-lg max-w-2xl">
+                Entraînez-vous avec des simulations médicales réalistes. 
+                Choisissez un cas, interagissez avec un patient virtuel et développez vos compétences cliniques.
+              </p>
             </div>
-
-            {/* Zone chat */}
-            <div className="flex-1 flex flex-col">
-              {/* Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white flex justify-between p-4">
-                <div>
-                  <h2 className="text-xl font-bold">Assistant Patient Virtuel</h2>
-                  <p className="text-sm text-blue-100">Pose tes questions ici</p>
+            <div className="flex items-center gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <div className="text-2xl font-bold">{cases.length}</div>
+                <div className="text-sm text-blue-100">Cas disponibles</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <div className="text-2xl font-bold">
+                  {cases.reduce((acc, cas) => acc + (cas.estimated_time || 15), 0)}
                 </div>
-
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="p-2 rounded-xl transition-colors hover:bg-red-500"
-                >
-                  <X size={24}/>
-                </button>
+                <div className="text-sm text-blue-100">Minutes d'apprentissage</div>
               </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-                {messages.length === 0 ? (
-                  <div className="h-full flex items-center justify-center text-gray-400">
-                    <div className="text-center">
-                      <MessageCircle size={48} className="mx-auto mb-4 opacity-50" />
-                      <p>Aucun message pour le moment</p>
-                      <p className="text-sm">Commencez une conversation avec le patient</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {messages.map(msg => (
-                      <div key={msg.id} className={`flex flex-col ${msg.sender === "apprenant" ? "items-end" : "items-start"}`}>
-                        
-                        <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
-                          {msg.sender === "patient" && <img src={msg.avatar} className="w-6 h-6 rounded-full border" />}
-                          <span className="font-semibold">{msg.name}</span>
-                          {msg.sender === "apprenant" && <img src={msg.avatar} className="w-6 h-6 rounded-full border" />}
-                        </div>
-
-                        <div
-                          className={`max-w-xs lg:max-w-md xl:max-w-lg px-4 py-3 rounded-lg whitespace-pre-line ${
-                            msg.sender === "apprenant"
-                              ? "bg-blue-600 text-white"
-                              : "bg-white border border-gray-200 text-gray-800"
-                          }`}
-                        >
-                          {msg.text}
-                        </div>
-
-                        <span className="text-[11px] text-gray-500 mt-1">
-                          {msg.date} — {msg.time}
-                        </span>
-
-                        {msg.fileUrl && (
-                          <div className="mt-2">
-                            {msg.fileUrl.startsWith("blob:") || msg.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-                              <img
-                                src={msg.fileUrl}
-                                alt={msg.fileName}
-                                className="max-w-[220px] rounded-lg border"
-                              />
-                            ) : (
-                              <a
-                                href={msg.fileUrl}
-                                target="_blank"
-                                className="underline text-blue-600"
-                              > {/** className="underline text-blue-600 text-sm" */}
-                                📎 {msg.fileName}
-                              </a>
-                            )}
-                          </div>
-                        )}
-
-                        {msg.audioUrl && (
-                          <audio controls className="mt-2 w-60">
-                            <source src={msg.audioUrl} type="audio/wav" />
-                          </audio>
-                        )}
-
-                      </div>
-                    ))}
-                    {loading && (
-                      <div className="flex justify-start">
-                        <div className="bg-white border px-4 py-3 rounded-lg flex gap-2">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-300"></div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div ref={messagesEndRef}/>
-                  </div>
-                )}
-              </div>
-
-              {/* Input */}
-              <div className="border-t p-4 bg-white">
-                {/* Zone de saisie */}
-                <div className="flex gap-3 items-end">
-                  <textarea
-                    className="flex-1 border rounded-lg p-3 resize-none outline-none focus:ring-blue-500 focus:ring"
-                    rows={3}
-                    placeholder="Écrire au patient..."
-                    onKeyDown={handleKeyPress}
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                  />
-                  
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileSelect}
-                    accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx"
-                    className="hidden"
-                  />
-
-                  {!canSend && (
-                    <p className="text-xs text-gray-500 mb-2">
-                    ⏳ Attente de la réponse du patient...
-                    </p>
-                  )}
-
-                  <div className="flex flex-col gap-2">
-                    {/* Menu déroulant pour les options */}
-                    <div className="flex-shrink-0 relative">
-                      <div className="relative">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsDropdownOpen(!isDropdownOpen);
-                          }}
-                          className="bg-gray-600 text-white p-4 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors"
-                        >
-                          <FiPlus className="w-5 h-5" />
-                        </button>
-                        
-                        {isDropdownOpen && (
-                          <div className="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-lg shadow-lg border z-50">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAudioRecord();
-                                setIsDropdownOpen(false);
-                              }}
-                              className="flex items-center gap-3 w-full p-3 hover:bg-gray-100 rounded-t-lg transition-colors text-left"
-                            >
-                              <FiMic className="w-4 h-4 flex-shrink-0" />
-                              <span className="text-sm">Enregistrement audio</span>
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleFileUpload();
-                                setIsDropdownOpen(false);
-                              }}
-                              className="flex items-center gap-3 w-full p-3 hover:bg-gray-100 rounded-b-lg transition-colors text-left"
-                            >
-                              <FiPaperclip className="w-4 h-4 flex-shrink-0" />
-                              <span className="text-sm">Ajouter un fichier</span>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Bouton d'envoi */}
-                    <button
-                      onClick={handleSend}
-                      disabled={!inputText.trim() || !canSend || loading}
-                      className={`bg-blue-600 text-white p-4 rounded-lg flex items-center justify-center disabled:opacity-50 hover:bg-blue-700 transition-colors ${
-                        !canSend ? "opacity-40 cursor-not-allowed" : ""
-                    }`}
-                    >
-                      <FiSend className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
             </div>
           </div>
         </div>
-      )}
-    </>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Barre de statistiques */}
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <BookOpen className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {filteredCases.length}
+                </div>
+                <div className="text-sm text-gray-600">Cas correspondants</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Activity className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {new Set(filteredCases.map(c => c.specialty)).size}
+                </div>
+                <div className="text-sm text-gray-600">Spécialités</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <Star className="w-5 h-5 text-yellow-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {filteredCases.filter(c => c.difficulty_level === "Débutant").length}
+                </div>
+                <div className="text-sm text-gray-600">Niveau débutant</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Clock className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {filteredCases.reduce((acc, c) => acc + (c.estimated_time || 15), 0)}
+                </div>
+                <div className="text-sm text-gray-600">Minutes totales</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contenu principal */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Sidebar filtres */}
+          <div className="lg:w-1/4">
+            <FilterSidebar 
+              filters={filters}
+              setFilters={setFilters}
+              specialties={specialties}
+              difficultyLevels={difficultyLevels}
+            />
+          </div>
+
+          {/* Liste des cas */}
+          <div className="lg:w-3/4">
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : filteredCases.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
+                <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  Aucun cas trouvé
+                </h3>
+                <p className="text-gray-500">
+                  Essayez de modifier vos critères de recherche
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredCases.map((clinicalCase, index) => (
+                  <div 
+                    key={clinicalCase.id} 
+                    onClick={() => handleCaseClick(clinicalCase.id)}
+                  >
+                    <CaseCard 
+                      caseData={clinicalCase}
+                      onClick={() => {}}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Pagination (optionnel) */}
+            {filteredCases.length > 0 && (
+              <div className="mt-8 flex justify-center">
+                <div className="flex items-center gap-2">
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                    Précédent
+                  </button>
+                  <span className="px-4 py-2 text-sm text-gray-700">
+                    Page 1 sur 1
+                  </span>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                    Suivant
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

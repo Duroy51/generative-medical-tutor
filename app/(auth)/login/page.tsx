@@ -1,9 +1,11 @@
+//  app/(auth)/login/page.tsx
+
 'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiUser  } from 'react-icons/fi';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -21,27 +23,31 @@ const ConnexionPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const [email, setEmail] = useState('');
+  //const [email, setEmail] = useState('');
+
+  const [username, setUsername] = useState(''); // Changé de email à username
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
 
   // --- Toggle show/hide password ---
   const togglePassword = () => setShowPassword(!showPassword);
 
-  // --- Submit form ---
+
+  // --- Submit form --- CORRIGÉ
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!username || !password) {
       toast.error('Veuillez remplir tous les champs.');
       return;
     }
+    
     try {
       setLoading(true);
-      const username = email.split('@')[0]; // Simple extraction du nom d'utilisateur depuis l'email
-      const res = await login(username, email);
+      
+      // Appel direct avec username et password
+      const res = await login(username, password);
 
       if (!res.success) {
-        toast.error(res.error);
+        toast.error(res.error || 'Erreur de connexion');
         return;
       }
 
@@ -49,7 +55,8 @@ const ConnexionPage: React.FC = () => {
       toast.success('Connexion réussie ! Bienvenue sur MedCaseGen 👋');
 
       setTimeout(() => router.push('/dashboard'), 1500);
-    } catch {
+    } catch (error: any) {
+      console.error('Erreur login:', error);
       toast.error('Erreur lors de la connexion');
     } finally {
       setLoading(false);
@@ -124,24 +131,27 @@ const ConnexionPage: React.FC = () => {
               </p>
             </div>
 
-            {/* FORM */}
+            {/* FORM - CORRIGÉ */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* EMAIL */}
+              {/* USERNAME - CHANGÉ DE EMAIL À USERNAME */}
               <div>
                 <label className="block text-gray-700 text-sm font-medium mb-1">
-                  Adresse email ou nom d'utilisateur
+                  Nom d'utilisateur
                 </label>
                 <div className="relative">
-                  <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     className="w-full py-3 pl-10 pr-3 border border-gray-200 rounded-lg
                     focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition"
-                    placeholder="exemple@gmail.com"
+                    placeholder="votre_nom_utilisateur"
                   />
                 </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Utilisez le nom d'utilisateur que vous avez créé lors de l'inscription
+                </p>
               </div>
 
               {/* PASSWORD */}

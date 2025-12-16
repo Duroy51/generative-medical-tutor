@@ -54,7 +54,7 @@ const MEDICAL_CATEGORIES: MedicalCategory[] = [
         description:
           "Exacerbation asthmatique après infection virale, débit expiratoire bas, oxygénation 90%.",
         image:
-          "https://upload.wikimedia.org/wikipedia/commons/7/75/Asthma_diagram.png",
+          "/images/Cardiologie_1.png",
       },
       {
         id: "cas4",
@@ -85,7 +85,7 @@ const MEDICAL_CATEGORIES: MedicalCategory[] = [
         description:
           "Patient 19 ans, crises répétées, pas de fièvre, examen neuro normal en intercritique.",
         image:
-          "https://upload.wikimedia.org/wikipedia/commons/e/e0/EEG_normal.svg",
+          "/images/Pneumonie.png",
       },
     ],
   },

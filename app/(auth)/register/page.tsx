@@ -134,6 +134,16 @@ export default function InscriptionPageClient() {
     }
   };
 
+  // ================= LOADING OVERLAY =================
+  {loading && (
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center">
+        <div className="w-10 h-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p className="text-gray-700">Création de votre compte...</p>
+      </div>
+    </div>
+  )}
+
   return (
     <main className="min-h-screen w-full bg-blue-50 flex p-4">
       <div className="w-full max-6xl bg-white rounded-xl shadow-xl overflow-hidden grid lg:grid-cols-2">
@@ -229,6 +239,12 @@ export default function InscriptionPageClient() {
                 onChange={handleChange}
                 error={errors.email}
               />
+
+              // Après le champ email, ajoutez :
+              <p className="text-xs text-gray-500 mt-1">
+                Vous serez inscrit en tant qu'<strong>Apprenant</strong> par défaut.
+                Contactez l'administrateur pour obtenir le rôle Expert.
+              </p>
 
               {/* --- Password + confirm --- */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
