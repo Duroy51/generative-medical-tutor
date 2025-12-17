@@ -41,6 +41,13 @@ class ClinicalCase(models.Model):
     categories = models.ManyToManyField(Category, blank=True, related_name='cases')
     raw_llm_suggestions = models.JSONField(default=dict, blank=True)
 
+    key_questions = models.JSONField(
+        default=list,
+        blank=True,
+        null=True,
+        help_text="Liste des questions clés que l'apprenant doit poser."
+    )
+
     def __str__(self):
         return f"Cas #{self.id} ({self.case_title}) - {self.get_status_display()}"
 

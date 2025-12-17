@@ -36,7 +36,9 @@ class StartSimulationSerializer(serializers.Serializer):
     Serializer spécialisé pour la validation des données lors de la création d'une session.
     Il ne correspond pas directement à un modèle, mais définit les champs attendus par l'API.
     """
-    case_id = serializers.IntegerField(required=True, help_text="L'ID du cas clinique à simuler.")
+    case_id = serializers.IntegerField(required=False, help_text="ID du cas. Si absent, un cas aléatoire est choisi.")
+    force_new = serializers.BooleanField(required=False, default=False,
+                                         help_text="Forcer la création d'une nouvelle session.")
 
     # On pourrait ajouter d'autres options ici plus tard, comme le niveau de difficulté souhaité.
 

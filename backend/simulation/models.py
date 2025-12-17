@@ -60,7 +60,8 @@ class ChatMessage(models.Model):
     class Sender(models.TextChoices):
         APPRENANT = 'APPRENANT', 'Apprenant'
         PATIENT_IA = 'PATIENT_IA', 'Patient IA'
-        SYSTEM = 'SYSTEM', 'Système'  # Pour des messages de tutorat ou d'événements
+        SYSTEM = 'SYSTEM', 'Système'
+        TUTEUR = 'TUTEUR', 'Tuteur Pédagogique'
 
     session = models.ForeignKey(
         SimulationSession,

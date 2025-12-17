@@ -2,9 +2,10 @@
 
 import json
 from django.db import transaction
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
+from django.conf import settings
 
 from cases.models import (
     Category, ClinicalCase, Symptom, MedicalHistory, CurrentTreatment,
@@ -50,6 +51,7 @@ def save_structured_data_to_db(structured_data: dict, fultang_id: str):
         # Données Pédagogiques
         case_title=pedagogical_data.get('case_title', 'Titre manquant'),
         learning_objectives=pedagogical_data.get('learning_objectives', ''),
+        key_questions=pedagogical_data.get('key_questions_to_ask', []),
 
         # Données Patient
         age=patient_info.get('age', 0),  # 0 comme valeur par défaut pour un entier
@@ -120,7 +122,11 @@ def get_structured_data_from_llm(raw_data: dict, existing_categories_names: list
     JSON de sortie :
     """
 
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2)
+    llm = ChatGroq(
+            model="llama-3.3-70b-versatile", # Le modèle le plus intelligent et polyvalent
+            temperature=0.1,                 # Faible température pour un JSON strict
+            api_key=settings.GROQ_API_KEY
+        )
 
     parser = JsonOutputParser(pydantic_object=FullCaseStructure)
 

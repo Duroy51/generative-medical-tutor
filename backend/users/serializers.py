@@ -47,7 +47,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
     Serializer pour renvoyer les infos complètes de l'utilisateur connecté.
     """
     role = serializers.CharField(source='profile.role', read_only=True)
+    skill_matrix = serializers.JSONField(source='profile.skill_matrix', read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'skill_matrix']

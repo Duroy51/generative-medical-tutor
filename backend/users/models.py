@@ -13,6 +13,12 @@ class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.APPRENANT)
 
+    skill_matrix = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Niveau de compétence par catégorie (Score moyen sur 100)"
+    )
+
     #TODO Ajouter plus tard des attributs relatifs aux métriques d'évaluations
 
     def __str__(self):

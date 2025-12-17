@@ -1,8 +1,9 @@
 # backend/simulation/agents/simulator.py
+from django.conf import settings
 
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
+from langchain_groq import ChatGroq
 
 from cases.models import ClinicalCase
 from simulation.models import ChatMessage
@@ -22,38 +23,55 @@ class PatientSimulatorAgent:
         self.session_id = session_id
 
         # 1. Initialisation du Modèle LLM (Gemini via LangChain)
-        self.llm = ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
-            temperature=0.7,  # Un peu de créativité pour un dialogue plus naturel
-            convert_system_message_to_human=True  # Bonne pratique pour Gemini
+        self.llm = ChatGroq(
+            model="llama-3.3-70b-versatile",
+            temperature=0.7,  # Plus créatif pour la conversation
+            api_key=settings.GROQ_API_KEY
         )
 
         # 2. Définition du Prompt Template
         # C'est le "scénario" que nous donnons à l'IA. C'est la partie la plus importante.
+        # Nouveau Prompt optimisé pour les Actions Cliniques
         prompt_template_str = """
-        Tu es un patient virtuel. Ton rôle est de simuler une consultation médicale de manière réaliste.
-        Ne révèle JAMAIS que tu es une IA. Agis comme une véritable personne.
+                Tu es une IA simulant un cas médical pour la formation d'un étudiant en médecine.
+                Tu dois gérer deux rôles distincts selon l'entrée de l'utilisateur.
 
-        CONTEXTE DU CAS (Tes informations personnelles et médicales - Ne les révèle que si l'apprenant pose les bonnes questions) :
-        ---
-        Titre du cas : {case_title}
-        Résumé de la situation : {case_summary}
-        Tes symptômes principaux : {symptoms_list}
-        Tes antécédents médicaux : {history_list}
-        Ton état d'esprit / personnalité : {patient_persona}
-        ---
+                CONTEXTE DU CAS (Vérité Terrain) :
+                ---
+                Titre : {case_title}
+                Résumé : {case_summary}
+                Symptômes réels : {symptoms_list}
+                Antécédents : {history_list}
+                Personnalité du patient : {patient_persona}
+                ---
 
-        HISTORIQUE DE LA CONVERSATION (Ce qui a déjà été dit) :
-        {chat_history}
+                HISTORIQUE :
+                {chat_history}
 
-        INSTRUCTION :
-        Réponds à la dernière question de l'apprenant (le médecin) de manière naturelle et cohérente avec ton rôle et le contexte fourni.
-        Si la conversation vient de commencer et que l'apprenant dit "Bonjour", utilise ta phrase d'introduction : "{initial_statement}".
-        Ne fournis que les informations directement demandées. Sois concis.
+                DERNIÈRE ENTRÉE DE L'UTILISATEUR :
+                "{user_message}"
 
-        Question de l'apprenant : {user_message}
-        Ta réponse de patient :
-        """
+                --- INSTRUCTIONS DE RÉPONSE ---
+
+                CAS 1 : L'utilisateur pose une question (Dialogue standard).
+                - RÔLE : Tu es le PATIENT.
+                - TON : Naturel, non médical, subjectif. Tu exprimes ce que tu ressens.
+                - EXEMPLE : "J'ai mal au ventre." (Pas "Douleur épigastrique").
+                - Si la question n'a pas de sens pour un patient, exprime ton incompréhension.
+
+                CAS 2 : L'utilisateur effectue une ACTION CLINIQUE (L'entrée commence par "[ACTION]").
+                - RÔLE : Tu es le SYSTÈME/LE CORPS.
+                - TON : Clinique, objectif, précis, "Telegraphic style".
+                - TÂCHE : Décris le résultat de l'examen demandé en te basant sur les données du cas.
+                - DÉDUCTION : Si une donnée n'est pas explicite dans le résumé ci-dessus (ex: Température), DÉDUIS-LA logiquement du contexte clinique (ex: Si infection -> Fièvre probable / Si cas bénin -> Constantes normales).
+                - FORMAT : Ne fais pas de phrases complètes. Donne juste le résultat.
+                - EXEMPLE Entrée : "[ACTION] Constantes Vitales > Prise de Tension"
+                - EXEMPLE Sortie : "TA : 135/85 mmHg. Asymétrie non notée."
+                - EXEMPLE Entrée : "[ACTION] Auscultation > Pulmonaire"
+                - EXEMPLE Sortie : "Murmure vésiculaire perçu. Pas de râles crépitants."
+
+                TA RÉPONSE :
+                """
         self.prompt = ChatPromptTemplate.from_template(prompt_template_str)
 
         # 3. Création de la chaîne LangChain (LCEL)

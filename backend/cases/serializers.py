@@ -1,7 +1,7 @@
 # backend/cases/serializers.py
 
 from rest_framework import serializers
-from .models import ClinicalCase # Importez les autres modèles au besoin
+from .models import ClinicalCase, Category  # Importez les autres modèles au besoin
 
 class ClinicalCaseListSerializer(serializers.ModelSerializer):
     """
@@ -9,7 +9,7 @@ class ClinicalCaseListSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = ClinicalCase
-        fields = ['id', 'case_title', 'status', 'age', 'sexe']
+        fields = ['id', 'case_title', 'case_summary', 'categories', 'status', 'age', 'sexe']
 
 class ClinicalCaseDetailSerializer(serializers.ModelSerializer):
     """
@@ -19,3 +19,9 @@ class ClinicalCaseDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClinicalCase
         fields = '__all__' # Inclut tous les champs du modèle
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'description']

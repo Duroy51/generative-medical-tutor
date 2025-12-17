@@ -3,8 +3,8 @@ from django.shortcuts import render
 # backend/cases/views.py
 
 from rest_framework import viewsets, permissions
-from .models import ClinicalCase
-from .serializers import ClinicalCaseListSerializer, ClinicalCaseDetailSerializer
+from .models import ClinicalCase, Category
+from .serializers import ClinicalCaseListSerializer, ClinicalCaseDetailSerializer, CategorySerializer
 
 
 class ClinicalCaseViewSet(viewsets.ReadOnlyModelViewSet):
@@ -19,3 +19,11 @@ class ClinicalCaseViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == 'list':
             return ClinicalCaseListSerializer
         return ClinicalCaseDetailSerializer
+
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Permet de lister les catégories pour les filtres du frontend.
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    # Pas besoin de permissions strictes pour lire les catégories, mais IsAuthenticated est bien
