@@ -22,35 +22,67 @@ class TutorEvaluatorAgent:
         )
         self.parser = JsonOutputParser(pydantic_object=EvaluationResult)
 
+
+
+    def _get_full_clinical_context(self):
+        """Récupère toutes les données du cas pour donner la vérité terrain au Tuteur."""
+        c = self.case
+
+
+        context = f"""
+        --- VÉRITÉ TERRAIN DU PATIENT (DOSSIER COMPLET) ---
+        TITRE : {c.case_title}
+        RÉSUMÉ : {c.case_summary}
+
+        SYMPTÔMES RÉELS :
+        {", ".join([f"- {s.nom} ({s.localisation or ''}, {s.degre or ''}/10)" for s in c.symptoms.all()])}
+
+        ANTÉCÉDENTS :
+        {", ".join([f"- {h.type}: {h.description}" for h in c.history_entries.all()])}
+
+        TRAITEMENTS EN COURS :
+        {", ".join([f"- {t.nom}" for t in c.current_treatments.all()])}
+
+        DIAGNOSTICS (Le final est le but) :
+        {", ".join([f"- {d.description} {'(CIBLE FINALE)' if d.is_final else '(Différentiel)'}" for d in c.diagnoses.all()])}
+
+        QUESTIONS CLÉS ATTENDUES (Le chemin idéal) :
+        {self.case.key_questions}
+        ---------------------------------------------------
+        """
+        return context
+
+
     def evaluate_exchange(self, user_message: str, chat_history_str: str) -> dict:
         """
         Analyse la dernière question de l'apprenant par rapport au contexte du cas.
         """
 
+        full_context_str = self._get_full_clinical_context()
         # Le Prompt Pédagogique (Socratique + Étayage)
         prompt_template = """
-                Tu es un Mentor Socratique expert en médecine.
-                Ta mission n'est PAS de donner les réponses, mais de forcer l'étudiant à réfléchir par lui-même.
+                Tu es un Mentor Clinique expert.
+                Tu dois évaluer la pertinence de la question de l'étudiant en fonction du DOSSIER COMPLET du patient.
 
-                CONTEXTE DU CAS :
-                - Diagnostic Final : {diagnoses}
-                - Questions clés attendues : {key_questions}
+                {full_context}
 
-                HISTORIQUE RÉCENT :
+                HISTORIQUE DE LA CONVERSATION :
                 {chat_history}
 
                 DERNIÈRE QUESTION DE L'ÉTUDIANT :
                 "{user_message}"
 
-                CONSIGNES STRICTES POUR LE FEEDBACK :
-                1. **Analyse la pertinence (0-10)** : La question est-elle utile pour le diagnostic ?
-                2. **Génération du Feedback (pedagogical_feedback)** :
-                   - SI LE SCORE EST BAS (< 6) : Tu dois formuler une **QUESTION SOCRATIQUE**.
-                   - **INTERDIT** : Ne donne jamais la réponse. Ne dis jamais "Tu devrais demander X". Ne dis jamais "Concentre-toi sur Y".
-                   - **OBLIGATOIRE** : Pose une question qui met en lumière la lacune de l'étudiant.
-                   - *Exemple mauvais* : "Demande-lui s'il a de la fièvre."
-                   - *Exemple Socratique (Bon)* : "Pourquoi écartes-tu l'hypothèse infectieuse à ce stade ?" ou "Quel lien fais-tu entre ce détail et la douleur thoracique ?"
+                --- TA MISSION D'ANALYSE ---
+                1. Comprends l'INTENTION de l'étudiant. Cherche-t-il un symptôme ? Teste-t-il une hypothèse (même fausse mais logique) ?
+                2. Compare cela aux données du dossier.
+                   - Si la question explore une piste pertinente (même un diagnostic différentiel), c'est BON.
+                   - Si la question est totalement illogique par rapport aux symptômes (ex: demander mal au pied pour une migraine), c'est MAUVAIS.
+                   - Si la question est une répétition inutile, c'est MAUVAIS.
 
+                --- RÈGLES D'INTERVENTION ---
+                - N'interviens (note < 4 + feedback) QUE si l'étudiant est perdu ou dangereux.
+                - S'il explore une piste secondaire logique, laisse-le faire (Note > 6).
+                - S'il essaie juste d'etre poli avec le Patient, tu le laisse engagement faire.
                 {format_instructions}
                 """
 
@@ -78,6 +110,7 @@ class TutorEvaluatorAgent:
 
         try:
             result = chain.invoke({
+                "full_context": full_context_str,
                 "case_title": self.case.case_title,
                 "case_summary": self.case.case_summary or "",  # Gestion du None
                 "diagnoses": diagnoses_str,  # <--- ON PASSE LA VARIABLE MANQUANTE ICI

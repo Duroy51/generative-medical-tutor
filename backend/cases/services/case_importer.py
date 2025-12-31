@@ -102,17 +102,19 @@ def get_structured_data_from_llm(raw_data: dict, existing_categories_names: list
     """
     categories_list_str = ", ".join(existing_categories_names)
 
+    context_str = f"[{categories_list_str}]" if existing_categories_names else "(LISTE VIDE - CRÉEZ DES CATÉGORIES PERTINENTES)"
     prompt_template = """
     Tâche : Analyser les données cliniques brutes suivantes et les transformer en un JSON riche et structuré pour une simulation pédagogique.
 
-    Contexte Important : Voici la liste des catégories médicales officielles déjà existantes :
-    [{categories_list_str}]
+    Contexte Important (Liste des catégories officielles) : 
+    {context_str}
 
     Instructions :
     1. Lis l'intégralité des données brutes.
     2. Remplis TOUS les champs du format JSON de sortie en te basant sur les données fournies. Si une information est absente, tu dois l'estimer de manière plausible ou utiliser une valeur par défaut appropriée (chaîne vide `""`, liste vide `[]`, `null`).
     3. Pour "categories", choisis dans la liste fournie. Tu peux en suggérer une nouvelle si absolument nécessaire.
-    4. Génère des données pédagogiques et de simulation pertinentes et utiles pour un étudiant en médecine.
+    4. CRITIQUE : Le champ "case_title" est visible par l'étudiant AVANT la simulation. Il NE DOIT PAS révéler le diagnostic final. Utilise une description du symptôme principal et du profil du patient (ex: "Jeune femme avec céphalées chroniques").
+    5. Génère des données pédagogiques et de simulation pertinentes et utiles pour un étudiant en médecine.
 
     {format_instructions}
 
@@ -138,7 +140,7 @@ def get_structured_data_from_llm(raw_data: dict, existing_categories_names: list
     chain = prompt | llm | parser
 
     response_json = chain.invoke({
-        "categories_list_str": categories_list_str,
+        "context_str": context_str,
         "raw_data_str": json.dumps(raw_data, ensure_ascii=False)
     })
 

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -160,7 +161,7 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-FULTANG_API_URL = os.getenv("FULTANG_API_URL")
+
 
 
 REST_FRAMEWORK = {
@@ -174,3 +175,31 @@ MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
 MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
 MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME", "datasets")
 MINIO_USE_SECURE = False
+
+# backend/core/settings.py
+
+# ... à la fin du fichier ...
+
+SIMPLE_JWT = {
+    # Durée du token d'accès (celui utilisé pour les requêtes API)
+    # 60 minutes est un bon compromis. L'étudiant a le temps de finir sa simulation.
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+
+    # Durée du token de rafraîchissement (celui qui permet de rester connecté sans remettre le mot de passe)
+    # 7 jours permet à l'utilisateur de revenir le lendemain sans se reconnecter.
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+
+    # Optionnel mais recommandé : Rotation des tokens
+    # À chaque fois qu'on utilise le refresh token, on en reçoit un nouveau.
+    # Cela permet de garder une session active indéfiniment tant que l'utilisateur est actif.
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+
+    # ... on garde les autres réglages par défaut
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+FULTANG_API_URL = os.getenv("FULTANG_API_URL")
+FULTANG_API_KEY = os.getenv("FULTANG_API_KEY")
