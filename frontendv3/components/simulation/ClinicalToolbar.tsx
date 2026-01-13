@@ -1,84 +1,120 @@
 "use client";
 
 import {
-    Activity,       // Pour les constantes
+    Activity,       // Constantes
     Eye,            // Inspection
     Stethoscope,    // Auscultation
-    Hand,           // Palpation (la main)
+    Hand,           // Palpation
+    Microscope,     // Examens
     Thermometer,    // Température
-    HeartPulse,     // Cardio
-    //Lungs,          // Pulmo (si dispo, sinon on utilise autre chose)
-    Search          // Autre
+    Search
 } from 'lucide-react';
 
 interface ClinicalToolbarProps {
-    onAction: (actionCategory: string, actionName: string) => void;
+    onAction: (category: string, actionName: string) => void;
     disabled: boolean;
 }
 
 export function ClinicalToolbar({ onAction, disabled }: ClinicalToolbarProps) {
 
-    // Configuration des actions disponibles
+    // Ordre clinique logique : On regarde, on mesure, on touche, on écoute.
     const tools = [
         {
-            category: "Constantes Vitales",
-            icon: <Activity size={18} className="text-blue-500" />,
-            actions: ["Prise de Tension (TA)", "Fréquence Cardiaque", "Saturation O2 (SpO2)", "Température", "Fréquence Respiratoire"]
+            category: "1. Inspection Générale",
+            icon: <Eye size={18} className="text-emerald-600" />,
+            actions: [
+                "État Général & Conscience",
+                "Peau et Muqueuses (Coloration)",
+                "Faciès & Regard",
+                "Gorge / Bouche",
+                "Marche & Posture",
+                "Signes de détresse respiratoire"
+            ]
         },
         {
-            category: "Inspection",
-            icon: <Eye size={18} className="text-emerald-500" />,
-            actions: ["État Général", "Peau et Muqueuses", "Gorge / Bouche", "Signes de détresse"]
+            category: "2. Constantes Vitales",
+            icon: <Activity size={18} className="text-blue-600" />,
+            actions: [
+                "Prise de Tension (TA)",
+                "Fréquence Cardiaque (Pouls)",
+                "Fréquence Respiratoire",
+                "Température",
+                "Saturation O2 (SpO2)",
+                "Glycémie Capillaire (Dextro)"
+            ]
         },
         {
-            category: "Auscultation",
+            category: "3. Palpation",
+            icon: <Hand size={18} className="text-purple-600" />,
+            actions: [
+                "Palpation Abdominale",
+                "Pouls Périphériques",
+                "Recherche d'œdèmes (Godet)",
+                "Aires Ganglionnaires",
+                "Palpation des reliefs osseux"
+            ]
+        },
+        {
+            category: "4. Auscultation",
             icon: <Stethoscope size={18} className="text-brand-primary" />,
-            actions: ["Auscultation Cardiaque", "Auscultation Pulmonaire", "Bruits intestinaux"]
+            actions: [
+                "Auscultation Cardiaque",
+                "Auscultation Pulmonaire",
+                "Bruits intestinaux (Hydro-aériques)",
+                "Souffles vasculaires"
+            ]
         },
         {
-            category: "Palpation",
-            icon: <Hand size={18} className="text-purple-500" />, // Hand au lieu de Heart pour la palpation
-            actions: ["Palpation Abdominale", "Pouls Périphériques", "Recherche d'œdèmes", "Ganglions (Aires ganglionnaires)"]
+            category: "Examens Spécifiques",
+            icon: <Microscope size={18} className="text-gray-600" />,
+            actions: [
+                "Examen Neurologique (Réflexes)",
+                "Examen ORL (Otoscope)",
+                "Bandelette Urinaire",
+                "ECG (Électrocardiogramme)"
+            ]
         }
     ];
 
     return (
-        <div className="w-80 bg-white border-l border-gray-200 flex flex-col h-full overflow-hidden shadow-sm">
+        <div className="flex flex-col h-full bg-white">
             {/* En-tête */}
-            <div className="p-5 border-b border-gray-100 bg-gray-50/50">
-                <h3 className="font-bold text-brand-dark text-sm uppercase tracking-wider flex items-center gap-2">
-                    <Activity size={16} /> Examen Clinique
+            <div className="p-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between flex-shrink-0">
+                <h3 className="font-bold text-brand-dark text-xs uppercase tracking-wider flex items-center gap-2">
+                    <Activity size={14} /> Actes Cliniques
                 </h3>
-                <p className="text-xs text-gray-400 mt-1">Sélectionnez un geste à effectuer</p>
+                <span className="text-[10px] text-gray-400 font-medium">Sélectionnez un geste</span>
             </div>
 
-            {/* Liste des actions scrollable */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            {/* Liste Scrollable */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-5 custom-scrollbar">
                 {tools.map((group, idx) => (
-                    <div key={idx} className="animate-fade-in" style={{ animationDelay: `${idx * 0.1}s` }}>
-                        <div className="flex items-center gap-2 mb-3 text-gray-800 font-semibold text-sm">
-                            <div className="p-1.5 rounded-md bg-gray-50 border border-gray-100">
-                                {group.icon}
-                            </div>
+                    <div key={idx} className="animate-fade-in" style={{ animationDelay: `${idx * 0.05}s` }}>
+
+                        {/* Titre de catégorie */}
+                        <div className="flex items-center gap-2 mb-2 px-2 py-1 bg-gray-50/80 rounded-lg text-gray-800 font-bold text-xs uppercase tracking-wide border border-gray-100">
+                            {group.icon}
                             {group.category}
                         </div>
 
-                        <div className="grid grid-cols-1 gap-2">
+                        {/* Boutons d'action */}
+                        <div className="grid grid-cols-1 gap-1">
                             {group.actions.map((action) => (
                                 <button
                                     key={action}
-                                    onClick={() => onAction(group.category, action)}
+                                    onClick={() => onAction(group.category.replace(/^[0-9].\s/, ''), action)}
                                     disabled={disabled}
-                                    className="text-left text-xs font-medium px-3 py-2.5 rounded-lg border border-gray-100 text-gray-600 hover:bg-brand-light hover:text-brand-primary hover:border-brand-primary/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-between items-center group"
+                                    className="text-left text-xs font-medium px-3 py-2.5 rounded-lg border border-transparent text-gray-600 hover:bg-brand-light hover:text-brand-primary hover:border-brand-primary/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-between items-center group"
                                 >
                                     {action}
-                                    {/* Petite flèche qui apparait au survol */}
-                                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-brand-primary">→</span>
+                                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-brand-primary font-bold">→</span>
                                 </button>
                             ))}
                         </div>
                     </div>
                 ))}
+                {/* Marge de fin pour le scroll */}
+                <div className="h-4"></div>
             </div>
         </div>
     );

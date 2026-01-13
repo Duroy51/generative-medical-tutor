@@ -48,6 +48,27 @@ class ClinicalCase(models.Model):
         help_text="Liste des questions clés que l'apprenant doit poser."
     )
 
+    rejection_reason = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Motif du rejet (rempli par l'expert)"
+    )
+
+    difficulty = models.CharField(
+        max_length=20,
+        choices=[('Facile', 'Facile'), ('Moyen', 'Moyen'), ('Difficile', 'Difficile')],
+        default='Moyen',
+        blank=True,
+        null=True
+    )
+
+    reasoning_graph = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        help_text="Structure nœuds/liens représentant le raisonnement clinique (généré par IA)."
+    )
+
     def __str__(self):
         return f"Cas #{self.id} ({self.case_title}) - {self.get_status_display()}"
 
@@ -69,18 +90,37 @@ class Symptom(models.Model):
 
 class MedicalHistory(models.Model):
     class HistoryType(models.TextChoices):
-        MEDICAL = 'medical', 'Médical'
-        CHIRURGICAL = 'chirurgical', 'Chirurgical'
-        OBSTETRICAL = 'obstetrical', 'Obstétrical'
-        FAMILIAL = 'familial', 'Familial'
-        ALLERGIE = 'allergie', 'Allergie'
+        MALADIE = 'maladie', 'Maladie'
+        CHIRURGIE = 'chirurgie', 'Chirurgie'
+        FAMILIAL = 'familial', 'Familiaux'
+        ALLERGIE = 'allergie', 'Allergies'
+        OBSTETRICAL = 'obstetrical', 'Obstétricaux'
 
     case = models.ForeignKey(ClinicalCase, related_name='history_entries', on_delete=models.CASCADE)
     type = models.CharField(max_length=20, choices=HistoryType.choices)
-    description = models.TextField()
+    description = models.TextField(help_text="Description générale")  # On garde pour la compatibilité
+
+    # --- CHAMPS SPÉCIFIQUES (Selon votre graphe) ---
+    # Pour Maladie / Chirurgie
+    nom = models.CharField(max_length=200, blank=True, null=True)
+    date = models.CharField(max_length=100, blank=True, null=True, help_text="Date ou Date début")
+    date_fin = models.CharField(max_length=100, blank=True, null=True)
+    observation = models.TextField(blank=True, null=True)
+
+    # Pour le Traitement lié à la maladie
+    traitement_nom = models.CharField(max_length=200, blank=True, null=True)
+    traitement_duree = models.CharField(max_length=100, blank=True, null=True)
+    traitement_posologie = models.CharField(max_length=200, blank=True, null=True)
+
+    # Pour Allergie
+    declencheur = models.CharField(max_length=200, blank=True, null=True)
+    manifestation = models.CharField(max_length=200, blank=True, null=True)
+
+    # Pour Obstétrique
+    nombre_grossesse = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
-        return f"Antécédent {self.get_type_display()} (Cas #{self.case.id})"
+        return f"{self.type}: {self.nom or self.description}"
 
 
 class CurrentTreatment(models.Model):
@@ -98,6 +138,7 @@ class ComplementaryExam(models.Model):
     case = models.ForeignKey(ClinicalCase, related_name='exams', on_delete=models.CASCADE)
     nom = models.CharField(max_length=200)
     resultat = models.TextField()
+    anatomie = models.CharField(max_length=200, blank=True, null=True, help_text="Zone anatomique concernée")
 
     def __str__(self):
         return f"Examen : {self.nom} (Cas #{self.case.id})"
@@ -120,3 +161,5 @@ class Diagnosis(models.Model):
     def __str__(self):
         final_text = "[Final] " if self.is_final else ""
         return f"{final_text}{self.description} (Cas #{self.case.id})"
+
+

@@ -2,6 +2,7 @@ import io
 
 from django.core.management import call_command
 from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
 
 # backend/cases/views.py
 
@@ -21,6 +22,9 @@ class ClinicalCaseViewSet(viewsets.ModelViewSet):  # Changé de ReadOnlyModelVie
     - Expert : Lecture/Écriture, tous les cas + Actions d'administration.
     """
     permission_classes = [IsAuthenticated]
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status', 'difficulty', 'categories']
 
     def get_serializer_class(self):
         if self.action == 'list':

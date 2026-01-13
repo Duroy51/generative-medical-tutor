@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # Dépendances tierces
     'rest_framework',
     "corsheaders",
+    "django_filters",
 
     # Nos applications locales
     'users.apps.UsersConfig',
@@ -168,6 +169,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "localhost:9000")

@@ -3,75 +3,124 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import Link from 'next/link';
+import toast from 'react-hot-toast';
 
-// Composants
-import { Navbar } from '@/components/layout/Navbar';
+// Composants UI
+import { PatientMonitor, VitalsData } from '@/components/simulation/PatientMonitor';
 import { ChatBubble } from '@/components/simulation/ChatBubble';
-import { ClinicalToolbar } from '@/components/simulation/ClinicalToolbar';
+import { SimulationWorkspace } from '@/components/simulation/SimulationWorkspace';
+import { MentorSidecar } from '@/components/simulation/MentorSidecar';
+import { ClinicalDecision } from '@/components/simulation/ClinicalDecision';
+import { Modal } from '@/components/ui/Modal';
+
+// Hook Tutoriel
+import { useSimulationTour } from '@/hooks/useSimulationTour';
 
 // Icônes
-import { Send, ArrowLeft, Loader2, User, Stethoscope } from 'lucide-react';
-import toast from "react-hot-toast";
+import { Send, Loader2, User, Stethoscope, HelpCircle, Gavel } from 'lucide-react';
 
 export default function SimulationPage() {
-    const { id } = useParams(); // ID de la session
+    const { id } = useParams();
     const router = useRouter();
 
-    // États
+    // --- ÉTATS DONNÉES ---
     const [messages, setMessages] = useState<any[]>([]);
     const [caseInfo, setCaseInfo] = useState<any>(null);
+
+    // --- ÉTATS UI ---
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [input, setInput] = useState("");
+    const [isDecisionModalOpen, setIsDecisionModalOpen] = useState(false); // Modale Diagnostic
 
-    const handleFinish = async () => {
-        if(!confirm("Voulez-vous vraiment terminer la session et voir le rapport ?")) return;
+    // --- ÉTATS WORKSPACE & MONITEUR ---
+    const [notes, setNotes] = useState("");
+    const [lastTutorMsgCount, setLastTutorMsgCount] = useState(0);
+    const [vitals, setVitals] = useState<VitalsData>({});
 
-        // On peut afficher un loader global ici
-        const toastId = toast.loading("Génération du rapport d'analyse...");
+    // --- ÉTAT DU TOUR ---
+    const [runTour, setRunTour] = useState(false);
 
-        try {
-            const res = await api.post(`/simulations/${id}/finish/`);
-            toast.dismiss(toastId);
-            toast.success("Rapport généré !");
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
-            // Redirection vers la page de résultats
-            // Note: L'endpoint renvoie { report_id: ... } mais on utilise l'id de la session dans l'URL pour plus de simplicité
-            router.push(`/simulation/${id}/report`);
+    // Lancement du tour interactif
+    useSimulationTour(runTour, setRunTour);
 
-        } catch (error) {
-            toast.dismiss(toastId);
-            toast.error("Erreur lors de la génération du rapport.");
+    // --- LOGIQUE D'EXTRACTION DES CONSTANTES (REGEX) ---
+    const updateVitalsFromMessage = (content: string) => {
+        const newVitals: VitalsData = {};
+
+        const taMatch = content.match(/(?:TA|Tension|BP|Pression)\s*[:=]?\s*(\d{2,3}\/\d{2,3})/i);
+        if (taMatch) newVitals.ta = taMatch[1];
+
+        const fcMatch = content.match(/(?:FC|Fréquence Cardiaque|Pouls|Pulse|HR)\s*[:=]?\s*(\d{2,3})/i);
+        if (fcMatch) newVitals.fc = fcMatch[1];
+
+        const tempMatch = content.match(/(?:Température|Temp|T°)\s*[:=]?\s*(\d{2}(?:[\.,]\d)?)/i);
+        if (tempMatch) newVitals.temp = tempMatch[1].replace(',', '.');
+
+        const spo2Match = content.match(/(?:SpO2|Saturation|Sat)\s*[:=]?\s*(\d{2,3})/i);
+        if (spo2Match) newVitals.spo2 = spo2Match[1];
+
+        const frMatch = content.match(/(?:FR|Fréquence Respiratoire|Resp)\s*[:=]?\s*(\d{2})/i);
+        if (frMatch) newVitals.fr = frMatch[1];
+
+        const glycMatch = content.match(/(?:Glycémie|Dextro|Sucre)\s*[:=]?\s*([\d\.,]+)/i);
+        if (glycMatch) newVitals.glyc = glycMatch[1].replace(',', '.');
+
+        if (Object.keys(newVitals).length > 0) {
+            setVitals(prev => ({ ...prev, ...newVitals }));
         }
     };
 
-    // Référence pour le scroll automatique
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    // --- 1. CHARGEMENT INITIAL ---
+    // --- CHARGEMENT INITIAL ---
     useEffect(() => {
         const fetchSession = async () => {
             try {
                 const res = await api.get(`/simulations/${id}/`);
                 setMessages(res.data.messages);
                 setCaseInfo(res.data.case);
+
+                // Repeupler le moniteur si on revient sur la page
+                res.data.messages.forEach((msg: any) => {
+                    if (msg.sender === 'PATIENT_IA') updateVitalsFromMessage(msg.content);
+                });
+
                 setLoading(false);
+
+                // Auto-start du tour
+                const hasSeenTour = localStorage.getItem('hasSeenSimulationTour');
+                if (!hasSeenTour) {
+                    setTimeout(() => setRunTour(true), 1500);
+                    localStorage.setItem('hasSeenSimulationTour', 'true');
+                }
+
             } catch (error) {
-                console.error("Erreur chargement session", error);
-                alert("Impossible de charger la simulation");
+                toast.error("Impossible de charger la simulation");
                 router.push('/dashboard');
             }
         };
         fetchSession();
     }, [id, router]);
 
-    // --- 2. SCROLL AUTOMATIQUE ---
+    // --- SCROLL AUTO ---
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // --- 3. ENVOI DE MESSAGE TEXTE (Dialogue) ---
+    // --- FILTRAGE MESSAGES ---
+    const chatMessages = messages.filter((m: any) => m.sender !== 'TUTEUR');
+
+    // Logique Mentor Sidecar
+    const tutorMessages = messages.filter((m: any) => m.sender === 'TUTEUR');
+    const lastTutorMessage = tutorMessages.length > 0 ? tutorMessages[tutorMessages.length - 1] : null;
+    const tutorContent = lastTutorMessage ? lastTutorMessage.content.replace('🤔 Question du Mentor :', '').trim() : null;
+    const tutorId = lastTutorMessage ? lastTutorMessage.id : null;
+
+    const hasNewTutorMessage = tutorMessages.length > lastTutorMsgCount;
+    useEffect(() => { setLastTutorMsgCount(tutorMessages.length); }, [tutorMessages.length]);
+
+    // --- HANDLER MESSAGE TEXTE ---
     const handleSend = async (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!input.trim() || sending) return;
@@ -80,31 +129,32 @@ export default function SimulationPage() {
         setInput("");
         setSending(true);
 
-        // Optimistic Update : On affiche le message tout de suite
         const tempMsg = { id: Date.now(), sender: 'APPRENANT', content: userMsgContent };
         setMessages(prev => [...prev, tempMsg]);
 
         try {
-            await api.post(`/simulations/${id}/message/`, { content: userMsgContent });
+            const res = await api.post(`/simulations/${id}/message/`, { content: userMsgContent });
+            const aiMsg = res.data;
+            setMessages(prev => [...prev, aiMsg]);
 
-            // On recharge tout pour avoir la réponse IA + éventuelle intervention Tuteur
+            if (aiMsg.sender === 'PATIENT_IA') updateVitalsFromMessage(aiMsg.content);
+
+            // Refresh pour le tuteur
             const sessionRes = await api.get(`/simulations/${id}/`);
             setMessages(sessionRes.data.messages);
 
         } catch (error) {
-            console.error(error);
-            alert("Erreur lors de l'envoi.");
+            toast.error("Erreur d'envoi");
         } finally {
             setSending(false);
         }
     };
 
-    // --- 4. ACTION CLINIQUE (Barre d'outils) ---
+    // --- HANDLER ACTION CLINIQUE ---
     const handleClinicalAction = async (category: string, actionName: string) => {
         if (sending) return;
         setSending(true);
 
-        // Message visuel spécial pour l'action
         const tempMsg = {
             id: Date.now(),
             sender: 'APPRENANT',
@@ -113,90 +163,102 @@ export default function SimulationPage() {
         setMessages(prev => [...prev, tempMsg]);
 
         try {
-            // On envoie le "Prompt caché" au backend : [ACTION] Categorie > Action
-            // Le backend détectera ce préfixe et changera le comportement du LLM
-            await api.post(`/simulations/${id}/message/`, {
-                content: `[ACTION] ${category} > ${actionName}`
-            });
+            const res = await api.post(`/simulations/${id}/message/`, { content: `[ACTION] ${category} > ${actionName}` });
+            const aiMsg = res.data;
 
+            setMessages(prev => [...prev, aiMsg]);
+            updateVitalsFromMessage(aiMsg.content);
+
+            // Refresh pour le tuteur
             const sessionRes = await api.get(`/simulations/${id}/`);
             setMessages(sessionRes.data.messages);
 
         } catch (error) {
-            console.error(error);
-            alert("Erreur lors de l'action clinique.");
+            toast.error("Erreur action clinique");
         } finally {
             setSending(false);
         }
     };
 
-    // --- RENDU : LOADING ---
-    if (loading) return (
-        <div className="h-screen flex items-center justify-center bg-brand-light">
-            <div className="flex flex-col items-center gap-4">
-                <Loader2 className="animate-spin text-brand-primary" size={48} />
-                <p className="text-brand-muted font-medium">Préparation du patient...</p>
-            </div>
-        </div>
-    );
+    // --- FIN DE SESSION SIMPLE ---
+    const handleExit = async () => {
+        if(!confirm("Quitter sans valider le diagnostic ?")) return;
+        router.push('/dashboard');
+    };
 
-    // --- RENDU : PAGE PRINCIPALE ---
+    // --- FIN DE SESSION AVEC DIAGNOSTIC (MODALE) ---
+    const handleFinalDiagnose = async (diagnosis: string, prescription: string) => {
+        setIsDecisionModalOpen(false);
+        const toastId = toast.loading("Analyse de votre diagnostic...");
+
+        try {
+            // 1. Envoi du diagnostic comme message système
+            await api.post(`/simulations/${id}/message/`, {
+                content: `[DIAGNOSTIC FINAL] : ${diagnosis}. [TRAITEMENT] : ${prescription}`
+            });
+
+            // 2. Clôture et génération rapport
+            await api.post(`/simulations/${id}/finish/`);
+
+            toast.dismiss(toastId);
+            toast.success("Terminé !");
+            router.push(`/simulation/${id}/report`);
+
+        } catch (error) {
+            toast.dismiss(toastId);
+            toast.error("Erreur technique");
+        }
+    };
+
+    if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-brand-primary" size={32}/></div>;
+
     return (
         <div className="h-screen flex flex-col bg-brand-light overflow-hidden">
-            <Navbar />
 
-            {/* HEADER DU CAS (Fixe en haut) */}
-            <div className="bg-white border-b border-gray-200 px-6 py-3 shadow-sm flex items-center justify-between z-20">
-                <div className="flex items-center gap-4">
-                    <Link href="/dashboard" className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors">
-                        <ArrowLeft size={20} />
-                    </Link>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-lg font-bold text-brand-dark leading-tight">{caseInfo?.case_title}</h1>
-                            <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] uppercase font-bold rounded-full tracking-wide">
-                        En cours
-                    </span>
-                        </div>
-                        <p className="text-xs text-gray-500 line-clamp-1 max-w-xl">{caseInfo?.case_summary}</p>
-                    </div>
-                </div>
-
-                <button
-                    onClick={handleFinish}
-                    className="text-sm font-medium text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
-                >
-                    Terminer la session
-                </button>
+            {/* 1. HEADER MONITEUR (Tour: #tour-header-patient) */}
+            <div id="tour-header-patient">
+                <PatientMonitor
+                    caseTitle={caseInfo?.case_title}
+                    patientInfo={{ age: caseInfo?.age || 0, sexe: caseInfo?.sexe || 'Inconnu' }}
+                    vitals={vitals}
+                    onExit={handleExit}
+                />
             </div>
 
-            {/* ZONE PRINCIPALE (Flex Row) */}
             <div className="flex flex-1 overflow-hidden relative">
 
-                {/* COLONNE GAUCHE : CHAT (Prend toute la place disponible) */}
-                <div className="flex-1 flex flex-col relative bg-[#F8F9FC]">
+                {/* COLONNE GAUCHE : CHAT (Tour: #tour-chat-area) */}
+                <div id="tour-chat-area" className="flex-1 flex flex-col relative bg-[#F8F9FC]">
 
-                    {/* Zone de messages (Scrollable) */}
-                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-2 scroll-smooth">
+                    {/* Bouton Aide */}
+                    <button
+                        onClick={() => setRunTour(true)}
+                        className="absolute top-4 right-4 z-20 p-2 bg-white/80 backdrop-blur text-brand-primary rounded-full shadow-sm hover:bg-white transition-all"
+                        title="Relancer le tutoriel"
+                    >
+                        <HelpCircle size={20} />
+                    </button>
+
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 scroll-smooth">
                         <div className="max-w-3xl mx-auto pb-4">
 
-                            {/* Badge de début */}
+                            {/* Sidecar Mentor (Tour: #tour-mentor-sidecar) */}
+                            <div className="sticky top-0 z-10 pointer-events-none">
+                                <div className="pointer-events-auto">
+                                    <MentorSidecar adviceId={tutorId} adviceContent={tutorContent} />
+                                </div>
+                            </div>
+
                             <div className="flex justify-center my-8">
                         <span className="bg-white border border-gray-200 text-gray-400 text-xs px-4 py-1.5 rounded-full shadow-sm flex items-center gap-2">
                             <Stethoscope size={12} /> Début de la consultation
                         </span>
                             </div>
 
-                            {/* Liste des messages */}
-                            {messages.map((msg: any) => (
-                                <ChatBubble
-                                    key={msg.id}
-                                    sender={msg.sender}
-                                    content={msg.content}
-                                />
+                            {chatMessages.map((msg: any) => (
+                                <ChatBubble key={msg.id} sender={msg.sender} content={msg.content} />
                             ))}
 
-                            {/* Indicateur de frappe (Patient ou Système) */}
                             {sending && (
                                 <div className="flex gap-3 justify-start mb-4 animate-fade-in">
                                     <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 border border-blue-200">
@@ -209,45 +271,69 @@ export default function SimulationPage() {
                                     </div>
                                 </div>
                             )}
-
                             <div ref={messagesEndRef} />
                         </div>
                     </div>
 
-                    {/* Zone de saisie (Fixe en bas) */}
-                    <div className="bg-white border-t border-gray-200 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] z-10">
+                    {/* BOUTON FLOTTANT DIAGNOSTIC (Nouveau) */}
+                    <div className="absolute bottom-24 right-6 z-30">
+                        <button
+                            onClick={() => setIsDecisionModalOpen(true)}
+                            className="group flex items-center gap-3 pl-4 pr-5 py-3.5 bg-gradient-to-r from-brand-primary to-orange-600 text-white rounded-full shadow-2xl shadow-brand-primary/40 hover:scale-105 hover:shadow-brand-primary/60 transition-all duration-300"
+                        >
+                            <div className="bg-white/20 p-1.5 rounded-full group-hover:rotate-12 transition-transform">
+                                <Gavel size={20} className="text-white" />
+                            </div>
+                            <span className="font-bold text-sm tracking-wide">POSER LE DIAGNOSTIC</span>
+                        </button>
+                    </div>
+
+                    {/* Input Zone */}
+                    <div className="bg-white border-t border-gray-200 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] z-10 shrink-0">
                         <div className="max-w-3xl mx-auto">
                             <form onSubmit={handleSend} className="relative flex items-center gap-3">
-                                <div className="flex-1 relative">
-                                    <input
-                                        type="text"
-                                        value={input}
-                                        onChange={(e) => setInput(e.target.value)}
-                                        placeholder="Posez une question au patient..."
-                                        className="w-full pl-5 pr-12 py-3.5 rounded-xl border border-gray-300 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all outline-none text-brand-dark placeholder:text-gray-400"
-                                        autoFocus
-                                        disabled={sending}
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    disabled={!input.trim() || sending}
-                                    className="p-3.5 bg-brand-primary text-white rounded-xl hover:bg-brand-primaryHover disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl active:scale-95"
-                                >
+                                <input
+                                    type="text"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    placeholder="Posez une question au patient..."
+                                    className="w-full pl-5 pr-12 py-3.5 rounded-xl border border-gray-300 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all outline-none text-brand-dark"
+                                    autoFocus
+                                    disabled={sending}
+                                />
+                                <button type="submit" disabled={!input.trim() || sending} className="p-3.5 bg-brand-primary text-white rounded-xl hover:bg-brand-primaryHover disabled:opacity-50 transition-all shadow-lg hover:shadow-xl active:scale-95">
                                     {sending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
                                 </button>
                             </form>
-                            <p className="text-center text-[10px] text-gray-400 mt-2">
-                                MedTutor AI - Simulation à but éducatif. Ne remplace pas un avis médical réel.
-                            </p>
                         </div>
                     </div>
                 </div>
 
-                {/* COLONNE DROITE : BARRE D'OUTILS (Largeur fixe) */}
-                <ClinicalToolbar onAction={handleClinicalAction} disabled={sending} />
+                {/* COLONNE DROITE : WORKSPACE (Tour: IDs inclus dans le composant) */}
+                <SimulationWorkspace
+                    onAction={handleClinicalAction}
+                    disabled={sending}
+                    messages={messages}
+                    notes={notes}
+                    setNotes={setNotes}
+                    hasNewTutorMessage={hasNewTutorMessage}
+                    onDiagnose={() => {}} // Non utilisé car déplacé dans la modale, mais gardé pour compatibilité prop
+                />
 
             </div>
+
+            {/* MODALE DE DÉCISION CLINIQUE */}
+            <Modal
+                isOpen={isDecisionModalOpen}
+                onClose={() => setIsDecisionModalOpen(false)}
+                title="Conclusion Clinique"
+            >
+                <ClinicalDecision
+                    onDiagnose={handleFinalDiagnose}
+                    onCancel={() => setIsDecisionModalOpen(false)}
+                />
+            </Modal>
+
         </div>
     );
 }

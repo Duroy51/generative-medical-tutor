@@ -1,36 +1,51 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import {
     CheckCircle, XCircle, Edit3, Download, RefreshCw,
-    Database, Clock, AlertCircle
+    Database, Clock, AlertCircle, Filter, Search
 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
-import { useRouter } from 'next/navigation';
-import {useAuth} from "@/context/AuthContext"; // <--- AJOUTER CET IMPORT
 
 export default function ExpertDashboard() {
-    // --- ÉTATS ---
+    const router = useRouter();
+
+    // --- ÉTATS DONNÉES ---
     const [cases, setCases] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
+
+    // --- ÉTATS UI ---
     const [loading, setLoading] = useState(true);
     const [importing, setImporting] = useState(false);
     const [exporting, setExporting] = useState(false);
-    const router = useRouter(); // <--- AJOUTER CETTE LIGNE
-    const { user, isLoading: authLoading } = useAuth();
 
-    // Filtres
+    // --- FILTRES ---
     const [filterStatus, setFilterStatus] = useState<'non_approuve' | 'approuve' | 'rejete'>('non_approuve');
+    const [filterCategory, setFilterCategory] = useState<string>('');
+    const [filterDifficulty, setFilterDifficulty] = useState<string>('');
 
-    // Modale d'édition
-    const [editingCase, setEditingCase] = useState<any | null>(null);
-    const [editForm, setEditForm] = useState<any>({});
+    // --- MODALE DE REJET ---
+    const [rejectingId, setRejectingId] = useState<number | null>(null);
+    const [rejectReason, setRejectReason] = useState("");
 
-    // --- CHARGEMENT DES DONNÉES ---
+    // --- 1. CHARGEMENT INITIAL ---
+    useEffect(() => {
+        api.get('/categories/').then(res => setCategories(res.data)).catch(console.error);
+        fetchCases();
+    }, []);
+
+    // --- 2. RÉCUPÉRATION DES CAS ---
     const fetchCases = async () => {
+        setLoading(true);
         try {
-            const res = await api.get('/cases/');
+            const params = new URLSearchParams();
+            if (filterCategory) params.append('categories', filterCategory);
+            if (filterDifficulty) params.append('difficulty', filterDifficulty);
+
+            const res = await api.get(`/cases/?${params.toString()}`);
             setCases(res.data);
         } catch (e) {
             toast.error("Erreur de chargement des cas.");
@@ -41,14 +56,14 @@ export default function ExpertDashboard() {
 
     useEffect(() => {
         fetchCases();
-    }, []);
+    }, [filterCategory, filterDifficulty]);
 
-    // --- ACTIONS GLOBALES (IMPORT/EXPORT) ---
+
+    // --- 3. ACTIONS GLOBALES ---
     const handleImport = async () => {
         setImporting(true);
         const toastId = toast.loading("Interrogation de Fultang...");
         try {
-            // Astuce : ajoutez ?mock=true si vous testez en local sans Fultang
             const res = await api.post('/cases/trigger-import/');
             toast.dismiss(toastId);
 
@@ -56,7 +71,7 @@ export default function ExpertDashboard() {
                 toast(res.data.message, { icon: 'ℹ️' });
             } else {
                 toast.success("Nouveaux cas importés !");
-                fetchCases(); // Rafraîchir la liste
+                fetchCases();
             }
         } catch (e) {
             toast.dismiss(toastId);
@@ -68,11 +83,11 @@ export default function ExpertDashboard() {
 
     const handleExport = async () => {
         setExporting(true);
-        const toastId = toast.loading("Génération du dataset JSONL...");
+        const toastId = toast.loading("Génération du dataset...");
         try {
             await api.post('/cases/trigger-export/');
             toast.dismiss(toastId);
-            toast.success("Dataset exporté vers MinIO avec succès.");
+            toast.success("Dataset exporté sur MinIO.");
         } catch (e) {
             toast.dismiss(toastId);
             toast.error("Erreur d'export.");
@@ -81,44 +96,35 @@ export default function ExpertDashboard() {
         }
     };
 
-    // --- ACTIONS SUR UN CAS (STATUS / EDIT) ---
+    // --- 4. GESTION DES STATUTS ---
     const handleUpdateStatus = async (id: number, newStatus: string) => {
-        try {
-            await api.patch(`/cases/${id}/`, { status: newStatus });
-            toast.success(`Cas ${newStatus === 'approuve' ? 'approuvé' : 'rejeté'} !`);
+        if (newStatus === 'rejete') {
+            setRejectingId(id);
+            return;
+        }
+        await executeStatusUpdate(id, newStatus);
+    };
 
-            // Mise à jour optimiste locale
-            setCases(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
+    const executeStatusUpdate = async (id: number, newStatus: string, reason?: string) => {
+        try {
+            const payload: any = { status: newStatus };
+            if (reason) payload.rejection_reason = reason;
+
+            await api.patch(`/cases/${id}/`, payload);
+
+            toast.success(`Cas mis à jour : ${newStatus}`);
+            setCases(prev => prev.map(c => c.id === id ? { ...c, status: newStatus, rejection_reason: reason } : c));
+
+            setRejectingId(null);
+            setRejectReason("");
         } catch (e) {
-            toast.error("Erreur de mise à jour.");
+            toast.error("Erreur technique.");
         }
     };
 
-    const openEditModal = (c: any) => {
-        setEditingCase(c);
-        setEditForm({
-            case_title: c.case_title,
-            case_summary: c.case_summary,
-            difficulty: c.difficulty
-        });
-    };
-
-    const saveEdits = async () => {
-        if (!editingCase) return;
-        try {
-            await api.patch(`/cases/${editingCase.id}/`, editForm);
-            toast.success("Modifications enregistrées.");
-            setCases(prev => prev.map(c => c.id === editingCase.id ? { ...c, ...editForm } : c));
-            setEditingCase(null);
-        } catch (e) {
-            toast.error("Erreur sauvegarde.");
-        }
-    };
-
-    // Filtrage pour l'affichage
     const displayedCases = cases.filter(c => c.status === filterStatus);
 
-    if (loading) return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Chargement...</div>;
+    if (loading && cases.length === 0) return <div className="h-screen flex items-center justify-center">Chargement...</div>;
 
     return (
         <>
@@ -129,7 +135,7 @@ export default function ExpertDashboard() {
                         <Database className="text-brand-primary" /> Administration
                     </h1>
                     <p className="text-gray-500 text-sm mt-1">
-                        Gérez la base de connaissances et les pipelines de données.
+                        Pilotage de la base de connaissances et flux de validation.
                     </p>
                 </div>
 
@@ -140,7 +146,7 @@ export default function ExpertDashboard() {
                         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
                     >
                         {exporting ? <Clock className="animate-spin" size={18}/> : <Download size={18} />}
-                        Exporter Dataset
+                        Exporter
                     </button>
                     <button
                         onClick={handleImport}
@@ -153,38 +159,96 @@ export default function ExpertDashboard() {
                 </div>
             </div>
 
-            {/* STATS RAPIDES */}
+            {/* --- STATS RAPIDES (La barre que vous vouliez) --- */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+                {/* Carte À VALIDER */}
+                <div
+                    onClick={() => setFilterStatus('non_approuve')}
+                    className={`bg-white p-5 rounded-xl border shadow-sm flex items-center justify-between cursor-pointer transition-all hover:shadow-md ${filterStatus === 'non_approuve' ? 'border-orange-300 ring-2 ring-orange-100' : 'border-gray-100'}`}
+                >
                     <div>
-                        <p className="text-xs text-gray-400 uppercase font-bold">À valider</p>
-                        <p className="text-2xl font-black text-orange-500">{cases.filter(c => c.status === 'non_approuve').length}</p>
+                        <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">À Valider</p>
+                        <p className="text-3xl font-black text-orange-500 mt-1">{cases.filter(c => c.status === 'non_approuve').length}</p>
                     </div>
-                    <AlertCircle className="text-orange-100" size={32} />
+                    <div className="h-12 w-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-400">
+                        <AlertCircle size={24} />
+                    </div>
                 </div>
-                <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+
+                {/* Carte APPROUVÉS */}
+                <div
+                    onClick={() => setFilterStatus('approuve')}
+                    className={`bg-white p-5 rounded-xl border shadow-sm flex items-center justify-between cursor-pointer transition-all hover:shadow-md ${filterStatus === 'approuve' ? 'border-green-300 ring-2 ring-green-100' : 'border-gray-100'}`}
+                >
                     <div>
-                        <p className="text-xs text-gray-400 uppercase font-bold">Approuvés</p>
-                        <p className="text-2xl font-black text-green-600">{cases.filter(c => c.status === 'approuve').length}</p>
+                        <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Approuvés</p>
+                        <p className="text-3xl font-black text-green-600 mt-1">{cases.filter(c => c.status === 'approuve').length}</p>
                     </div>
-                    <CheckCircle className="text-green-100" size={32} />
+                    <div className="h-12 w-12 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+                        <CheckCircle size={24} />
+                    </div>
                 </div>
-                <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+
+                {/* Carte REJETÉS */}
+                <div
+                    onClick={() => setFilterStatus('rejete')}
+                    className={`bg-white p-5 rounded-xl border shadow-sm flex items-center justify-between cursor-pointer transition-all hover:shadow-md ${filterStatus === 'rejete' ? 'border-red-300 ring-2 ring-red-100' : 'border-gray-100'}`}
+                >
                     <div>
-                        <p className="text-xs text-gray-400 uppercase font-bold">Rejetés</p>
-                        <p className="text-2xl font-black text-red-500">{cases.filter(c => c.status === 'rejete').length}</p>
+                        <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Rejetés</p>
+                        <p className="text-3xl font-black text-red-500 mt-1">{cases.filter(c => c.status === 'rejete').length}</p>
                     </div>
-                    <XCircle className="text-red-100" size={32} />
+                    <div className="h-12 w-12 rounded-full bg-red-50 flex items-center justify-center text-red-400">
+                        <XCircle size={24} />
+                    </div>
                 </div>
             </div>
 
-            {/* ONGLETS DE FILTRAGE */}
+            {/* FILTRES AVANCÉS */}
+            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-6 flex flex-wrap gap-4 items-center">
+                <div className="flex items-center gap-2 text-gray-500 text-sm font-bold uppercase tracking-wider">
+                    <Filter size={16} /> Filtres :
+                </div>
+
+                <select
+                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 hover:bg-white transition-colors outline-none focus:ring-2 focus:ring-brand-primary/20 cursor-pointer min-w-[200px]"
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                >
+                    <option value="">Toutes les catégories</option>
+                    {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                </select>
+
+                <select
+                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 hover:bg-white transition-colors outline-none focus:ring-2 focus:ring-brand-primary/20 cursor-pointer min-w-[150px]"
+                    value={filterDifficulty}
+                    onChange={(e) => setFilterDifficulty(e.target.value)}
+                >
+                    <option value="">Toutes difficultés</option>
+                    <option value="Facile">Facile</option>
+                    <option value="Moyen">Moyen</option>
+                    <option value="Difficile">Difficile</option>
+                </select>
+
+                {(filterCategory || filterDifficulty) && (
+                    <button
+                        onClick={() => { setFilterCategory(''); setFilterDifficulty(''); }}
+                        className="text-xs text-red-500 font-bold hover:underline ml-auto"
+                    >
+                        Réinitialiser
+                    </button>
+                )}
+            </div>
+
+            {/* BARRE D'ONGLETS (Navigation secondaire) */}
             <div className="border-b border-gray-200 mb-6">
-                <nav className="-mb-px flex space-x-8">
+                <nav className="-mb-px flex space-x-8 overflow-x-auto">
                     {[
-                        { id: 'non_approuve', label: 'À Valider', icon: AlertCircle },
-                        { id: 'approuve', label: 'Base Active', icon: CheckCircle },
-                        { id: 'rejete', label: 'Corbeille', icon: XCircle },
+                        { id: 'non_approuve', label: 'File d\'attente' },
+                        { id: 'approuve', label: 'Base Active' },
+                        { id: 'rejete', label: 'Corbeille' },
                     ].map((tab) => (
                         <button
                             key={tab.id}
@@ -192,15 +256,11 @@ export default function ExpertDashboard() {
                             className={`
                         whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors
                         ${filterStatus === tab.id
-                                ? 'border-brand-primary text-brand-primary'
+                                ? 'border-brand-primary text-brand-primary font-bold'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
                     `}
                         >
-                            <tab.icon size={16} />
                             {tab.label}
-                            <span className={`ml-2 py-0.5 px-2.5 rounded-full text-xs ${filterStatus === tab.id ? 'bg-brand-primary/10 text-brand-primary' : 'bg-gray-100 text-gray-600'}`}>
-                        {cases.filter(c => c.status === tab.id).length}
-                    </span>
                         </button>
                     ))}
                 </nav>
@@ -209,48 +269,60 @@ export default function ExpertDashboard() {
             {/* LISTE DES CAS */}
             <div className="space-y-4">
                 {displayedCases.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200 text-gray-400">
-                        Aucun cas dans cette catégorie.
+                    <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-200 text-gray-400">
+                        <Search className="h-10 w-10 mx-auto mb-2 text-gray-200" />
+                        Aucun cas trouvé.
                     </div>
                 ) : (
                     displayedCases.map((c) => (
                         <div key={c.id} className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row gap-6">
 
-                            {/* Infos principales */}
                             <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded uppercase">
+                                <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold rounded uppercase tracking-wide">
                                 ID: {c.source_fultang_id}
                             </span>
 
-                                    {/* --- CORRECTION ICI : Gestion de la clé unique --- */}
                                     {c.categories && c.categories.map((cat: any, index: number) => (
-                                        <span
-                                            key={cat.id || `cat-${c.id}-${index}`}
-                                            className="px-2 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded"
-                                        >
+                                        <span key={cat.id || index} className="px-2 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded">
                                     {cat.name || cat}
                                 </span>
                                     ))}
-                                    {/* ------------------------------------------------ */}
 
+                                    {c.difficulty && (
+                                        <span className={`px-2 py-1 text-xs font-bold rounded border ${
+                                            c.difficulty === 'Difficile' ? 'bg-red-50 text-red-700 border-red-100' :
+                                                c.difficulty === 'Facile' ? 'bg-green-50 text-green-700 border-green-100' :
+                                                    'bg-yellow-50 text-yellow-700 border-yellow-100'
+                                        }`}>
+                                    {c.difficulty}
+                                </span>
+                                    )}
                                 </div>
+
                                 <h3 className="text-lg font-bold text-gray-900 mb-1">{c.case_title}</h3>
                                 <p className="text-sm text-gray-500 mb-3 line-clamp-2">{c.case_summary}</p>
 
-                                <div className="flex gap-4 text-xs text-gray-400">
-                                    <span>Patient: {c.age} ans, {c.sexe}</span>
-                                    <span>Difficulté: {c.difficulty || 'Non définie'}</span>
+                                <div className="flex gap-4 text-xs text-gray-400 font-mono">
+                                    <span>{c.age} ans • {c.sexe}</span>
                                 </div>
+
+                                {c.status === 'rejete' && c.rejection_reason && (
+                                    <div className="mt-3 p-2 bg-red-50 border border-red-100 rounded text-xs text-red-700 flex items-start gap-2">
+                                        <AlertCircle size={14} className="mt-0.5 flex-shrink-0"/>
+                                        <div>
+                                            <span className="font-bold">Motif du rejet :</span> {c.rejection_reason}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Actions Admin */}
-                            <div className="flex md:flex-col gap-2 justify-center border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6 min-w-[140px]">
+                            <div className="flex md:flex-col gap-2 justify-center border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6 min-w-[150px]">
                                 <button
                                     onClick={() => router.push(`/expert/cases/${c.id}`)}
                                     className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-gray-50 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-100 transition-colors"
                                 >
-                                    <Edit3 size={16} /> Éditer
+                                    <Edit3 size={16} /> Voir / Éditer
                                 </button>
 
                                 {c.status === 'non_approuve' && (
@@ -278,53 +350,62 @@ export default function ExpertDashboard() {
                                         <AlertCircle size={16} /> Suspendre
                                     </button>
                                 )}
+
+                                {c.status === 'rejete' && (
+                                    <button
+                                        onClick={() => handleUpdateStatus(c.id, 'non_approuve')}
+                                        className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-gray-100 text-gray-600 text-sm font-bold rounded-lg hover:bg-gray-200 transition-colors"
+                                    >
+                                        <RefreshCw size={16} /> Restaurer
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))
                 )}
             </div>
 
-            {/* MODALE D'ÉDITION */}
+            {/* MODALE DE REJET */}
             <Modal
-                isOpen={!!editingCase}
-                onClose={() => setEditingCase(null)}
-                title="Éditer le cas clinique"
+                isOpen={!!rejectingId}
+                onClose={() => { setRejectingId(null); setRejectReason(""); }}
+                title="Rejeter ce cas"
             >
                 <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Titre</label>
-                        <input
-                            className="w-full p-2 border rounded-lg"
-                            value={editForm.case_title || ''}
-                            onChange={e => setEditForm({...editForm, case_title: e.target.value})}
-                        />
+                    <div className="bg-red-50 text-red-800 p-3 rounded-lg text-sm border border-red-100 flex gap-2">
+                        <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+                        Vous êtes sur le point de rejeter ce cas. Merci d'indiquer la raison pour aider nos équipes.
                     </div>
+
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Résumé</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-1">Motif du rejet</label>
                         <textarea
-                            className="w-full p-2 border rounded-lg h-32"
-                            value={editForm.case_summary || ''}
-                            onChange={e => setEditForm({...editForm, case_summary: e.target.value})}
+                            className="w-full p-3 border border-gray-300 rounded-lg h-32 focus:ring-2 focus:ring-red-200 focus:border-red-400 outline-none text-sm resize-none"
+                            placeholder="Ex: Données cliniques incohérentes, diagnostic erroné, manque de détails..."
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                            autoFocus
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Difficulté</label>
-                        <select
-                            className="w-full p-2 border rounded-lg"
-                            value={editForm.difficulty || 'Moyen'}
-                            onChange={e => setEditForm({...editForm, difficulty: e.target.value})}
+
+                    <div className="flex justify-end gap-2 pt-2">
+                        <button
+                            onClick={() => { setRejectingId(null); setRejectReason(""); }}
+                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium text-sm"
                         >
-                            <option value="Facile">Facile</option>
-                            <option value="Moyen">Moyen</option>
-                            <option value="Difficile">Difficile</option>
-                        </select>
-                    </div>
-                    <div className="pt-4 flex justify-end gap-2">
-                        <button onClick={() => setEditingCase(null)} className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg">Annuler</button>
-                        <button onClick={saveEdits} className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primaryHover">Sauvegarder</button>
+                            Annuler
+                        </button>
+                        <button
+                            onClick={() => rejectingId && executeStatusUpdate(rejectingId, 'rejete', rejectReason)}
+                            disabled={!rejectReason.trim()}
+                            className="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                        >
+                            Confirmer le rejet
+                        </button>
                     </div>
                 </div>
             </Modal>
+
         </>
     );
 }
