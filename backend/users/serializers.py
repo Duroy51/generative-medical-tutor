@@ -43,12 +43,59 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
-    """
-    Serializer pour renvoyer les infos complètes de l'utilisateur connecté.
-    """
     role = serializers.CharField(source='profile.role', read_only=True)
     skill_matrix = serializers.JSONField(source='profile.skill_matrix', read_only=True)
 
+    detailed_analysis = serializers.JSONField(source='profile.detailed_profile_analysis', read_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'skill_matrix']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'skill_matrix', 'detailed_analysis',
+                  'date_joined']
+
+
+# ... imports existants ...
+
+class UserAdminSerializer(serializers.ModelSerializer):
+    """
+    Serializer complet pour la gestion des utilisateurs par l'admin.
+    """
+    role = serializers.CharField(source='profile.role')  # On rend le rôle modifiable
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'date_joined', 'role']
+        read_only_fields = ['date_joined']
+
+    def update(self, instance, validated_data):
+        # Gestion spécifique pour la mise à jour du rôle (qui est dans le profil)
+        profile_data = validated_data.pop('profile', {})
+        role = profile_data.get('role')
+
+        # Mise à jour des champs User standard
+        instance = super().update(instance, validated_data)
+
+        # Mise à jour du rôle dans le profil
+        if role:
+            instance.profile.role = role
+            instance.profile.save()
+
+        return instance
+
+
+class UserCreateExpertSerializer(serializers.ModelSerializer):
+    """
+    Pour créer un expert rapidement.
+    """
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password', 'first_name', 'last_name']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        # On force le rôle EXPERT
+        user.profile.role = 'EXPERT'
+        user.profile.save()
+        return user

@@ -15,21 +15,20 @@ export function SessionCard({ session, onResume, onDelete }: SessionCardProps) {
         day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
     });
 
-    // Récupération de la catégorie du cas (si disponible)
-    const categoryName = session.case.categories && session.case.categories.length > 0
-        ? session.case.categories[0].name
-        : "Général";
+    // --- ADAPTATION AU NOUVEAU MODÈLE BACKEND ---
+    // Le backend renvoie maintenant 'specialties' (liste) au lieu de 'categories'
+    const specialties = session.case.specialties || [];
+    const specialtyName = specialties.length > 0 ? specialties[0].name : "Général";
 
     return (
         <div className="bg-white rounded-xl p-5 border border-brand-primary/20 shadow-sm hover:shadow-md transition-all duration-300 relative group overflow-hidden">
 
-            {/* Bandeau latéral pour indiquer "En cours" */}
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-brand-primary"></div>
 
             <div className="flex justify-between items-start mb-3 pl-2">
-                <div className={`flex items-center gap-2 px-2 py-0.5 rounded-md text-xs font-semibold ${getCategoryColor(categoryName)}`}>
-                    {getCategoryIcon(categoryName)}
-                    <span>{categoryName}</span>
+                <div className={`flex items-center gap-2 px-2 py-0.5 rounded-md text-xs font-semibold ${getCategoryColor(specialtyName)}`}>
+                    {getCategoryIcon(specialtyName)}
+                    <span>{specialtyName}</span>
                 </div>
                 <span className="text-xs text-brand-primary font-bold bg-brand-primary/10 px-2 py-1 rounded-full">
             En cours

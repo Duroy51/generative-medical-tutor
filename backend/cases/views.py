@@ -11,20 +11,16 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import ClinicalCase, Category
-from .serializers import ClinicalCaseListSerializer, ClinicalCaseDetailSerializer, CategorySerializer
+from .filter import ClinicalCaseFilter
+from .models import ClinicalCase, Specialty
+from .serializers import ClinicalCaseListSerializer, ClinicalCaseDetailSerializer, SpecialtySerializer
 
 
-class ClinicalCaseViewSet(viewsets.ModelViewSet):  # Changé de ReadOnlyModelViewSet à ModelViewSet (Lecture + Écriture)
-    """
-    ViewSet principal pour les cas cliniques.
-    - Apprenant : Lecture seule, cas approuvés uniquement.
-    - Expert : Lecture/Écriture, tous les cas + Actions d'administration.
-    """
+class ClinicalCaseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['status', 'difficulty', 'categories']
+    filterset_class = ClinicalCaseFilter
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -33,10 +29,8 @@ class ClinicalCaseViewSet(viewsets.ModelViewSet):  # Changé de ReadOnlyModelVie
 
     def get_queryset(self):
         user = self.request.user
-        # Si c'est un expert, il voit TOUT
         if hasattr(user, 'profile') and user.profile.role == 'EXPERT':
             return ClinicalCase.objects.all().order_by('-created_at')
-        # Si c'est un apprenant, il ne voit que les approuvés
         return ClinicalCase.objects.filter(status='approuve').order_by('-created_at')
 
     # --- ACTION : IMPORT MANUEL ---
@@ -86,10 +80,6 @@ class ClinicalCaseViewSet(viewsets.ModelViewSet):  # Changé de ReadOnlyModelVie
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Permet de lister les catégories pour les filtres du frontend.
-    """
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    # Pas besoin de permissions strictes pour lire les catégories, mais IsAuthenticated est bien
+class SpecialtyViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Specialty.objects.all()
+    serializer_class = SpecialtySerializer

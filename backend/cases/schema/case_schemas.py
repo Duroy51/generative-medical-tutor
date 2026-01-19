@@ -74,7 +74,7 @@ class ReasoningGraphStructure(BaseModel):
 
 class PedagogicalDataStructure(BaseModel):
     case_title: str = Field(description="Titre pédagogique NE RÉVÉLANT PAS le diagnostic. Ex: 'Douleur abdominale...' pas 'Appendicite'")
-    categories: List[str] = Field(description="Liste des catégories médicales pertinentes pour ce cas.")
+    specialties: List[str] = Field(description="Liste des spécialités médicales concernées (ex: Cardiologie, Neurologie).")
     difficulty: str = Field(description="Difficulté estimée du cas, choisir parmi: Facile, Moyen, Difficile.")
     learning_objectives: str = Field(description="Objectifs pédagogiques que l'apprenant doit atteindre.")
     key_questions_to_ask: List[str] = Field(description="Liste des 3 à 5 questions essentielles que l'apprenant doit poser.")

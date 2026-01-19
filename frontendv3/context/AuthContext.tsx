@@ -7,7 +7,8 @@ import { jwtDecode } from "jwt-decode";
 interface User {
     user_id: number;
     username: string;
-    role: 'APPRENANT' | 'EXPERT'; // Assurez-vous que les types matchent votre backend
+    // AJOUT DE 'ADMIN' ICI
+    role: 'APPRENANT' | 'EXPERT' | 'ADMIN';
 }
 
 interface AuthContextType {
@@ -29,14 +30,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (token) {
             try {
                 const decoded: any = jwtDecode(token);
-                // Vérification basique d'expiration
                 if (decoded.exp * 1000 < Date.now()) {
                     logout();
                 } else {
                     setUser({
                         user_id: decoded.user_id,
                         username: decoded.username,
-                        role: decoded.role // Le rôle vient du token
+                        role: decoded.role
                     });
                 }
             } catch (e) {
@@ -52,18 +52,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const decoded: any = jwtDecode(access);
 
-        // Mise à jour de l'état
         setUser({
             user_id: decoded.user_id,
             username: decoded.username,
             role: decoded.role
         });
 
-        // --- CORRECTION ICI : REDIRECTION CONDITIONNELLE ---
-        if (decoded.role === 'EXPERT') {
-            router.push('/expert');
+        // --- MISE À JOUR DE L'AIGUILLAGE ICI ---
+        if (decoded.role === 'ADMIN') {
+            router.push('/sys-admin'); // Vers le Dashboard Admin
+        } else if (decoded.role === 'EXPERT') {
+            router.push('/expert');    // Vers le Dashboard Expert
         } else {
-            router.push('/dashboard');
+            router.push('/dashboard'); // Vers le Dashboard Apprenant
         }
     };
 

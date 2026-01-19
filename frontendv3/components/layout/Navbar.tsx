@@ -23,8 +23,10 @@ export function Navbar() {
                     </Link>
 
                     {/* User Profile & Actions */}
+
                     <div className="flex items-center gap-6">
                         {user && (
+                            <Link href="/profile" className="...">
                             <div className="hidden md:flex items-center gap-3">
                                 <div className="text-right">
                                     <p className="text-sm font-semibold text-brand-dark">{user.username}</p>
@@ -36,6 +38,7 @@ export function Navbar() {
                                     <User size={20} className="text-brand-muted" />
                                 </div>
                             </div>
+                            </Link>
                         )}
 
                         <button

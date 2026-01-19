@@ -1,120 +1,122 @@
-from django.conf import settings
+from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
-from langchain_groq import ChatGroq
-
+from django.conf import settings
 from cases.models import ClinicalCase
 from evaluation.schemas.evaluator_schemas import EvaluationResult
 
 
 class TutorEvaluatorAgent:
     """
-    Agent pédagogique qui observe la simulation et évalue l'apprenant en temps réel.
+    Agent pédagogique avancé (Niveau Expert).
+    Il évalue le RAISONNEMENT CLINIQUE et non plus seulement la conformité à une liste.
     """
 
     def __init__(self, case: ClinicalCase):
         self.case = case
-
+        # On utilise le modèle 70b pour une meilleure capacité de raisonnement médical
         self.llm = ChatGroq(
             model="llama-3.3-70b-versatile",
-            temperature=0.1,  # Évaluation stricte
+            temperature=0.1,
             api_key=settings.GROQ_API_KEY
         )
         self.parser = JsonOutputParser(pydantic_object=EvaluationResult)
 
-
-
-    def _get_full_clinical_context(self):
-        """Récupère toutes les données du cas pour donner la vérité terrain au Tuteur."""
+    def _format_full_context(self):
+        """
+        Construit une représentation textuelle complète de la 'Vérité Terrain'.
+        Le tuteur doit tout savoir pour juger si une question est pertinente.
+        """
         c = self.case
 
+        # Formatage des listes pour le prompt
+        symptoms = ", ".join([f"{s.nom} ({s.localisation or ''})" for s in c.symptoms.all()])
+        history = ", ".join([f"{h.type}: {h.description}" for h in c.history_entries.all()])
+        treatments = ", ".join([f"{t.nom}" for t in c.current_treatments.all()])
 
-        context = f"""
-        --- VÉRITÉ TERRAIN DU PATIENT (DOSSIER COMPLET) ---
+        # Diagnostics : On distingue le final des différentiels
+        final_diag = ""
+        diff_diags = []
+        for d in c.diagnoses.all():
+            if d.is_final:
+                final_diag = d.description
+            else:
+                diff_diags.append(d.description)
+
+        diff_diags_str = ", ".join(diff_diags) if diff_diags else "Aucun spécifique"
+
+        return f"""
+        --- DOSSIER MÉDICAL COMPLET (VÉRITÉ TERRAIN) ---
         TITRE : {c.case_title}
         RÉSUMÉ : {c.case_summary}
 
-        SYMPTÔMES RÉELS :
-        {", ".join([f"- {s.nom} ({s.localisation or ''}, {s.degre or ''}/10)" for s in c.symptoms.all()])}
+        SYMPTÔMES DU PATIENT : {symptoms}
+        ANTÉCÉDENTS : {history}
+        TRAITEMENTS EN COURS : {treatments}
 
-        ANTÉCÉDENTS :
-        {", ".join([f"- {h.type}: {h.description}" for h in c.history_entries.all()])}
+        DIAGNOSTIC FINAL (CIBLE) : {final_diag}
+        DIAGNOSTICS DIFFÉRENTIELS (PISTES À ÉCARTER) : {diff_diags_str}
 
-        TRAITEMENTS EN COURS :
-        {", ".join([f"- {t.nom}" for t in c.current_treatments.all()])}
-
-        DIAGNOSTICS (Le final est le but) :
-        {", ".join([f"- {d.description} {'(CIBLE FINALE)' if d.is_final else '(Différentiel)'}" for d in c.diagnoses.all()])}
-
-        QUESTIONS CLÉS ATTENDUES (Le chemin idéal) :
-        {self.case.key_questions}
-        ---------------------------------------------------
+        QUESTIONS CLÉS IDÉALES : {c.key_questions}
+        PIÈGES COURANTS : {c.common_pitfalls}
+        ------------------------------------------------
         """
-        return context
-
 
     def evaluate_exchange(self, user_message: str, chat_history_str: str) -> dict:
         """
-        Analyse la dernière question de l'apprenant par rapport au contexte du cas.
+        Analyse la pertinence médicale de la question.
         """
 
-        full_context_str = self._get_full_clinical_context()
-        # Le Prompt Pédagogique (Socratique + Étayage)
+        full_context = self._format_full_context()
+
+        # LE PROMPT "CERVEAU MÉDICAL"
         prompt_template = """
-                Tu es un Mentor Clinique expert.
-                Tu dois évaluer la pertinence de la question de l'étudiant en fonction du DOSSIER COMPLET du patient.
+        Tu es un Professeur de Médecine Senior et Mentor Socratique.
+        Ta mission est d'évaluer la pertinence clinique de la dernière question posée par un étudiant en médecine.
 
-                {full_context}
+        {full_context}
 
-                HISTORIQUE DE LA CONVERSATION :
-                {chat_history}
+        HISTORIQUE DE LA CONVERSATION :
+        {chat_history}
 
-                DERNIÈRE QUESTION DE L'ÉTUDIANT :
-                "{user_message}"
+        DERNIÈRE QUESTION DE L'ÉTUDIANT :
+        "{user_message}"
 
-                --- TA MISSION D'ANALYSE ---
-                1. Comprends l'INTENTION de l'étudiant. Cherche-t-il un symptôme ? Teste-t-il une hypothèse (même fausse mais logique) ?
-                2. Compare cela aux données du dossier.
-                   - Si la question explore une piste pertinente (même un diagnostic différentiel), c'est BON.
-                   - Si la question est totalement illogique par rapport aux symptômes (ex: demander mal au pied pour une migraine), c'est MAUVAIS.
-                   - Si la question est une répétition inutile, c'est MAUVAIS.
+        --- GUIDE D'ÉVALUATION AVANCÉ ---
 
-                --- RÈGLES D'INTERVENTION ---
-                - N'interviens (note < 4 + feedback) QUE si l'étudiant est perdu ou dangereux.
-                - S'il explore une piste secondaire logique, laisse-le faire (Note > 6).
-                - S'il essaie juste d'etre poli avec le Patient, tu le laisse engagement faire.
-                {format_instructions}
-                """
+        Ne te base pas uniquement sur la liste des "Questions Clés Idéales". Utilise ton jugement médical.
+        Une question est PERTINENTE (Score > 6) si :
+        1. **Cible le Diagnostic Final :** Elle cherche un symptôme clé de la maladie réelle du patient.
+        2. **Élimine un Diagnostic Différentiel :** Elle vérifie une autre hypothèse logique (ex: demander "Avez-vous mal au bras ?" pour une douleur thoracique est pertinent pour écarter l'infarctus, même si c'est une embolie).
+        3. **Sécurité :** Elle vérifie les allergies, les traitements en cours ou les constantes vitales.
+        4. **Clarification :** Elle précise une information vague donnée par le patient (durée, intensité).
+        5. **Politesse :** "Bonjour" ou se présenter est une bonne pratique (Score 8-10, pas de feedback correctif).
+
+        Une question est FAIBLE (Score < 4) si :
+        1. **Hors-Sujet total :** Aucun lien physiologique avec les symptômes présentés.
+        2. **Redondante :** L'information a DÉJÀ été donnée clairement dans l'historique ci-dessus.
+        3. **Prématurée/Illogique :** Conclure ou prescrire sans avoir assez d'infos.
+
+        --- RÈGLES DE FEEDBACK (Socratique) ---
+        - Si Score < 4 (Faible) : Interviens avec une QUESTION qui pousse à la réflexion. Ne donne jamais la réponse.
+          Ex: "Le patient se plaint du ventre, pourquoi explorez-vous les réflexes maintenant ?"
+        - Si Score >= 4 : Laisse l'étudiant avancer (feedback vide).
+
+        Génère la réponse au format JSON strict.
+
+        {format_instructions}
+        """
 
         prompt = ChatPromptTemplate.from_template(
             template=prompt_template,
             partial_variables={"format_instructions": self.parser.get_format_instructions()},
         )
 
-        key_questions_val = self.case.key_questions if self.case.key_questions else []
-        key_questions_str = ", ".join(key_questions_val) if isinstance(key_questions_val, list) else str(
-            key_questions_val)
-
-        # 2. Préparation des Diagnostics (C'est ce qui manquait !)
-        # On récupère tous les diagnostics liés au cas via la relation inverse
-        diagnoses_objs = self.case.diagnoses.all()
-        if diagnoses_objs:
-            # On crée une chaîne : "Grippe (Final: Non), Covid (Final: Oui)"
-            diagnoses_str = ", ".join(
-                [f"{d.description} (Final: {'Oui' if d.is_final else 'Non'})" for d in diagnoses_objs])
-        else:
-            diagnoses_str = "Diagnostic non défini dans la base."
-
-        # Exécution de la chaîne
         chain = prompt | self.llm | self.parser
 
         try:
             result = chain.invoke({
-                "full_context": full_context_str,
-                "case_title": self.case.case_title,
-                "case_summary": self.case.case_summary or "",  # Gestion du None
-                "diagnoses": diagnoses_str,  # <--- ON PASSE LA VARIABLE MANQUANTE ICI
-                "key_questions": key_questions_str,
+                "full_context": full_context,
                 "chat_history": chat_history_str,
                 "user_message": user_message
             })

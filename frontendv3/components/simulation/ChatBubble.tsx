@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { User, Stethoscope, Lightbulb } from "lucide-react";
+import { User, Lightbulb, Activity } from "lucide-react"; // J'ajoute Activity pour le système
+import ReactMarkdown from 'react-markdown';
 
 interface ChatBubbleProps {
     sender: 'APPRENANT' | 'PATIENT_IA' | 'TUTEUR';
@@ -10,12 +11,11 @@ interface ChatBubbleProps {
 
 export function ChatBubble({ sender, content }: ChatBubbleProps) {
 
-    // Configuration du style selon l'expéditeur
     const styles = {
         APPRENANT: {
             container: "justify-end",
             bubble: "bg-brand-primary text-white rounded-br-none",
-            icon: null, // Pas d'icône pour soi-même, juste la bulle
+            icon: null,
             label: "Vous"
         },
         PATIENT_IA: {
@@ -25,15 +25,14 @@ export function ChatBubble({ sender, content }: ChatBubbleProps) {
             label: "Patient"
         },
         TUTEUR: {
-            container: "justify-center my-4", // Centré pour l'intervention
+            container: "justify-center my-4",
             bubble: "bg-amber-50 border-l-4 border-amber-400 text-amber-900 w-full max-w-2xl shadow-sm",
             icon: <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><Lightbulb size={18} /></div>,
-            label: "Mentor Socratique"
+            label: "Mentor"
         }
     };
 
     const style = styles[sender] || styles.PATIENT_IA;
-    const isTutor = sender === 'TUTEUR';
 
     return (
         <motion.div
@@ -41,20 +40,47 @@ export function ChatBubble({ sender, content }: ChatBubbleProps) {
             animate={{ opacity: 1, y: 0 }}
             className={`flex gap-3 ${style.container} mb-4`}
         >
-            {/* Icône à gauche pour le Patient ou Tuteur */}
             {sender !== 'APPRENANT' && (
                 <div className="flex-shrink-0 mt-1">
                     {style.icon}
                 </div>
             )}
 
-            <div className={`flex flex-col ${sender === 'APPRENANT' ? 'items-end' : 'items-start'} max-w-[80%]`}>
-                <span className="text-xs text-gray-400 mb-1 ml-1">{style.label}</span>
+            <div className={`flex flex-col ${sender === 'APPRENANT' ? 'items-end' : 'items-start'} max-w-[85%]`}>
+                {sender !== 'TUTEUR' && (
+                    <span className="text-[10px] text-gray-400 mb-1 ml-1 uppercase font-bold tracking-wider">{style.label}</span>
+                )}
 
                 <div className={`px-5 py-3.5 rounded-2xl text-sm leading-relaxed ${style.bubble}`}>
-                    {/* Si c'est le tuteur, on met un titre */}
-                    {isTutor && <div className="font-bold text-amber-700 mb-1 flex items-center gap-2"><Lightbulb size={14}/> Intervention Pédagogique</div>}
-                    {content}
+
+                    {/* RENDU MARKDOWN PERSONNALISÉ */}
+                    <div className="markdown-content">
+                        <ReactMarkdown
+                            components={{
+                                // 1. GESTION DES ASTÉRISQUES (*) -> Didascalies
+                                em: ({node, ...props}) => (
+                                    <span className="block text-gray-400 text-xs italic mb-1 border-l-2 border-gray-300 pl-2">
+                            {props.children}
+                        </span>
+                                ),
+
+                                // 2. GESTION DU GRAS (**)
+                                strong: ({node, ...props}) => <span className="font-bold" {...props} />,
+
+                                // 3. LISTES
+                                ul: ({node, ...props}) => <ul className="list-disc ml-4 space-y-1 mt-1" {...props} />,
+                                li: ({node, ...props}) => <li {...props} />,
+
+                                // 4. PARAGRAPHES
+                                // On évite les marges trop grandes sur le dernier élément
+                                p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />
+                            }}
+                        >
+                            {/* Petite astuce : On remplace "(Système)" par du gras pour le mettre en valeur avant le rendu */}
+                            {content.replace('(Système)', '**Système**')}
+                        </ReactMarkdown>
+                    </div>
+
                 </div>
             </div>
 

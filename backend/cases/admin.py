@@ -1,56 +1,100 @@
-from django.contrib import admin
+# backend/cases/admin.py
 
-# Register your models here.
 from django.contrib import admin
 from .models import (
-    ClinicalCase, Symptom, MedicalHistory, CurrentTreatment,
-    ComplementaryExam, PhysicalFinding, Diagnosis
+    ClinicalCase, Specialty, Symptom, MedicalHistory,
+    CurrentTreatment, ComplementaryExam, PhysicalFinding, Diagnosis
 )
 
 
+# --- Administration des Spécialités ---
+@admin.register(Specialty)
+class SpecialtyAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    search_fields = ('name',)
+
+
+# --- Inlines pour le cas clinique ---
 class SymptomInline(admin.TabularInline):
     model = Symptom
-    extra = 1
+    extra = 0
+
 
 class MedicalHistoryInline(admin.TabularInline):
     model = MedicalHistory
-    extra = 1
+    extra = 0
 
-class CurrentTreatmentInline(admin.TabularInline):
+
+class TreatmentInline(admin.TabularInline):
     model = CurrentTreatment
-    extra = 1
+    extra = 0
 
-class ComplementaryExamInline(admin.TabularInline):
+
+class ExamInline(admin.TabularInline):
     model = ComplementaryExam
-    extra = 1
+    extra = 0
+
+
+class FindingInline(admin.TabularInline):
+    model = PhysicalFinding
+    extra = 0
+
 
 class DiagnosisInline(admin.TabularInline):
     model = Diagnosis
-    extra = 1
-
-class PhysicalFindingInline(admin.TabularInline):
-    model = PhysicalFinding
-    extra = 1
+    extra = 0
 
 
+# --- Administration des Cas Cliniques ---
 @admin.register(ClinicalCase)
 class ClinicalCaseAdmin(admin.ModelAdmin):
-    # Ce qu'on voit dans la liste des cas
-    list_display = ('id', 'case_title', 'status','display_categories', 'validated_by', 'updated_at', )
-    # Permet de filtrer par statut et catégorie
-    list_filter = ('status', 'categories')
-    filter_horizontal = ('categories',)
-    # Permet de faire une recherche
-    search_fields = ('case_title', 'case_summary')
-    # Permet d'éditer les symptômes et antécédents directement depuis la page du cas
-    inlines = [SymptomInline, MedicalHistoryInline]
+    # On utilise 'display_specialties' au lieu de 'display_categories'
+    list_display = ('id', 'case_title', 'status', 'display_specialties', 'difficulty', 'updated_at')
 
-    def display_categories(self, obj):
-        return ", ".join([category.name for category in obj.categories.all()])
+    # On filtre sur 'specialties' au lieu de 'categories'
+    list_filter = ('status', 'difficulty', 'specialties')
 
-    display_categories.short_description = 'Catégories'
+    search_fields = ('case_title', 'case_summary', 'source_fultang_id')
+
+    # On utilise le widget horizontal pour 'specialties'
+    filter_horizontal = ('specialties',)
+
+    # Configuration des champs éditables
+    fieldsets = (
+        ('Gestion Système', {
+            'fields': ('source_fultang_id', 'status', 'rejection_reason', 'validated_by')
+        }),
+        ('Classification', {
+            'fields': ('specialties', 'difficulty')  # <--- ICI AUSSI
+        }),
+        ('Contenu Clinique', {
+            'fields': ('case_title', 'case_summary', 'motif_consultation', 'age', 'sexe', 'etat_civil', 'profession',
+                       'mode_de_vie')
+        }),
+        ('Pédagogie & IA', {
+            'fields': ('learning_objectives', 'key_questions', 'common_pitfalls', 'patient_persona',
+                       'initial_statement', 'system_prompt_patient', 'system_prompt_tutor', 'reasoning_graph',
+                       'raw_llm_suggestions')
+        }),
+    )
+
+    inlines = [
+        SymptomInline,
+        MedicalHistoryInline,
+        TreatmentInline,
+        ExamInline,
+        FindingInline,
+        DiagnosisInline
+    ]
+
+    # Méthode pour afficher joliment les spécialités
+    def display_specialties(self, obj):
+        return ", ".join([s.name for s in obj.specialties.all()])
+
+    display_specialties.short_description = 'Spécialités'
 
 
+# Enregistrement des autres modèles
 admin.site.register(Symptom)
 admin.site.register(MedicalHistory)
 admin.site.register(CurrentTreatment)

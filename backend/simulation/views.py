@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+from evaluation.agent.profile_analyzer import ProfileAnalyzerAgent
 from evaluation.agent.summarizer import SessionSummarizerAgent
 from .models import SimulationSession, ChatMessage
 from .serializers import ChatMessageSerializer, StartSimulationSerializer, SimulationSessionSerializer
@@ -197,48 +198,56 @@ class SimulationViewSet(mixins.CreateModelMixin,
         if session.status == SimulationSession.Status.COMPLETED and hasattr(session, 'report'):
             return Response({"report_id": session.report.id}, status=status.HTTP_200_OK)
 
-        # 1. Clôture
+        # 1. Sauvegarde des Décisions Cliniques (NOUVEAU)
+        # On récupère les données envoyées par le frontend
+        student_diagnosis = request.data.get('diagnosis')
+        student_prescription = request.data.get('prescription')
+
+        session.student_diagnosis = student_diagnosis
+        session.student_prescription = student_prescription
         session.status = SimulationSession.Status.COMPLETED
         session.end_time = timezone.now()
         session.save()
 
-        # 2. Génération rapport
+        # 2. Génération rapport (Appel à l'agent)
         try:
             summarizer = SessionSummarizerAgent(session)
             report = summarizer.generate_report()
             print(f"--- RAPPORT GÉNÉRÉ. SCORE: {report.score_global} ---")
 
-            # --- 3. MISE À JOUR DU PROFIL (KNOWLEDGE TRACING) ---
+            # 3. Mise à jour du profil (Knowledge Tracing)
             user_profile = request.user.profile
-            case_categories = session.case.categories.all()
-
-            print(f"--- CATÉGORIES DU CAS : {[c.name for c in case_categories]} ---")
-
-            if not case_categories:
-                print("⚠️ ATTENTION : Ce cas n'a aucune catégorie ! Le profil ne sera pas mis à jour.")
-
+            case_specialties = session.case.specialties.all()
             current_matrix = user_profile.skill_matrix or {}
 
-            for category in case_categories:
-                cat_name = category.name
-                cat_data = current_matrix.get(cat_name, {"level": 0, "sessions": 0})
+            for specialty in case_specialties:
+                spec_name = specialty.name
+                spec_data = current_matrix.get(spec_name, {"level": 0, "sessions": 0})
 
-                # Calcul moyenne pondérée
-                current_level = cat_data["level"]
-                sessions_count = cat_data["sessions"]
+                current_level = spec_data["level"]
+                sessions_count = spec_data["sessions"]
                 new_session_score = report.score_global
 
                 new_level = ((current_level * sessions_count) + new_session_score) / (sessions_count + 1)
 
-                current_matrix[cat_name] = {
+                current_matrix[spec_name] = {
                     "level": round(new_level, 1),
                     "sessions": sessions_count + 1
                 }
-                print(f"--- MISE À JOUR {cat_name} : {current_level} -> {new_level} ---")
 
             user_profile.skill_matrix = current_matrix
             user_profile.save()
-            # ----------------------------------------------------
+
+            try:
+                analyzer = ProfileAnalyzerAgent(request.user)
+                analysis_result = analyzer.analyze_progression()
+
+                if analysis_result:
+                    user_profile.detailed_profile_analysis = analysis_result
+                    user_profile.save()
+                    print("--- ANALYSE PROFIL MISE À JOUR ---")
+            except Exception as e:
+                print(f"Erreur analyse profil : {e}")
 
             return Response({"report_id": report.id}, status=status.HTTP_201_CREATED)
 
@@ -293,7 +302,7 @@ class SimulationViewSet(mixins.CreateModelMixin,
             content=user_message_content
         )
 
-        # 4. Génération de la réponse du PATIENT (Agent Simulateur)
+
         try:
             agent = PatientSimulatorAgent(case=session.case, session_id=session.id)
             ai_response_content = agent.generate_response(user_message=user_message_content)
@@ -307,18 +316,15 @@ class SimulationViewSet(mixins.CreateModelMixin,
             content=ai_response_content
         )
 
-        # 5. Processus du TUTEUR (Agent Évaluateur)
-        # Ce bloc est isolé dans un try/except pour ne jamais bloquer la conversation principale
+
         try:
-            # A. Préparation du contexte pour l'évaluateur
-            # On récupère l'historique jusqu'au message de l'utilisateur (sans la réponse du patient qui vient d'être créée)
+
             history_qs = ChatMessage.objects.filter(session=session).exclude(id=ai_message.id).order_by('timestamp')
             history_str = "\n".join([f"{m.get_sender_display()}: {m.content}" for m in history_qs])
 
-            # Force le rechargement des données du cas (notamment key_questions)
+
             session.case.refresh_from_db()
 
-            # B. Analyse par l'IA Tuteur
             evaluator = TutorEvaluatorAgent(case=session.case)
             eval_result = evaluator.evaluate_exchange(
                 user_message=user_message_content,
@@ -326,7 +332,7 @@ class SimulationViewSet(mixins.CreateModelMixin,
             )
 
             if eval_result:
-                # C. Sauvegarde du Log technique (pour les statistiques)
+
                 EvaluationLog.objects.create(
                     message=user_message_obj,
                     relevance_score=eval_result.get('relevance_score', 5),
@@ -335,13 +341,12 @@ class SimulationViewSet(mixins.CreateModelMixin,
                     pedagogical_feedback=eval_result.get('pedagogical_feedback', '')
                 )
 
-                # D. Logique d'Intervention SOCRATIQUE
-                # Si la pertinence est faible (< 6) ET qu'un feedback existe
+
                 score = eval_result.get('relevance_score', 10)
                 feedback = eval_result.get('pedagogical_feedback', '')
 
                 if score < 6 and feedback:
-                    # Le Tuteur intervient dans le chat avec une question guidante
+
                     ChatMessage.objects.create(
                         session=session,
                         sender=ChatMessage.Sender.TUTEUR,

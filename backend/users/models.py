@@ -9,6 +9,7 @@ class UserProfile(models.Model):
     class Role(models.TextChoices):
         APPRENANT = 'APPRENANT', 'Apprenant'
         EXPERT = 'EXPERT', 'Expert'
+        ADMIN = 'ADMIN', 'Administrateur'
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.APPRENANT)
@@ -23,6 +24,12 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s Profile ({self.get_role_display()})"
+
+    detailed_profile_analysis = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Analyse qualitative globale de l'apprenant générée par l'IA."
+    )
 
 
 

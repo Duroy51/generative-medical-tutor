@@ -10,8 +10,8 @@ import { PatientMonitor, VitalsData } from '@/components/simulation/PatientMonit
 import { ChatBubble } from '@/components/simulation/ChatBubble';
 import { SimulationWorkspace } from '@/components/simulation/SimulationWorkspace';
 import { MentorSidecar } from '@/components/simulation/MentorSidecar';
-import { ClinicalDecision } from '@/components/simulation/ClinicalDecision';
-import { Modal } from '@/components/ui/Modal';
+import { ClinicalDecision } from '@/components/simulation/ClinicalDecision'; // Formulaire de diagnostic
+import { Modal } from '@/components/ui/Modal'; // Conteneur Pop-up
 
 // Hook Tutoriel
 import { useSimulationTour } from '@/hooks/useSimulationTour';
@@ -31,7 +31,7 @@ export default function SimulationPage() {
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [input, setInput] = useState("");
-    const [isDecisionModalOpen, setIsDecisionModalOpen] = useState(false); // Modale Diagnostic
+    const [isDecisionModalOpen, setIsDecisionModalOpen] = useState(false); // État pour la modale de diagnostic
 
     // --- ÉTATS WORKSPACE & MONITEUR ---
     const [notes, setNotes] = useState("");
@@ -50,6 +50,7 @@ export default function SimulationPage() {
     const updateVitalsFromMessage = (content: string) => {
         const newVitals: VitalsData = {};
 
+        // Extraction souple des valeurs (TA, FC, Temp, SpO2, FR, Glycémie)
         const taMatch = content.match(/(?:TA|Tension|BP|Pression)\s*[:=]?\s*(\d{2,3}\/\d{2,3})/i);
         if (taMatch) newVitals.ta = taMatch[1];
 
@@ -88,7 +89,7 @@ export default function SimulationPage() {
 
                 setLoading(false);
 
-                // Auto-start du tour
+                // Auto-start du tour si première visite
                 const hasSeenTour = localStorage.getItem('hasSeenSimulationTour');
                 if (!hasSeenTour) {
                     setTimeout(() => setRunTour(true), 1500);
@@ -120,7 +121,7 @@ export default function SimulationPage() {
     const hasNewTutorMessage = tutorMessages.length > lastTutorMsgCount;
     useEffect(() => { setLastTutorMsgCount(tutorMessages.length); }, [tutorMessages.length]);
 
-    // --- HANDLER MESSAGE TEXTE ---
+    // --- HANDLER MESSAGE TEXTE (DIALOGUE) ---
     const handleSend = async (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!input.trim() || sending) return;
@@ -129,17 +130,19 @@ export default function SimulationPage() {
         setInput("");
         setSending(true);
 
+        // Optimistic UI
         const tempMsg = { id: Date.now(), sender: 'APPRENANT', content: userMsgContent };
         setMessages(prev => [...prev, tempMsg]);
 
         try {
             const res = await api.post(`/simulations/${id}/message/`, { content: userMsgContent });
             const aiMsg = res.data;
+
             setMessages(prev => [...prev, aiMsg]);
 
             if (aiMsg.sender === 'PATIENT_IA') updateVitalsFromMessage(aiMsg.content);
 
-            // Refresh pour le tuteur
+            // Refresh complet pour récupérer le tuteur
             const sessionRes = await api.get(`/simulations/${id}/`);
             setMessages(sessionRes.data.messages);
 
@@ -150,7 +153,7 @@ export default function SimulationPage() {
         }
     };
 
-    // --- HANDLER ACTION CLINIQUE ---
+    // --- HANDLER ACTION CLINIQUE (OUTILS) ---
     const handleClinicalAction = async (category: string, actionName: string) => {
         if (sending) return;
         setSending(true);
@@ -163,13 +166,14 @@ export default function SimulationPage() {
         setMessages(prev => [...prev, tempMsg]);
 
         try {
+            // Envoi de l'action spéciale
             const res = await api.post(`/simulations/${id}/message/`, { content: `[ACTION] ${category} > ${actionName}` });
             const aiMsg = res.data;
 
             setMessages(prev => [...prev, aiMsg]);
             updateVitalsFromMessage(aiMsg.content);
 
-            // Refresh pour le tuteur
+            // Refresh complet
             const sessionRes = await api.get(`/simulations/${id}/`);
             setMessages(sessionRes.data.messages);
 
@@ -180,33 +184,32 @@ export default function SimulationPage() {
         }
     };
 
-    // --- FIN DE SESSION SIMPLE ---
+    // --- SORTIE SIMPLE (SANS DIAGNOSTIC) ---
     const handleExit = async () => {
-        if(!confirm("Quitter sans valider le diagnostic ?")) return;
+        if(!confirm("Quitter sans valider le diagnostic ? Votre progression sera sauvegardée.")) return;
         router.push('/dashboard');
     };
 
-    // --- FIN DE SESSION AVEC DIAGNOSTIC (MODALE) ---
+    // --- FIN DE SESSION AVEC DIAGNOSTIC FORMEL (MODALE) ---
     const handleFinalDiagnose = async (diagnosis: string, prescription: string) => {
         setIsDecisionModalOpen(false);
-        const toastId = toast.loading("Analyse de votre diagnostic...");
+        const toastId = toast.loading("Analyse de votre diagnostic par le jury...");
 
         try {
-            // 1. Envoi du diagnostic comme message système
-            await api.post(`/simulations/${id}/message/`, {
-                content: `[DIAGNOSTIC FINAL] : ${diagnosis}. [TRAITEMENT] : ${prescription}`
+            // Envoi direct des données structurées à l'endpoint de fin
+            await api.post(`/simulations/${id}/finish/`, {
+                diagnosis: diagnosis,
+                prescription: prescription
             });
 
-            // 2. Clôture et génération rapport
-            await api.post(`/simulations/${id}/finish/`);
-
             toast.dismiss(toastId);
-            toast.success("Terminé !");
+            toast.success("Simulation terminée !");
             router.push(`/simulation/${id}/report`);
 
         } catch (error) {
             toast.dismiss(toastId);
-            toast.error("Erreur technique");
+            console.error(error);
+            toast.error("Erreur technique lors de la génération du rapport.");
         }
     };
 
@@ -230,19 +233,20 @@ export default function SimulationPage() {
                 {/* COLONNE GAUCHE : CHAT (Tour: #tour-chat-area) */}
                 <div id="tour-chat-area" className="flex-1 flex flex-col relative bg-[#F8F9FC]">
 
-                    {/* Bouton Aide */}
+                    {/* Bouton Aide (Relancer Tuto) */}
                     <button
                         onClick={() => setRunTour(true)}
                         className="absolute top-4 right-4 z-20 p-2 bg-white/80 backdrop-blur text-brand-primary rounded-full shadow-sm hover:bg-white transition-all"
-                        title="Relancer le tutoriel"
+                        title="Aide / Tutoriel"
                     >
                         <HelpCircle size={20} />
                     </button>
 
+                    {/* Zone de messages scrollable */}
                     <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 scroll-smooth">
-                        <div className="max-w-3xl mx-auto pb-4">
+                        <div className="max-w-3xl mx-auto pb-24"> {/* Padding bottom pour le bouton flottant */}
 
-                            {/* Sidecar Mentor (Tour: #tour-mentor-sidecar) */}
+                            {/* Mentor Flottant (Sidecar) */}
                             <div className="sticky top-0 z-10 pointer-events-none">
                                 <div className="pointer-events-auto">
                                     <MentorSidecar adviceId={tutorId} adviceContent={tutorContent} />
@@ -275,8 +279,8 @@ export default function SimulationPage() {
                         </div>
                     </div>
 
-                    {/* BOUTON FLOTTANT DIAGNOSTIC (Nouveau) */}
-                    <div className="absolute bottom-24 right-6 z-30">
+                    {/* BOUTON FLOTTANT DIAGNOSTIC (FAB) */}
+                    <div className="absolute bottom-24 right-6 z-30 animate-slide-up">
                         <button
                             onClick={() => setIsDecisionModalOpen(true)}
                             className="group flex items-center gap-3 pl-4 pr-5 py-3.5 bg-gradient-to-r from-brand-primary to-orange-600 text-white rounded-full shadow-2xl shadow-brand-primary/40 hover:scale-105 hover:shadow-brand-primary/60 transition-all duration-300"
@@ -309,7 +313,7 @@ export default function SimulationPage() {
                     </div>
                 </div>
 
-                {/* COLONNE DROITE : WORKSPACE (Tour: IDs inclus dans le composant) */}
+                {/* COLONNE DROITE : WORKSPACE (Avec Props pour le Tour) */}
                 <SimulationWorkspace
                     onAction={handleClinicalAction}
                     disabled={sending}
@@ -317,12 +321,12 @@ export default function SimulationPage() {
                     notes={notes}
                     setNotes={setNotes}
                     hasNewTutorMessage={hasNewTutorMessage}
-                    onDiagnose={() => {}} // Non utilisé car déplacé dans la modale, mais gardé pour compatibilité prop
+                    onDiagnose={() => {}} // Non utilisé ici, géré par la modale
                 />
 
             </div>
 
-            {/* MODALE DE DÉCISION CLINIQUE */}
+            {/* --- MODALE DE DÉCISION CLINIQUE --- */}
             <Modal
                 isOpen={isDecisionModalOpen}
                 onClose={() => setIsDecisionModalOpen(false)}

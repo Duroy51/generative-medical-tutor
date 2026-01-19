@@ -1,28 +1,30 @@
 import json
 import os
 import requests
+import time
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from cases.models import Category, ClinicalCase
+from cases.models import Specialty, ClinicalCase
 from cases.services.case_importer import get_structured_data_from_llm, save_structured_data_to_db
 
 
 class Command(BaseCommand):
-    help = 'Importe de nouveaux cas cliniques, les structure via un LLM et les sauvegarde.'
+    help = 'Importe de nouveaux cas cliniques (depuis Fultang ou via des données de démonstration) et les structure via IA.'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--mock',
             action='store_true',
-            help='Utilise le fichier de données mock au lieu de l\'API Fultang réelle.'
+            help='Force l\'utilisation du fichier de données mock (démonstration) sans tenter de connexion réseau.'
         )
 
     def handle(self, *args, **options):
         self.stdout.write("--- DÉMARRAGE DU SYSTÈME D'IMPORTATION ---")
 
-        # 1. Chargement du contexte (Catégories)
-        existing_categories_names = list(Category.objects.values_list('name', flat=True))
-        self.stdout.write(f"Contexte : {len(existing_categories_names)} catégories existantes en base.")
+        # 1. Chargement du contexte (SPÉCIALITÉS existantes)
+        # On récupère la liste pour aider l'IA à catégoriser correctement
+        existing_specialties_names = list(Specialty.objects.values_list('name', flat=True))
+        self.stdout.write(f"Contexte : {len(existing_specialties_names)} spécialités existantes en base.")
 
         fultang_cases_raw = []
         use_fallback = False  # Indicateur pour savoir si on doit utiliser les données de démo
@@ -32,10 +34,11 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("🔶 Mode MOCK forcé par l'utilisateur."))
             use_fallback = True
 
-        # --- BRANCHE 2 : MODE LIVE (TENTATIVE DE CONNEXION) ---
+        # --- BRANCHE 2 : MODE LIVE (TENTATIVE DE CONNEXION À FULTANG) ---
         else:
             self.stdout.write("\n1. TENTATIVE DE CONNEXION À FULTANG (LIVE)...")
             try:
+                # Utilisation de l'URL et du Token définis dans .env
                 url = settings.FULTANG_API_URL
                 headers = {'Authorization': f'Token {settings.FULTANG_API_KEY}'}
 
@@ -46,15 +49,23 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS("   ✅ CONNEXION RÉUSSIE (HTTP 200)"))
                     api_data = response.json()
 
-                    # Fultang renvoie un objet avec une clé 'patients'
-                    real_patients = api_data.get('patients', [])
+                    # Fultang renvoie généralement un objet avec une clé 'patients' ou une liste directe
+                    # Adaptation selon la structure réelle de Fultang
+                    if isinstance(api_data, dict):
+                        real_patients = api_data.get('patients', [])
+                    elif isinstance(api_data, list):
+                        real_patients = api_data
+                    else:
+                        real_patients = []
 
                     count = len(real_patients)
+
                     if count == 0:
-                        # --- LE MESSAGE EXPLICITE QUE TU VEUX ---
+                        # --- SCÉNARIO : BASE FULTANG VIDE ---
                         self.stdout.write(self.style.WARNING(
                             f"   ⚠️  AVERTISSEMENT : La base de données Fultang est accessible mais VIDE (0 patients trouvés)."))
-                        self.stdout.write("   -> Bascule automatique vers le mode DÉMONSTRATION pour la présentation.")
+                        self.stdout.write(
+                            "   -> Bascule automatique vers le mode DÉMONSTRATION pour présenter le fonctionnement.")
                         use_fallback = True
                     else:
                         self.stdout.write(self.style.SUCCESS(f"   🚀 {count} patients récupérés depuis Fultang."))
@@ -97,28 +108,32 @@ class Command(BaseCommand):
             if not fultang_id:
                 continue
 
+            # Vérification de doublon
             if ClinicalCase.objects.filter(source_fultang_id=fultang_id).exists():
                 self.stdout.write(f"   - Le cas {fultang_id} existe déjà. Ignoré.")
                 continue
 
-            self.stdout.write(f"   - Traitement et structuration du cas {fultang_id}...")
+            self.stdout.write(f"   - Structuration du cas {fultang_id}...")
 
-            # Petite pause pour respecter les quotas API (Groq est rapide, 2s suffit)
-            import time
+            # Petite pause pour respecter les quotas API de Groq (2s est suffisant)
             time.sleep(2)
 
             try:
-                structured_data = get_structured_data_from_llm(case_data_raw, existing_categories_names)
+                # 1. Appel à l'IA pour structurer les données brutes
+                # On passe la liste des spécialités existantes pour le contexte
+                structured_data = get_structured_data_from_llm(case_data_raw, existing_specialties_names)
+
                 if not structured_data:
                     self.stderr.write(self.style.ERROR(f"     [ÉCHEC] Structuration échouée pour {fultang_id}."))
                     failed_imports += 1
                     continue
 
-                case_instance, created_categories = save_structured_data_to_db(structured_data, fultang_id)
+                # 2. Sauvegarde en base de données via le service
+                case_instance, created_specialties = save_structured_data_to_db(structured_data, fultang_id)
 
                 msg = f"     [SUCCÈS] Cas importé (ID: {case_instance.id})."
-                if created_categories:
-                    msg += f" Catégories créées: {created_categories}"
+                if created_specialties:
+                    msg += f" Spécialités créées: {created_specialties}"
                 self.stdout.write(self.style.SUCCESS(msg))
                 successful_imports += 1
 

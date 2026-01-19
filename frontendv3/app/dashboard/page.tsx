@@ -11,7 +11,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { CaseCard } from '@/components/ui/CaseCard';
 import { SessionCard } from '@/components/ui/SessionCard';
 import { Modal } from '@/components/ui/Modal';
-import { SkillsRadar } from '@/components/dashboard/SkillsRadar'; // <--- NOUVEAU COMPOSANT
+import { SkillProgression } from '@/components/dashboard/SkillsRadar'; // <--- LE NOUVEAU COMPOSANT
 
 // Icônes
 import { Search, Sparkles, Stethoscope, LayoutGrid, History, Play, Activity } from 'lucide-react';
@@ -27,7 +27,7 @@ interface ClinicalCase {
     case_title: string;
     case_summary: string;
     difficulty: 'Facile' | 'Moyen' | 'Difficile';
-    categories: Category[];
+    categories: Category[]; // ou specialties selon votre backend
 }
 
 export default function Dashboard() {
@@ -38,7 +38,7 @@ export default function Dashboard() {
     const [cases, setCases] = useState<ClinicalCase[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [sessions, setSessions] = useState<any[]>([]);
-    const [userStats, setUserStats] = useState<any>(null); // Pour le Radar
+    const [userStats, setUserStats] = useState<any>(null); // Pour la SkillProgression
 
     // --- ÉTATS UI ---
     const [loading, setLoading] = useState(true);
@@ -55,11 +55,12 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // On charge tout en parallèle : User (pour les stats), Cas, Catégories, Sessions
+                // On charge tout en parallèle : User (pour les stats), Cas, Spécialités/Catégories, Sessions
+                // Note: Adaptez '/categories/' si vous avez renommé en '/specialties/' côté backend
                 const [userRes, casesRes, catsRes, sessionsRes] = await Promise.all([
                     api.get('/users/me/'),
                     api.get('/cases/'),
-                    api.get('/categories/'),
+                    api.get('/specialties/'),
                     api.get('/simulations/')
                 ]);
 
@@ -140,7 +141,13 @@ export default function Dashboard() {
 
     // --- FILTRAGE ---
     const filteredCases = cases.filter(c => {
-        const matchesCategory = selectedCategory ? c.categories.some((cat:any) => cat.name === selectedCategory) : true;
+        // Gestion de la compatibilité si le backend envoie "categories" ou "specialties"
+        const caseCats: any[] = (c as any).specialties || c.categories || [];
+
+        const matchesCategory = selectedCategory
+            ? caseCats.some((cat: any) => cat.name === selectedCategory)
+            : true;
+
         const matchesSearch = c.case_title.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
     });
@@ -151,7 +158,7 @@ export default function Dashboard() {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-                {/* --- SECTION SUPÉRIEURE (HERO + RADAR) --- */}
+                {/* --- SECTION SUPÉRIEURE (HERO + PROGRESSION) --- */}
                 <div className="mb-10 animate-slide-up">
                     <h1 className="text-3xl font-extrabold text-brand-dark mb-6">
                         Bonjour, <span className="text-brand-primary">{user?.username}</span> 👋
@@ -159,7 +166,7 @@ export default function Dashboard() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                        {/* 1. HERO BANNER (Prend 2 colonnes sur grand écran) */}
+                        {/* 1. HERO BANNER (Prend 2 colonnes) */}
                         <div
                             onClick={() => handleStartSimulation()}
                             className="lg:col-span-2 relative overflow-hidden rounded-3xl bg-brand-dark text-white p-8 md:p-10 shadow-2xl shadow-brand-primary/10 group cursor-pointer transition-transform hover:scale-[1.005] flex flex-col justify-center min-h-[280px]"
@@ -189,9 +196,9 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        {/* 2. RADAR CHART (Prend 1 colonne) */}
+                        {/* 2. PROGRESSION (Prend 1 colonne) */}
                         <div className="lg:col-span-1 h-full min-h-[280px]">
-                            <SkillsRadar skillMatrix={userStats} />
+                            <SkillProgression skillMatrix={userStats} />
                         </div>
                     </div>
                 </div>
@@ -256,7 +263,7 @@ export default function Dashboard() {
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                 <input
                                     type="text"
-                                    placeholder="Rechercher..."
+                                    placeholder="Rechercher un cas..."
                                     className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition-all text-sm"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -276,7 +283,11 @@ export default function Dashboard() {
                                         key={c.id}
                                         title={c.case_title}
                                         summary={c.case_summary}
-                                        category={c.categories && c.categories.length > 0 ? c.categories[0].name : "Général"}
+                                        // Adaptation dynamique selon que le backend envoie 'categories' ou 'specialties'
+                                        category={
+                                            ((c as any).specialties && (c as any).specialties.length > 0) ? (c as any).specialties[0].name :
+                                                (c.categories && c.categories.length > 0) ? c.categories[0].name : "Général"
+                                        }
                                         difficulty={c.difficulty}
                                         onClick={() => handleStartSimulation(c.id)}
                                     />
@@ -300,8 +311,11 @@ export default function Dashboard() {
                                 <div className="bg-gray-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <History size={32} className="text-gray-300" />
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900">Aucune session</h3>
-                                <p className="text-gray-500 text-sm mt-1">Lancez une simulation pour commencer votre historique.</p>
+                                <h3 className="text-lg font-bold text-gray-900">Aucune session en cours</h3>
+                                <p className="text-gray-500 text-sm mt-1">Lancez une simulation depuis la bibliothèque pour commencer.</p>
+                                <button onClick={() => setActiveTab('explore')} className="mt-6 text-brand-primary font-bold text-sm hover:underline">
+                                    Explorer la bibliothèque
+                                </button>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

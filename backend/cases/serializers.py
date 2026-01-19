@@ -1,22 +1,22 @@
 # backend/cases/serializers.py
 
 from rest_framework import serializers
-from .models import ClinicalCase, Category, Diagnosis, PhysicalFinding, \
+from .models import ClinicalCase, Specialty, Diagnosis, PhysicalFinding, \
     ComplementaryExam, CurrentTreatment, MedicalHistory, Symptom  # Importez les autres modèles au besoin
 
-class CategorySerializer(serializers.ModelSerializer):
+class SpecialtySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Category
+        model = Specialty
         fields = ['id', 'name', 'description']
 
 class ClinicalCaseListSerializer(serializers.ModelSerializer):
     """
     Serializer simplifié pour afficher une liste de cas.
     """
-    categories = CategorySerializer(many=True, read_only=True)
+    specialties = SpecialtySerializer(many=True, read_only=True)
     class Meta:
         model = ClinicalCase
-        fields = ['id', 'case_title', 'case_summary', 'categories', 'status', 'age', 'sexe']
+        fields = ['id', 'case_title', 'case_summary', 'specialties', 'status','difficulty', 'age', 'sexe', 'rejection_reason']
 
 
 class SymptomSerializer(serializers.ModelSerializer):
@@ -59,6 +59,7 @@ class ClinicalCaseDetailSerializer(serializers.ModelSerializer):
     Serializer détaillé pour afficher toutes les informations d'un seul cas.
     Nous le complexifierons plus tard pour inclure les symptômes, etc.
     """
+    specialties = SpecialtySerializer(many=True, read_only=True)
     symptoms = SymptomSerializer(many=True, read_only=True)
     history_entries = MedicalHistorySerializer(many=True, read_only=True)
     current_treatments = TreatmentSerializer(many=True, read_only=True)

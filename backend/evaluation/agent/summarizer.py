@@ -13,73 +13,108 @@ class SessionSummarizerAgent:
         self.session = session
         self.case = session.case
 
-        # On utilise le modèle le plus intelligent pour l'analyse finale
+        # Utilisation de Llama 3 70B pour une analyse médicale fine
         self.llm = ChatGroq(
             model="llama-3.3-70b-versatile",
-            temperature=0.1,  # Très analytique
+            temperature=0.1,
             api_key=settings.GROQ_API_KEY
         )
         self.parser = JsonOutputParser(pydantic_object=FinalReportStructure)
 
     def _get_context_data(self):
-        """Prépare toutes les données textuelles pour le prompt."""
+        """
+        Prépare le contexte riche en incluant explicitement les décisions formelles.
+        """
 
-        # 1. La conversation
+        # 1. Transcript du Chat (Pour l'anamnèse)
         messages = ChatMessage.objects.filter(session=self.session).order_by('timestamp')
         transcript = ""
-        for msg in messages:
-            sender = "ÉTUDIANT" if msg.sender == 'APPRENANT' else "PATIENT/SYSTÈME"
-            if msg.sender == 'TUTEUR': continue  # On ignore les interventions du tuteur pour l'analyse finale de l'étudiant
-            transcript += f"{sender}: {msg.content}\n"
+        clinical_actions = []
 
-        # 2. Les notes prises par l'Agent Évaluateur en temps réel (précieux !)
+        for msg in messages:
+            if msg.sender == 'APPRENANT':
+                # On capture les actions cliniques faites dans le chat
+                if "[ACTION]" in msg.content:
+                    action = msg.content.replace("[ACTION]", "").strip()
+                    clinical_actions.append(action)
+                    transcript += f"[ACTE TECHNIQUE] : {action}\n"
+                else:
+                    transcript += f"ÉTUDIANT: {msg.content}\n"
+            elif msg.sender == 'PATIENT_IA':
+                transcript += f"PATIENT: {msg.content}\n"
+
+        actions_str = ", ".join(clinical_actions) if clinical_actions else "Aucun examen physique réalisé."
+
+        # 2. Notes du Tuteur (Pour l'évaluation continue)
         eval_logs = EvaluationLog.objects.filter(message__session=self.session)
         eval_summary = ""
         for log in eval_logs:
-            eval_summary += f"- Sur la question '{log.message.content}': Score Pertinence {log.relevance_score}/10. Note: {log.reasoning}\n"
+            eval_summary += f"- Question: '{log.message.content}' -> Pertinence: {log.relevance_score}/10.\n"
 
-        # 3. Les attentes du cas
-        key_questions = self.case.key_questions if self.case.key_questions else []
-        key_questions_str = ", ".join(key_questions) if isinstance(key_questions, list) else str(key_questions)
+        # 3. Vérité Terrain (Le Dossier Expert)
+        c = self.case
+        truth_context = f"""
+        TITRE : {c.case_title}
+        RÉSUMÉ : {c.case_summary}
+        DIAGNOSTICS FINAUX (VRAIS) : {", ".join([d.description for d in c.diagnoses.all() if d.is_final])}
+        DIAGNOSTICS DIFFÉRENTIELS : {", ".join([d.description for d in c.diagnoses.all() if not d.is_final])}
+        TRAITEMENTS ATTENDUS : {", ".join([t.nom for t in c.current_treatments.all()])}
+        QUESTIONS CLÉS : {c.key_questions}
+        PIÈGES : {c.common_pitfalls}
+        """
 
-        # Récupération des diagnostics
-        diagnoses_objs = self.case.diagnoses.all()
-        final_diagnosis = next((d.description for d in diagnoses_objs if d.is_final), "Non défini")
+        # 4. Décisions de l'étudiant (Récupérées des champs dédiés)
+        student_diag = self.session.student_diagnosis or "NON FORMULÉ"
+        student_presc = self.session.student_prescription or "NON FORMULÉ"
 
         return {
             "transcript": transcript,
             "eval_notes": eval_summary,
-            "case_title": self.case.case_title,
-            "final_diagnosis": final_diagnosis,
-            "key_questions": key_questions_str
+            "truth": truth_context,
+            "student_diagnosis": student_diag,
+            "student_prescription": student_presc,
+            "actions_list": actions_str
         }
 
     def generate_report(self) -> FinalReport:
         context = self._get_context_data()
 
         prompt_template = """
-        Tu es un Professeur de Médecine Senior chargé d'évaluer l'examen clinique d'un étudiant.
-        Tu dois rédiger le rapport final de la simulation.
+        Tu es un Professeur de Médecine Senior (Jury d'examen).
+        Tu dois évaluer la performance clinique d'un étudiant.
 
-        --- CONTEXTE DU CAS (VÉRITÉ) ---
-        Cas : {case_title}
-        Diagnostic Final Attendu : {final_diagnosis}
-        Questions Clés Attendues : {key_questions}
+        --- 1. LE CAS CLINIQUE (CORRIGÉ) ---
+        {truth}
 
-        --- TRANSCRIPTION DE LA CONSULTATION ---
+        --- 2. PERFORMANCE DE L'ÉTUDIANT ---
+        > DIAGNOSTIC POSÉ PAR L'ÉTUDIANT : "{student_diagnosis}"
+        > TRAITEMENT PROPOSÉ : "{student_prescription}"
+        > EXAMENS PHYSIQUES RÉALISÉS : {actions_list}
+
+        --- 3. DÉROULEMENT DE L'ANAMNÈSE (DIALOGUE) ---
         {transcript}
 
-        --- NOTES D'ÉVALUATION CONTINUES (PRISES PENDANT LA SÉANCE) ---
-        {eval_notes}
+        --- GRILLE DE NOTATION STRICTE (Sur 100) ---
 
-        --- TA MISSION ---
-        Analyse la performance globale de l'étudiant.
-        1. A-t-il trouvé le bon diagnostic ? (Regarde la fin de la conversation).
-        2. A-t-il posé les questions clés ? (Remplis la checklist).
-        3. A-t-il été professionnel ?
+        1. **DIAGNOSTIC (40 points)** :
+           - Compare le "DIAGNOSTIC POSÉ" avec les "DIAGNOSTICS FINAUX".
+           - Si le sens médical est correct (même si les mots diffèrent légèrement) : 40/40.
+           - Si c'est un diagnostic différentiel proche : 20/40.
+           - Si c'est faux ou non formulé : 0/40. (diagnostic_found = false).
 
-        Génère un rapport JSON strict selon le format demandé.
-        Soyez juste mais exigeant. Le score global doit refléter la qualité du raisonnement.
+        2. **PRISE EN CHARGE & TRAITEMENT (30 points)** :
+           - Le "TRAITEMENT PROPOSÉ" est-il cohérent avec la pathologie ?
+           - A-t-il prescrit les bons médicaments ou la bonne orientation (ex: Urgences) ?
+
+        3. **DÉMARCHE CLINIQUE (30 points)** :
+           - A-t-il posé les questions clés (voir transcript) ?
+           - A-t-il réalisé les examens physiques nécessaires (actions_list) ?
+
+        --- SORTIE ATTENDUE ---
+        Génère un rapport JSON.
+        - `score_global` : La somme des points.
+        - `diagnostic_found` : Booléen (Vrai seulement si le diagnostic principal est trouvé).
+        - `detailed_analysis` : Explique pourquoi le diagnostic est bon/mauvais et commente la qualité de l'ordonnance.
 
         {format_instructions}
         """
@@ -92,17 +127,15 @@ class SessionSummarizerAgent:
         chain = prompt | self.llm | self.parser
 
         try:
-            # Appel au LLM
             data = chain.invoke(context)
 
-            # Création de l'objet en base de données
             report = FinalReport.objects.create(
                 session=self.session,
                 score_global=data.get('score_global', 0),
                 diagnostic_found=data.get('diagnostic_found', False),
                 feedback_strengths=data.get('strengths', []),
                 feedback_improvements=data.get('improvements', []),
-                detailed_analysis=data.get('detailed_analysis', "Pas d'analyse disponible."),
+                detailed_analysis=data.get('detailed_analysis', "Pas d'analyse."),
                 key_questions_status=data.get('key_questions_checklist', {})
             )
             return report
