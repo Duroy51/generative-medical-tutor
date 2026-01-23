@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+/* --- CONFIGURATION TAILWIND V4 --- */
+@theme {
+    /* --- COULEURS --- */
+    --color-brand-dark: #0F172A; /* Bleu Nuit Profond */
+    --color-brand-primary: #D97706; /* Orange Vibrant */
+    --color-brand-primary-hover: #b45309;
+    --color-brand-light: #F8FAFC; /* Gris très clair */
+    --color-brand-secondary: #60A5FA;
+    --color-brand-success: #34D399;
+    --color-brand-error: #F87171;
+    --color-brand-text: #334155;
+    --color-brand-muted: #64748b;
+
+    /* --- POLICE --- */
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+    /* --- OMBRES --- */
+    --shadow-default: 0 2px 10px rgba(0, 0, 0, 0.07);
+
+    /* --- ANIMATIONS --- */
+    --animate-fade-in: fadeIn 0.5s ease-out forwards;
+    --animate-slide-up: slideUp 0.5s ease-out forwards;
+    --animate-blob: blob 7s infinite;
+
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    @keyframes slideUp {
+        0% { transform: translateY(20px); opacity: 0; }
+        100% { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes blob {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
+    }
+}
+
+/* --- STYLES DE BASE --- */
+:root {
+    --foreground-rgb: 51, 65, 85;
+}
+
+body {
+    color: var(--color-brand-text);
+    background: var(--color-brand-light);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- UTILITAIRES --- */
+@utility animation-delay-2000 {
+    animation-delay: 2s;
+}
+@utility animation-delay-4000 {
+    animation-delay: 4s;
+}
+
+/* ========================================= */
+/* --- ULTIMATE DRIVER.JS THEME (V2 FIX) --- */
+/* ========================================= */
+
+/* 1. L'Overlay (Fond) */
+.driver-overlay {
+    /* On garde le fond sombre */
+    background-color: rgba(15, 23, 42, 0.85) !important;
+    /* On garde le flou, mais on s'assure qu'il reste derrière l'élément actif */
+    backdrop-filter: blur(8px) !important;
+    z-index: 100000 !important;
+    /* IMPORTANT : Empêche l'overlay de capturer les clics destinés à l'élément */
+    pointer-events: none;
+}
+
+/* 2. L'Élément Actif (La Cible) */
+.driver-active-element {
+    position: relative !important;
+    /* Z-Index supérieur à l'overlay (100000) et au popover (100002) pour être sûr */
+    z-index: 100003 !important;
+
+    /* FIX DU FLOU : On force un fond blanc si l'élément est transparent */
+    background-color: white;
+
+    /* Design : On ajoute une lueur pour le faire "pop" */
+    box-shadow:
+            0 0 0 4px rgba(217, 119, 6, 0.8), /* Bordure Orange */
+            0 0 40px rgba(0, 0, 0, 0.5) !important; /* Ombre portée */
+
+    border-radius: 8px !important;
+    pointer-events: auto !important; /* Réactive les clics */
+}
+
+/* Astuce : Si l'élément actif est en mode sombre ou a déjà une couleur, on ne force pas le blanc
+   On utilise une classe utilitaire Tailwind si besoin, ou on cible spécifiquement */
+.driver-active-element[class*="bg-"] {
+    /* Si l'élément a déjà une classe de background (ex: bg-blue-500), on laisse sa couleur */
+    background-color: inherit;
+}
+
+/* 3. La Boîte de Dialogue (Popover) */
+.driver-popover {
+    background: rgba(30, 41, 59, 0.98) !important; /* Quasi opaque */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 20px !important;
+
+    /* Ombre profonde pour détacher le popover du fond flouté */
+    box-shadow:
+            0 20px 25px -5px rgba(0, 0, 0, 0.5),
+            0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+
+    padding: 24px !important;
+    max-width: 400px !important;
+    color: #F8FAFC !important;
+    font-family: var(--font-sans) !important;
+    z-index: 100004 !important; /* Au-dessus de tout */
+}
+
+/* Flèche du popover */
+.driver-popover-arrow {
+    border-width: 8px !important;
+    border-color: rgba(30, 41, 59, 0.98) !important;
+}
+
+/* 4. Titre */
+.driver-popover-title {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #fff !important;
+    margin-bottom: 10px !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Petite barre décorative à gauche du titre */
+.driver-popover-title::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(to bottom, #D97706, #F59E0B); /* Orange Brand */
+    border-radius: 4px;
+}
+
+/* 5. Description */
+.driver-popover-description {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    color: #94a3b8 !important; /* Gris clair lisible */
+    margin-bottom: 24px !important;
+}
+
+/* 6. Footer (Boutons) */
+.driver-popover-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-top: 0 !important;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Bouton Suivant / Terminer */
+.driver-popover-next-btn {
+    background: linear-gradient(135deg, #D97706 0%, #ea580c 100%) !important; /* Brand Gradient */
+    color: white !important;
+    border: none !important;
+    padding: 8px 20px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-shadow: none !important;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+.driver-popover-next-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 15px rgba(234, 88, 12, 0.4) !important;
+    background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%) !important;
+}
+
+/* Bouton Précédent */
+.driver-popover-prev-btn {
+    background: transparent !important;
+    color: #64748b !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 8px 16px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-shadow: none !important;
+    transition: all 0.2s !important;
+}
+.driver-popover-prev-btn:hover {
+    color: white !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Bouton Fermer (Croix) */
+.driver-popover-close-btn {
+    color: #475569 !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+    transition: all 0.2s !important;
+}
+.driver-popover-close-btn:hover {
+    color: #ef4444 !important; /* Rouge au survol */
+    background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Désactiver l'animation de focus par défaut du navigateur sur les boutons */
+.driver-popover button:focus {
+    outline: none !important;
+    ring: 2px solid #D97706 !important;
+}
