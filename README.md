@@ -31,13 +31,13 @@
       <p><i>Page de Connexion</i></p>
     </td>
     <td align="center" style="border: none; padding: 10px;">
-      <img src="./docs/images/simulation_interface.png" alt="Dashboard Apprenant" width="400"/>
+      <img src="./docs/images/simulation_interface.jpeg" alt="Dashboard Apprenant" width="400"/>
       <p><i>Dashboard Apprenant avec Skill Matrix</i></p>
     </td>
   </tr>
   <tr>
     <td align="center" style="border: none; padding: 10px;">
-      <img src="./docs/images/dialogue.png" alt="Interface de Simulation" width="400"/>
+      <img src="./docs/images/dialogue.jpeg" alt="Interface de Simulation" width="400"/>
       <p><i>Interface de Simulation (Chat + Outils)</i></p>
     </td>
     <td align="center" style="border: none; padding: 10px;">
@@ -70,7 +70,7 @@ Ce diagramme montre comment le système interagit avec ses utilisateurs et les s
 ### Diagramme de Composants
 Ce diagramme détaille les différents services qui composent l'application.
 
-![Diagramme de Composants](./docs/images/diag_composant.png)
+![Diagramme de Composants](./docs/images/diagramme_composant.png)
 
 
 ## 🚀 Démarrage Rapide
