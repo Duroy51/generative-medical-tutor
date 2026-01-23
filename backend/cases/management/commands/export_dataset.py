@@ -1,5 +1,3 @@
-
-
 import csv
 import json
 import io
@@ -40,8 +38,9 @@ class Command(BaseCommand):
 
         self.stdout.write(f"Début de l'exportation des cas '{status}' vers MinIO au format {file_format}...")
 
+        # CORRECTION ICI : 'categories' -> 'specialties'
         cases_to_export = ClinicalCase.objects.filter(status=status).prefetch_related(
-            'categories', 'symptoms', 'history_entries', 'current_treatments',
+            'specialties', 'symptoms', 'history_entries', 'current_treatments',
             'exams', 'physical_findings', 'diagnoses'
         )
 
@@ -86,20 +85,20 @@ class Command(BaseCommand):
         except Exception as e:
             self.stderr.write(self.style.ERROR(f"Erreur lors de l'upload sur MinIO : {e}"))
 
-
-
     def _export_to_csv(self, queryset, file_object):
         """Exporte un dataset complet et aplati au format CSV."""
         headers = [
             'case_id', 'case_title', 'status', 'age', 'sexe', 'motif_consultation',
-            'categories', 'symptoms_json', 'history_json', 'current_treatments_json',
+            'specialties', 'symptoms_json', 'history_json', 'current_treatments_json',  # CORRECTION : Header renommé
             'exams_json', 'physical_findings_json', 'diagnoses_json'
         ]
         writer = csv.writer(file_object)
         writer.writerow(headers)
 
         for case in queryset:
-            categories_str = " | ".join([cat.name for cat in case.categories.all()])
+            # CORRECTION ICI : case.categories -> case.specialties
+            specialties_str = " | ".join([spec.name for spec in case.specialties.all()])
+
             symptoms_list = [{'nom': s.nom, 'localisation': s.localisation, 'degre': s.degre} for s in
                              case.symptoms.all()]
             history_list = [{'type': h.get_type_display(), 'description': h.description} for h in
@@ -117,7 +116,7 @@ class Command(BaseCommand):
                 case.age,
                 case.sexe,
                 case.motif_consultation,
-                categories_str,
+                specialties_str,  # Variable mise à jour
                 json.dumps(symptoms_list, ensure_ascii=False),
                 json.dumps(history_list, ensure_ascii=False),
                 json.dumps(treatments_list, ensure_ascii=False),
@@ -138,7 +137,8 @@ class Command(BaseCommand):
                 'age': case.age,
                 'sexe': case.sexe,
                 'motif_consultation': case.motif_consultation,
-                'categories': [cat.name for cat in case.categories.all()],
+                # CORRECTION ICI : case.categories -> case.specialties
+                'specialties': [spec.name for spec in case.specialties.all()],
                 'symptoms': [
                     {'nom': s.nom, 'localisation': s.localisation, 'date_debut': s.date_debut, 'frequence': s.frequence,
                      'duree': s.duree, 'evolution': s.evolution, 'activite_declenchante': s.activite_declenchante,

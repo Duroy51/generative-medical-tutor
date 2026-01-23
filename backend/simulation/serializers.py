@@ -1,51 +1,42 @@
 from rest_framework import serializers
 from .models import SimulationSession, ChatMessage
-from cases.serializers import ClinicalCaseListSerializer  # Pour afficher les détails du cas
+from cases.serializers import ClinicalCaseListSerializer
+from evaluation.models import EvaluationLog
 
+# --- AJOUT DU SERIALIZER POUR L'EVALUATION ---
+class EvaluationLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EvaluationLog
+        fields = ['relevance_score', 'empathy_score', 'pedagogical_feedback']
 
 class ChatMessageSerializer(serializers.ModelSerializer):
     """
     Serializer pour le modèle ChatMessage.
-    Utilisé pour afficher un message de chat.
+    Inclut maintenant les données d'évaluation liées (feedback tuteur).
     """
+    # On utilise le related_name 'evaluation' défini dans le modèle EvaluationLog
+    evaluation = EvaluationLogSerializer(read_only=True)
 
     class Meta:
         model = ChatMessage
-        fields = ['id', 'session', 'sender', 'content', 'timestamp']
-        read_only_fields = ['id', 'session', 'sender', 'timestamp']  # L'utilisateur ne peut fournir que 'content'
+        fields = ['id', 'session', 'sender', 'content', 'timestamp', 'evaluation']
+        read_only_fields = ['id', 'session', 'sender', 'timestamp', 'evaluation']
 
 
 class SimulationSessionSerializer(serializers.ModelSerializer):
-    """
-    Serializer détaillé pour le modèle SimulationSession.
-    Il inclut les détails du cas associé et les messages de la conversation.
-    """
-    # 'case' est un ForeignKey. Pour afficher plus que juste l'ID, on imbrique un autre serializer.
     case = ClinicalCaseListSerializer(read_only=True)
-
-    # 'messages' est une relation inverse (related_name). On peut l'inclure aussi.
     messages = ChatMessageSerializer(many=True, read_only=True)
 
     class Meta:
         model = SimulationSession
-        fields = ['id', 'case', 'apprenant', 'status', 'start_time', 'end_time', 'messages']
+        fields = ['id', 'case', 'apprenant', 'status', 'start_time', 'end_time', 'messages', 'student_diagnosis', 'student_prescription']
 
 
 class StartSimulationSerializer(serializers.Serializer):
-    """
-    Serializer spécialisé pour la validation des données lors de la création d'une session.
-    Il ne correspond pas directement à un modèle, mais définit les champs attendus par l'API.
-    """
-    case_id = serializers.IntegerField(required=False, help_text="ID du cas. Si absent, un cas aléatoire est choisi.")
-    force_new = serializers.BooleanField(required=False, default=False,
-                                         help_text="Forcer la création d'une nouvelle session.")
-
-    # On pourrait ajouter d'autres options ici plus tard, comme le niveau de difficulté souhaité.
+    case_id = serializers.IntegerField(required=False, help_text="ID du cas.")
+    force_new = serializers.BooleanField(required=False, default=False)
 
     def validate_case_id(self, value):
-        """
-        Validation personnalisée pour s'assurer que le cas_id est valide et utilisable.
-        """
         from cases.models import ClinicalCase
         try:
             case = ClinicalCase.objects.get(id=value, status=ClinicalCase.Status.APPROUVE)
