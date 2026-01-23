@@ -231,7 +231,16 @@ medtutor-ai/
 ```
 
 ---
+### Liste des membres 
+*   KOGHENE LADZOU ERIC (Chef)	
+*   MOMBO-DINGBA  Emmanuel	
+*   BIHAY Raphaël	
+*   KOUDJOU TIEMIGNI VICRAND ARMEL	
+*   DJONGO FOKOU ARIEL SHARON	
+*   BADA RODOLPHE André	
+*   MBIAMY NGAMENI Steven Loïc	
+
 
 <div align="center">
-  <p>Projet de fin de cycle Pré-Ingénieur - ENSPY 2024-2025</p>
+  <p>Projet de STI - ENSPY 2025-2026</p>
 </div>
