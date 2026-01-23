@@ -1,77 +1,140 @@
-### Racine du Projet
+<div align="center">
+  <img src="./docs/images/logo.png" alt="MedTutor.AI Logo" width="120" />
+  <h1>MedTutor.AI</h1>
+  <p>
+    <strong>Consolidation d'un système d'aide à la décision médicale et au raisonnement clinique basé sur les Systèmes Tutoriels Intelligents.</strong>
+  </p>
+  <p>
+    Un simulateur médical de nouvelle génération utilisant l'IA Générative pour former les futurs médecins.
+  </p>
+</div>
 
-*   **`backend/`** : Contient l'intégralité du projet Django. C'est le cœur de notre application.
-*   **`frontend/`** : Contient l'intégralité du projet Next.js. Il sera développé par le pôle UX.
-*   **`docker-compose.yml`** : Fichier d'orchestration Docker. C'est le "chef d'orchestre" qui lance et connecte tous les services (backend, frontend, base de données) d'un coup.
-*   **`.gitignore`** : Spécifie les fichiers et dossiers que Git doit ignorer (ex: `venv/`, `__pycache__/`).
+---
 
-### `backend/` (Projet Django)
+**MedTutor AI** est un Environnement Informatique pour l'Apprentissage Humain (EIAH) qui permet aux étudiants en médecine de s'entraîner au raisonnement clinique. En interagissant avec des patients virtuels pilotés par des LLM, les apprenants développent leurs compétences en anamnèse, examen physique et diagnostic dans un environnement sécurisé, immersif et pédagogiquement riche.
 
-*   **`core/`** : Le "cœur" du projet Django. Il contient les fichiers de configuration globaux (`settings.py`), les routes URL principales (`urls.py`) et la configuration du serveur (`wsgi.py`, `asgi.py`).
-*   **`manage.py`** : L'utilitaire en ligne de commande de Django, utilisé pour exécuter toutes les tâches de gestion (lancer le serveur, créer des migrations, etc.).
-*   **`requirements.txt`** : La liste de toutes les dépendances Python du projet.
-*   **`venv/`** : (Ignoré par Git) Le dossier de l'environnement virtuel Python, isolant les dépendances.
+## ✨ Fonctionnalités Clés
 
-#### Applications Django
+*   **🧠 Agents IA Autonomes :** Un système multi-agents (Patient, Tuteur, Expert) basé sur Llama 3 pour une simulation réaliste et un feedback pertinent.
+*   **📚 Pipeline de Données Intelligent :** Connexion à l'API Fultang pour extraire des cas réels et les structurer automatiquement grâce à l'IA.
+*   **🩺 Workspace Médical Complet :** Interface immersive séparant le dialogue (chat), l'examen physique (barre d'outils) et la prise de décision.
+*   **👨‍🏫 Tutorat Socratique :** Un mentor IA intervient de manière non intrusive pour guider l'étudiant par la réflexion, sans jamais donner la réponse.
+*   **📈 Suivi de Compétences :** Un dashboard personnalisé qui suit la progression de l'apprenant par spécialité grâce à une "Skill Matrix" dynamique.
+*   **🛡️ Dashboards par Rôle :** Des interfaces dédiées et sécurisées pour l'Apprenant, l'Expert (validation) et l'Administrateur (gestion).
 
-*   **`users/`** : Gère tout ce qui concerne les utilisateurs : modèles de profils (apprenant, expert), authentification, et permissions.
-*   **`cases/`** : Au cœur de la mission de l'**Agent Ingénieur des Données**.
-    *   **`models.py`** : Définit la structure des cas cliniques en base de données.
-    *   **`logic/`** (à créer) : Contient la logique d'import depuis Fultang, d'anonymisation et de génération de fiches via le LLM.
-    *   **`views.py`** : Gère les requêtes API pour la validation des cas par les experts.
-*   **`simulation/`** : Gère la logique de l'**Agent Orchestrateur** et de l'**Agent Simulateur**.
-    *   **`models.py`** : Définit les sessions de simulation, l'historique des conversations, etc.
-    *   **`logic/`** (à créer) : Contient la logique de dialogue, la construction des prompts et l'implémentation de la RAG.
-*   **`evaluation/`** : Gère la logique de l'**Agent Évaluateur-Tuteur**.
-    *   **`logic/`** (à créer) : Contient les algorithmes de scoring, l'analyse de la performance et la génération des rapports de feedback.
-*   **`api/`** : Une application dédiée à l'organisation de notre API REST. Elle centralise les routes de toutes les autres applications pour fournir un point d'entrée unique et propre (`/api/v1/...`).
+## Aperçu des Interfaces
+
+<table style="width:100%; border: none;">
+  <tr>
+    <td align="center" style="border: none; padding: 10px;">
+      <img src="./docs/images/login.jpeg" alt="Page de Connexion" width="400"/>
+      <p><i>Page de Connexion</i></p>
+    </td>
+    <td align="center" style="border: none; padding: 10px;">
+      <img src="./docs/images/simulation_interface.png" alt="Dashboard Apprenant" width="400"/>
+      <p><i>Dashboard Apprenant avec Skill Matrix</i></p>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" style="border: none; padding: 10px;">
+      <img src="./docs/images/dialogue.png" alt="Interface de Simulation" width="400"/>
+      <p><i>Interface de Simulation (Chat + Outils)</i></p>
+    </td>
+    <td align="center" style="border: none; padding: 10px;">
+      <img src="./docs/images/expert_dashboard.jpeg" alt="Dashboard Expert" width="400"/>
+      <p><i>Dashboard Expert pour la validation des cas</i></p>
+    </td>
+  </tr>
+    <tr>
+    <td align="center" style="border: none; padding: 10px;">
+      <img src="./docs/images/super_admin.jpeg" alt="Dashboard Super Admin" width="400"/>
+      <p><i>Dashboard Super Admin pour la gestion des utilisateurs</i></p>
+    </td>
+    <td align="center" style="border: none; padding: 10px;">
+      <img src="./docs/images/rejet1.jpeg" alt="Modale de Rejet" width="400"/>
+      <p><i>Modale de Rejet (Workflow Expert)</i></p>
+    </td>
+  </tr>
+</table>
+
+
+## 🏗️ Architecture Technique
+
+Le projet est construit sur une architecture distribuée moderne, découplant le frontend, le backend et les services de données pour garantir la scalabilité et la maintenabilité.
+
+### Diagramme de Contexte
+Ce diagramme montre comment le système interagit avec ses utilisateurs et les services externes.
+
+![Diagramme de Contexte](./docs/images/contexte.png)
+
+### Diagramme de Composants
+Ce diagramme détaille les différents services qui composent l'application.
+
+![Diagramme de Composants](./docs/images/diag_composant.png)
+
 
 ## 🚀 Démarrage Rapide
 
-Suivez ces instructions pour lancer le projet sur votre machine locale.
+Suivez ces instructions pour lancer l'environnement de développement complet sur votre machine.
 
 ### Prérequis
 
+*   [Docker](https://www.docker.com/products/docker-desktop/) & Docker Compose
 *   [Git](https://git-scm.com/)
-*   [Docker](https://www.docker.com/products/docker-desktop/)
 
 ### Installation et Lancement
 
 1.  **Clonez le dépôt :**
     ```bash
-    git clone [URL_DE_VOTRE_DEPOT_GITHUB]
+    git clone https://votre-url-de-depot.git
     cd generative-medical-tutor
     ```
 
-2.  **Lancez l'environnement avec Docker Compose :**
-    Cette commande va construire les images Docker pour le backend et le frontend, et démarrer tous les conteneurs (y compris la base de données).
+2.  **Configuration des variables d'environnement :**
+    *   Créez un fichier `.env` dans le dossier `backend/`.
+    *   Ajoutez vos clés d'API (Django `SECRET_KEY`, Groq `GROQ_API_KEY`, etc.) et la configuration de la base de données.
+
+3.  **Lancez avec Docker Compose :**
+    Cette commande unique va construire, lancer et connecter tous les services (Backend Django, Frontend Next.js, Base de données PostgreSQL, Stockage MinIO).
     ```bash
     docker-compose up --build
     ```
-    La première exécution peut prendre plusieurs minutes.
+    Le premier démarrage peut prendre quelques minutes.
 
-3.  **Accédez aux services :**
-    *   **Frontend (Application Apprenant/Expert) :** [http://localhost:3000](http://localhost:3000)
-    *   **Backend (API Django) :** [http://localhost:8000](http://localhost:8000)
-    *   **Documentation de l'API (Swagger) :** (à configurer)
-    *   **Interface d'administration Django :** [http://localhost:8000/admin/](http://localhost:8000/admin/)
+4.  **Accédez aux services :**
+    *   **Frontend (Application) :** [http://localhost:3000](http://localhost:3000)
+    *   **Backend (API Django) :** [http://localhost:8000/api/](http://localhost:8000/api/)
+    *   **Admin Django :** [http://localhost:8000/admin/](http://localhost:8000/admin/)
+    *   **Console MinIO :** [http://localhost:9001](http://localhost:9001)
 
 ## 🛠️ Stack Technologique
 
-*   **Backend :** Python, Django, Django REST Framework
-*   **Frontend :** Next.js, TypeScript, React, Tailwind CSS
-*   **Bases de Données :** PostgreSQL (relationnel), ChromaDB/Faiss (vectoriel)
-*   **IA & Orchestration :** LangChain, Hugging Face Transformers
-*   **Déploiement :** Docker
+| Catégorie       | Technologies                                     |
+| --------------- | ------------------------------------------------ |
+| **Backend**     | Python, Django, Django REST Framework            |
+| **Frontend**    | Next.js, TypeScript, React, Tailwind CSS         |
+| **Base de Données** | PostgreSQL                                     |
+| **IA & Orchestration** | LangChain, Groq API (Llama 3)                  |
+| **Stockage Fichiers** | MinIO (S3 Compatible)                            |
+| **Infrastructure** | Docker, Docker Compose                           |
 
-##  Contribution
 
-Pour contribuer au projet, veuillez suivre ce workflow :
+## 📂 Structure du Projet
 
-1.  Créez une nouvelle branche à partir de `main` : `git checkout -b feature/nom-de-la-feature`.
-2.  Effectuez vos modifications et commitez votre travail.
-3.  Poussez votre branche sur le dépôt distant : `git push origin feature/nom-de-la-feature`.
-4.  Ouvrez une **Pull Request** sur GitHub pour revue.
-5.  Une fois la revue approuvée, votre branche sera fusionnée dans `main`.
+*   **`backend/`** : L'API Django. Contient la logique métier, les modèles de données et les agents IA.
+    *   `cases/` : Gestion des cas cliniques et pipeline ETL.
+    *   `simulation/` : Moteur de la simulation interactive.
+    *   `evaluation/` : Agents Tuteur et analyse de performance.
+    *   `users/` : Gestion des utilisateurs et de l'authentification.
+*   **`frontend/`** : L'application Next.js. Contient les interfaces pour l'Apprenant, l'Expert et l'Admin.
+    *   `src/app/(student)/` : Routes et layout de l'apprenant.
+    *   `src/app/(expert)/` : Routes et layout de l'expert.
+    *   `src/components/` : Composants UI réutilisables.
+*   **`mock-fultang/`** : Serveur FastAPI simulant l'API de Fultang pour les tests.
+*   **`docker-compose.yml`** : Fichier d'orchestration de tous les services.
 
 ---
+
+<div align="center">
+Projet de fin de cycle Pré-Ingénieur - ENSPY 2024-2025
+</div>
